@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Active-ESL handheld — PLACEHOLDER</title>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b1220; --panel: rgba(12, 18, 32, 0.78); --text: #f4f7fb; --muted: #a9b4c7; --accent: #3ec6ff; --warn: #ffcc66;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; height: 100%;
+      background: radial-gradient(1200px 700px at 70% 10%, #15233d 0%, var(--bg) 55%);
+      color: var(--text);
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
+    model-viewer { width: 100%; height: 100%; background: transparent; }
+    .hud {
+      position: fixed; z-index: 2; left: 16px; right: 16px; top: 16px;
+      display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between;
+      pointer-events: none;
+    }
+    .card {
+      pointer-events: auto; background: var(--panel); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,.08); border-radius: 14px;
+      padding: 14px 16px; max-width: min(520px, 100%);
+      box-shadow: 0 10px 40px rgba(0,0,0,.35);
+    }
+    .badge {
+      display: inline-block; margin-bottom: 8px; padding: 3px 8px; border-radius: 999px;
+      background: rgba(255,204,102,.15); color: var(--warn);
+      font-size: .75rem; font-weight: 650; letter-spacing: .04em; text-transform: uppercase;
+    }
+    h1 { margin: 0 0 6px; font-size: 1.15rem; font-weight: 650; }
+    p { margin: 0; color: var(--muted); font-size: .92rem; line-height: 1.45; }
+    a { color: var(--accent); }
+    .hint {
+      position: fixed; z-index: 2; left: 50%; bottom: 18px; transform: translateX(-50%);
+      background: var(--panel); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 999px; padding: 8px 14px; color: var(--muted); font-size: .85rem;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="hud">
+    <div class="card">
+      <div class="badge">Placeholder concept</div>
+      <h1>Active-ESL handheld enclosure</h1>
+      <p>
+        Provisional ~10″ tablet-class shell — branded concept UI on the LCD.
+        Not measured production CAD. Exact LCD/PCB TBD from Michael’s STEP.
+        <a href="../">All concepts</a> ·
+        <a href="beauty_raytrace_baseline.png" target="_blank" rel="noopener">Sales still</a>
+      </p>
+    </div>
+  </div>
+
+  <model-viewer
+    src="handheld.glb"
+    alt="Active-ESL handheld PLACEHOLDER enclosure with branded LCD"
+    camera-controls
+    touch-action="pan-y"
+    auto-rotate
+    auto-rotate-delay="0"
+    rotation-per-second="22deg"
+    shadow-intensity="0.85"
+    exposure="1.1"
+    environment-image="neutral"
+    interaction-prompt="auto"
+  ></model-viewer>
+
+  <div class="hint">Drag to rotate · scroll / pinch to zoom · right-drag to pan</div>
+</body>
+</html>
