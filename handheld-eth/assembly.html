@@ -131,7 +131,7 @@
     }
     details.tool > summary {
       list-style: none; cursor: pointer; user-select: none;
-      display: flex; align-items: center; justify-content: space-between;
+      display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center;
       min-height: 36px; font-size: .72rem; font-weight: 650; color: var(--muted);
       text-transform: uppercase; letter-spacing: .05em;
       -webkit-tap-highlight-color: transparent;
@@ -142,6 +142,12 @@
     }
     details.tool[open] > summary::after { transform: rotate(90deg); }
     details.tool .tool-body { padding: 2px 0 4px; }
+    .chk-summary {
+      display: inline-flex; gap: 6px; align-items: center;
+      text-transform: none; letter-spacing: 0; font-size: .85rem; font-weight: 600;
+      color: var(--text); min-height: 32px; cursor: pointer;
+    }
+    .chk-summary input { width: 18px; height: 18px; }
     .hint {
       position: fixed; z-index: 2; left: 50%;
       bottom: calc(14px + var(--safe-bottom)); transform: translateX(-50%);
@@ -231,14 +237,19 @@
 
       <div id="sectionBlock" hidden>
         <details class="tool" id="sectionDetails">
-          <summary>Section</summary>
+          <summary>
+            <span>Section</span>
+            <label class="chk-summary" data-stop-toggle title="Slice the assembly">
+              <input type="checkbox" id="chkSection"> On
+            </label>
+          </summary>
           <div class="tool-body">
             <div class="row">
-              <label class="chk-inline"><input type="checkbox" id="chkSection"> Clip</label>
-              <select id="sectionPlane">
-                <option value="xy">XY (Z cut)</option>
+              <select id="sectionPlane" aria-label="Section plane">
+                <!-- Default X cut: obvious from Front. Z cut is nearly invisible on a thin handheld. -->
+                <option value="yz" selected>YZ (X cut)</option>
                 <option value="xz">XZ (Y cut)</option>
-                <option value="yz">YZ (X cut)</option>
+                <option value="xy">XY (Z cut)</option>
               </select>
             </div>
             <div class="slider-row">
@@ -251,11 +262,15 @@
 
       <div id="feaBlock" hidden>
         <details class="tool" id="feaDetails">
-          <summary>FEA (ranking)</summary>
+          <summary>
+            <span>FEA (ranking)</span>
+            <label class="chk-summary" data-stop-toggle title="Stress overlay on the ranked shell">
+              <input type="checkbox" id="chkFea"> On
+            </label>
+          </summary>
           <div class="tool-body">
             <div class="row">
-              <label class="chk-inline"><input type="checkbox" id="chkFea"> Overlay</label>
-              <select id="feaCase"></select>
+              <select id="feaCase" aria-label="FEA load case"></select>
             </div>
             <div id="feaOut" class="muted"></div>
           </div>
@@ -708,6 +723,7 @@
     "deeplink": true,
     "fea": true,
     "fea_part": "rear",
+    "fea_view": "rear",
     "fea_stl_stem": "rear",
     "fea_offset_mm": [
       0,
@@ -1267,8 +1283,10 @@
     function renderNormalBuffer() {
       const dimWas = dimRoot.visible;
       const markWas = markers.visible;
+      const helpWas = sectionHelper ? sectionHelper.visible : false;
       dimRoot.visible = false;
       markers.visible = false;
+      if (sectionHelper) sectionHelper.visible = false;
       scene.overrideMaterial = normalMaterial;
       renderer.setRenderTarget(normalTarget);
       renderer.clear();
@@ -1277,6 +1295,7 @@
       scene.overrideMaterial = null;
       dimRoot.visible = dimWas;
       markers.visible = markWas;
+      if (sectionHelper) sectionHelper.visible = helpWas;
     }
 
     function turbo(t) {
@@ -1350,6 +1369,24 @@
       const caseId = document.getElementById('feaCase')?.value;
       const meta = FEA_OVERLAYS.find((o) => o.id === caseId);
       if (!meta) return;
+
+      // Overlay lives on fea_part (rear shell). From Front that face is hidden
+      // behind the LCD — jump to the view that shows it and ensure it's on.
+      const partId = FEATURES.fea_part || 'rear';
+      const feaView = FEATURES.fea_view || 'rear';
+      const partCb = document.querySelector(`input[data-part="${partId}"]`);
+      if (partCb && !partCb.checked) {
+        soloPartId = null;
+        partSnapshot = null;
+        partCb.checked = true;
+        syncSoloButtons();
+        applyVisibility();
+      }
+      if (modelReady && feaView in VIEW_DIRS && lastView !== feaView) {
+        setView(feaView);
+      }
+      showHint(`FEA overlay on ${partId} — turbo scale is relative ranking, not certified strength`);
+
       if (!feaCache[caseId]) {
         document.getElementById('feaOut').textContent = 'Loading FEA…';
         try {
@@ -1366,7 +1403,6 @@
       const data = feaCache[caseId];
       if (!document.getElementById('chkFea')?.checked ||
           document.getElementById('feaCase')?.value !== caseId) return;
-      const partId = FEATURES.fea_part || 'rear';
       const meshes = byName[partId] || [];
       if (!meshes.length) {
         document.getElementById('feaOut').textContent = `No mesh for fea_part=${partId}`;
@@ -1435,12 +1471,31 @@
       return new THREE.Box3().setFromObject(root);
     }
 
+    let sectionHelper = null;
+    function syncSectionHelper(sizeHint) {
+      if (sectionHelper) {
+        scene.remove(sectionHelper);
+        sectionHelper.geometry?.dispose?.();
+        sectionHelper.material?.dispose?.();
+        sectionHelper = null;
+      }
+      if (!sectionOn || !modelReady) return;
+      const size = Math.max(sizeHint || 0.2, 0.05);
+      sectionHelper = new THREE.PlaneHelper(clipPlane, size, 0x3ec6ff);
+      sectionHelper.renderOrder = 2;
+      scene.add(sectionHelper);
+    }
+
     function applySection() {
+      const wasOn = sectionOn;
       sectionOn = !!document.getElementById('chkSection')?.checked;
-      const planeKey = document.getElementById('sectionPlane')?.value || 'xy';
+      const planeKey = document.getElementById('sectionPlane')?.value || 'yz';
       const t = (Number(document.getElementById('sectionRange')?.value) || 50) / 100;
       document.getElementById('sectionPct').textContent = `${Math.round(t * 100)}%`;
-      if (sectionOn) document.getElementById('sectionDetails').open = true;
+      if (sectionOn) {
+        document.getElementById('sectionDetails').open = true;
+        if (!wasOn) showHint('Section on — drag Cut to slice; try YZ / XZ for a clear cut from Front');
+      }
       if (!modelReady) {
         writeHash();
         return;
@@ -1475,6 +1530,7 @@
           m.needsUpdate = true;
         }
       });
+      syncSectionHelper(box.getSize(new THREE.Vector3()).length());
       writeHash();
     }
 
@@ -1865,6 +1921,11 @@
     }
     document.getElementById('chkEdges')?.addEventListener('change', applyEdges);
     applyEdges();
+
+    // Checkboxes live in <summary> — stop them toggling the <details> open state.
+    for (const el of document.querySelectorAll('[data-stop-toggle]')) {
+      el.addEventListener('click', (ev) => ev.stopPropagation());
+    }
 
     document.getElementById('explodeRange')?.addEventListener('input', applyExplode);
     document.getElementById('chkSection')?.addEventListener('change', applySection);

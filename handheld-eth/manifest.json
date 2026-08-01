@@ -402,6 +402,7 @@
     "deeplink": true,
     "fea": true,
     "fea_part": "rear",
+    "fea_view": "rear",
     "fea_stl_stem": "rear",
     "fea_offset_mm": [
       0,
