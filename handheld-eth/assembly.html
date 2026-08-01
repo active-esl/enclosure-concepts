@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Handheld eth — PLACEHOLDER</title>
-  <link rel="stylesheet" href="../site-nav.css" />
+  <link rel="stylesheet" href="../site-nav.css?v=2" />
   <style>
     :root {
       --bg: #0b1220; --panel: rgba(12, 18, 32, 0.94); --text: #f4f7fb;
@@ -186,7 +186,7 @@
 </head>
 <body class="panel-open">
   <nav id="siteNav" class="site-nav" data-root="../" data-concept="eth" data-mode="inspect" aria-label="Concept site"></nav>
-  <script src="../site-nav.js" defer></script>
+  <script src="../site-nav.js?v=2" defer></script>
   <canvas id="c"></canvas>
   <button type="button" id="btnPanel" aria-controls="hud" aria-expanded="true">Controls</button>
   <div class="hud" id="hud" role="region" aria-label="Assembly controls">
@@ -810,8 +810,30 @@
       updateHintDefault();
     });
     // Mobile starts collapsed so the model fills the screen; desktop starts open.
-    setPanelOpen(defaultPanelOpen(), { skipHash: true });
-
+    // Honour #ui=0|1 immediately so shared links don't flash the wrong chrome.
+    (function applyEarlyUiHash() {
+      const raw = (location.hash || '').replace(/^#/, '');
+      if (!raw) {
+        setPanelOpen(defaultPanelOpen(), { skipHash: true });
+        return;
+      }
+      const ui = Object.fromEntries(
+        raw.split('&').filter(Boolean).map((kv) => {
+          const i = kv.indexOf('=');
+          return i < 0 ? [kv, ''] : [decodeURIComponent(kv.slice(0, i)), decodeURIComponent(kv.slice(i + 1))];
+        })
+      ).ui;
+      if (ui === '0' || ui === '1') {
+        panelUserSet = true;
+        setPanelOpen(ui === '1', { skipHash: true });
+      } else {
+        setPanelOpen(defaultPanelOpen(), { skipHash: true });
+      }
+    })();
+    if (!isPanelOpen() && mqMobile.matches) {
+      btnPanel.classList.add('pulse-once');
+      setTimeout(() => btnPanel.classList.remove('pulse-once'), 2800);
+    }
     document.getElementById('title').textContent = MANIFEST.title || 'Assembly';
     const blurbEl = document.getElementById('blurb');
     blurbEl.innerHTML = MANIFEST.blurb || '';
@@ -831,8 +853,6 @@
         const t = l.target ? ` target="${l.target}" rel="noopener"` : '';
         return `<a href="${l.href}"${t}>${l.label}</a>`;
       }).join('');
-    } else {
-      linksEl.hidden = true;
     } else {
       linksEl.remove();
     }

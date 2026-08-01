@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Active-ESL — enclosure concepts</title>
-  <link rel="stylesheet" href="site-nav.css" />
+  <link rel="stylesheet" href="site-nav.css?v=2" />
   <style>
     :root {
       --bg: #0b1220; --card: #121a2b; --text: #f4f7fb; --muted: #a9b4c7; --accent: #3ec6ff; --warn: #ffcc66;
@@ -16,6 +16,10 @@
       color: var(--text);
       background: radial-gradient(1000px 600px at 80% 0%, #15233d 0%, var(--bg) 55%);
       padding: calc(32px + var(--site-nav-h, 46px)) 20px 48px;
+    }
+    @media (max-width: 640px) {
+      body { padding: calc(20px + var(--site-nav-h, 84px)) 14px 36px; }
+      h1 { font-size: 1.45rem; }
     }
     .wrap { max-width: 960px; margin: 0 auto; }
     .badge {
@@ -50,7 +54,7 @@
 </head>
 <body>
   <nav id="siteNav" class="site-nav" data-root="./" data-mode="gallery" aria-label="Concept site"></nav>
-  <script src="site-nav.js" defer></script>
+  <script src="site-nav.js?v=2" defer></script>
   <div class="wrap">
     <div class="badge">Concept gallery</div>
     <h1>Active-ESL enclosure concepts</h1>

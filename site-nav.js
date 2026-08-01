@@ -27,17 +27,23 @@
     ...concepts.map((c) => pill(conceptHref(c), c.label, c.id === concept)),
   ].join("");
 
-  const modePills = concept
-    ? [
-        pill(modeHref("look"), "Look", mode === "look"),
-        pill(modeHref("inspect"), "Inspect", mode === "inspect"),
-      ].join("")
+  const modeBlock = concept
+    ? `<div class="site-nav__modes" role="navigation" aria-label="Mode">${
+        pill(modeHref("look"), "Look", mode === "look")
+      }${
+        pill(modeHref("inspect"), "Inspect", mode === "inspect")
+      }</div>`
     : "";
 
   el.innerHTML = `
-    <a class="site-nav__brand" href="${brandHref}">Active-ESL <span>concepts</span></a>
-    <div class="site-nav__concepts" role="navigation" aria-label="Concepts">${conceptPills}</div>
-    <div class="site-nav__modes" role="navigation" aria-label="Mode"${concept ? "" : " hidden"}>${modePills}</div>
+    <div class="site-nav__row">
+      <a class="site-nav__brand" href="${brandHref}">
+        <span class="site-nav__brand-full">Active-ESL <span>concepts</span></span>
+        <span class="site-nav__brand-short">AESL <span>concepts</span></span>
+      </a>
+      <div class="site-nav__concepts" role="navigation" aria-label="Concepts">${conceptPills}</div>
+    </div>
+    ${modeBlock}
   `;
   document.body.classList.add("has-site-nav");
 })();
