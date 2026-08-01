@@ -736,7 +736,7 @@
     const featToggles = document.getElementById('featureToggles');
     if (FEATURES.outline) {
       const lab = document.createElement('label');
-      lab.innerHTML = '<input type="checkbox" id="chkEdges"> Edge outline';
+      lab.innerHTML = '<input type="checkbox" id="chkEdges" checked> Edge outline';
       featToggles.appendChild(lab);
     }
     if (FEATURES.explode) {
@@ -1230,7 +1230,9 @@
         (id) => document.querySelector(`input[data-dim="${id}"]`)?.checked
       );
       if (dimsOn.length) q.push(`d=${encodeURIComponent(dimsOn.join(','))}`);
-      if (document.getElementById('chkEdges')?.checked) q.push('o=1');
+      if (FEATURES.outline && document.getElementById('chkEdges')) {
+        q.push(document.getElementById('chkEdges').checked ? 'o=1' : 'o=0');
+      }
       if (FEATURES.explode) {
         const x = document.getElementById('explodeRange')?.value || '0';
         if (x !== '0') q.push(`x=${x}`);
@@ -1274,7 +1276,10 @@
       }
       applyDims();
       if (document.getElementById('chkEdges')) {
-        document.getElementById('chkEdges').checked = state.o === '1';
+        // Default is on; only override when the hash explicitly sets o.
+        if (state.o === '0' || state.o === '1') {
+          document.getElementById('chkEdges').checked = state.o === '1';
+        }
         applyEdges();
       }
       if (FEATURES.explode && state.x != null) {
