@@ -65,6 +65,9 @@
       <label><input type="checkbox" data-part="glass" checked> LCD glass</label>
       <label><input type="checkbox" data-part="accents" checked> Accents (cam ring / home)</label>
       <label><input type="checkbox" data-part="pcb"> PCB ghost</label></div>
+      <div class="toggles">
+        <label><input type="checkbox" id="chkEdges"> Edge outline</label>
+      </div>
       <h2>Measurements</h2>
       <div class="toggles" id="dimToggles">      <label><input type="checkbox" data-dim="overall" checked> Overall body (W×H×D)</label>
       <label><input type="checkbox" data-dim="pad" checked> Rear pad (CAD)</label>
@@ -146,6 +149,10 @@
     const root = new THREE.Group();
     scene.add(root);
     const byName = {};
+    const edgeLines = [];
+    const edgeMat = new THREE.LineBasicMaterial({
+      color: 0xd7dde8, transparent: true, opacity: 0.92,
+    });
     const dimRoot = new THREE.Group();
     scene.add(dimRoot);
     const dimByGroup = {};
@@ -241,6 +248,14 @@
           opacity: partId === 'glass' ? 0.6 : 1.0,
           vertexColors: false,
         });
+        // Feature edges (threshold skips soft triangulation noise)
+        const eg = new THREE.EdgesGeometry(o.geometry, 28);
+        const lines = new THREE.LineSegments(eg, edgeMat);
+        lines.renderOrder = 2;
+        lines.visible = false;
+        lines.userData.isEdge = true;
+        o.add(lines);
+        edgeLines.push(lines);
       });
       const meshes = [];
       model.traverse((o) => { if (o.isMesh) meshes.push(o); });
@@ -302,6 +317,12 @@
       }
     }
     document.getElementById('toggles').addEventListener('change', applyVisibility);
+
+    function applyEdges() {
+      const on = !!document.getElementById('chkEdges')?.checked;
+      for (const e of edgeLines) e.visible = on;
+    }
+    document.getElementById('chkEdges')?.addEventListener('change', applyEdges);
 
     let measureOn = false;
     let pts = [];
