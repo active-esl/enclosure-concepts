@@ -13,7 +13,8 @@
     html, body { margin: 0; height: 100%; overflow: hidden;
       background: radial-gradient(1200px 700px at 70% 10%, #15233d 0%, var(--bg) 55%);
       color: var(--text); font-family: "Segoe UI", system-ui, sans-serif; }
-    #c { position: absolute; inset: 0; display: block; }
+    #c { position: fixed; inset: 0; width: 100%; height: 100%;
+      display: block; touch-action: none; }
     .hud { position: fixed; z-index: 2; left: 16px; top: 16px; max-width: min(380px, calc(100% - 32px)); }
     .card { background: var(--panel); backdrop-filter: blur(10px);
       border: 1px solid rgba(255,255,255,.08); border-radius: 14px;
@@ -45,7 +46,7 @@
     <div class="card">
       <div class="badge">Placeholder · hideable + measure</div>
       <h1>Handheld eth — PLACEHOLDER</h1>
-      <p>Stepped rear eth concept. Toggle parts · Measure tool (mm). <a href="../">All concepts</a> · <a href="../handheld/">Slim</a> · <a href="beauty_card.png" target="_blank" rel="noopener">Still</a> · <a href="assembly.html">Assembly</a>. PLACEHOLDER — not measured CAD.</p>
+      <p>Stepped rear eth concept. Toggle parts · view presets · Measure (mm). <a href="../">All concepts</a> · <a href="../handheld/">Slim</a> · <a href="beauty_card.png" target="_blank" rel="noopener">Still</a>. PLACEHOLDER — not measured CAD.</p>
       
       <div class="toggles" id="toggles">      <label><input type="checkbox" data-part="body" checked> Enclosure body</label>
       <label><input type="checkbox" data-part="hatch" checked> Service hatch cover</label>
@@ -53,10 +54,17 @@
       <label><input type="checkbox" data-part="accents" checked> Accents (cam ring / home)</label>
       <label><input type="checkbox" data-part="pcb"> PCB ghost</label></div>
       <div class="row">
+        <button type="button" data-view="front">Front</button>
+        <button type="button" data-view="rear">Rear</button>
+        <button type="button" data-view="side">Side</button>
+        <button type="button" data-view="top">Top</button>
+      </div>
+      <div class="row">
         <button type="button" id="btnMeasure">Measure</button>
         <button type="button" id="btnClear">Clear measure</button>
       </div>
       <div id="measureOut"></div>
+      <div id="loading" class="muted">Loading model…</div>
     </div>
   </div>
   <div class="hint" id="hint">Drag to orbit · scroll zoom · Measure: two clicks</div>
@@ -81,7 +89,7 @@
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.85;
+    renderer.toneMappingExposure = 1.35;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(40, 2, 0.001, 20);
@@ -93,11 +101,18 @@
 
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environmentIntensity = 1.4;
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.35));
-    const key = new THREE.DirectionalLight(0xffffff, 1.1);
-    key.position.set(0.4, 0.6, 0.3);
+    scene.add(new THREE.AmbientLight(0xffffff, 1.1));
+    const key = new THREE.DirectionalLight(0xffffff, 2.2);
+    key.position.set(0.4, 0.6, 0.5);
     scene.add(key);
+    const fill = new THREE.DirectionalLight(0xffffff, 1.2);
+    fill.position.set(-0.5, 0.3, -0.6);
+    scene.add(fill);
+    const rim = new THREE.DirectionalLight(0xffffff, 0.9);
+    rim.position.set(0.0, -0.5, -0.3);
+    scene.add(rim);
 
     const root = new THREE.Group();
     scene.add(root);
@@ -126,10 +141,10 @@
         const col = PART_COLOR[partId] || 0x8e9298;
         o.material = new THREE.MeshStandardMaterial({
           color: col,
-          metalness: partId === 'glass' ? 0.05 : 0.55,
-          roughness: partId === 'glass' ? 0.15 : 0.42,
+          metalness: partId === 'glass' ? 0.1 : 0.35,
+          roughness: partId === 'glass' ? 0.12 : 0.45,
           transparent: partId === 'glass',
-          opacity: partId === 'glass' ? 0.85 : 1.0,
+          opacity: partId === 'glass' ? 0.6 : 1.0,
           vertexColors: false,
         });
       });
@@ -141,20 +156,53 @@
       });
       root.add(model);
       applyVisibility();
-      // Frame
+
       const box = new THREE.Box3().setFromObject(root);
+      fit.center = box.getCenter(new THREE.Vector3());
       const size = box.getSize(new THREE.Vector3());
-      const center = box.getCenter(new THREE.Vector3());
-      controls.target.copy(center);
-      const maxDim = Math.max(size.x, size.y, size.z);
-      camera.position.copy(center).add(new THREE.Vector3(maxDim * 1.1, maxDim * 0.7, maxDim * 1.2));
-      camera.near = maxDim / 200;
-      camera.far = maxDim * 20;
-      camera.updateProjectionMatrix();
-      controls.update();
+      fit.radius = size.length() / 2;
+      fit.dim = Math.max(...size.toArray());
+      camera.near = fit.dim / 500;
+      camera.far = fit.dim * 40;
+      setView('front');
+      document.getElementById('loading')?.remove();
     }, undefined, (err) => {
       document.getElementById('measureOut').textContent = 'Failed to load model: ' + err;
     });
+
+    // Named views — Michael reviews the stepped rear, so make it one click.
+    const fit = { center: new THREE.Vector3(), dim: 0.25, radius: 0.14 };
+    const VIEW_DIRS = {
+      front: [0.75, 0.5, 1.15],
+      rear: [-0.75, 0.5, -1.15],
+      side: [1.4, 0.25, 0.15],
+      top: [0.15, 1.4, 0.6],
+    };
+    let lastView = 'front';
+    function setView(name) {
+      lastView = name in VIEW_DIRS ? name : 'front';
+      const dir = new THREE.Vector3(...VIEW_DIRS[lastView]).normalize();
+      const fovV = THREE.MathUtils.degToRad(camera.fov);
+      const fovH = 2 * Math.atan(Math.tan(fovV / 2) * camera.aspect);
+      const dist = Math.max(fit.radius / Math.tan(fovV / 2),
+                            fit.radius / Math.tan(fovH / 2)) * 1.15;
+      camera.position.copy(fit.center).addScaledVector(dir, dist);
+      controls.target.copy(fit.center);
+      camera.updateProjectionMatrix();
+      controls.update();
+      // Pan the subject clear of the HUD card on wide screens.
+      if (innerWidth > 900) {
+        camera.updateMatrixWorld();
+        const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+        right.multiplyScalar(-dist * Math.tan(fovH / 2) * 0.22);
+        camera.position.add(right);
+        controls.target.add(right);
+        controls.update();
+      }
+    }
+    for (const b of document.querySelectorAll('button[data-view]')) {
+      b.addEventListener('click', () => setView(b.dataset.view));
+    }
 
     function applyVisibility() {
       for (const id of PART_IDS) {
@@ -233,13 +281,14 @@
     });
 
     function resize() {
-      const w = canvas.clientWidth || innerWidth;
-      const h = canvas.clientHeight || innerHeight;
+      const w = Math.max(1, innerWidth);
+      const h = Math.max(1, innerHeight);
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
     }
     addEventListener('resize', resize);
+    new ResizeObserver(resize).observe(document.body);
     resize();
 
     (function animate() {
