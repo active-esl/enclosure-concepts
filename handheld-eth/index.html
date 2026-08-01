@@ -31,13 +31,18 @@
     a { color: var(--accent); }
     .toggles { display: grid; gap: 8px; margin: 6px 0 4px; }
     .toggles label { display: flex; gap: 8px; align-items: center; font-size: .9rem; cursor: pointer; }
-    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
     button {
       background: rgba(62,198,255,.15); color: var(--accent); border: 1px solid rgba(62,198,255,.35);
       border-radius: 999px; padding: 6px 12px; font-size: .85rem; cursor: pointer;
     }
     button.active { background: rgba(62,198,255,.35); }
-    #measureOut { margin-top: 8px; font-size: .9rem; color: var(--text); min-height: 1.2em; }
+    input[type="range"] { width: 100%; accent-color: var(--accent); }
+    select {
+      background: rgba(255,255,255,.06); color: var(--text); border: 1px solid rgba(255,255,255,.15);
+      border-radius: 8px; padding: 4px 8px; font-size: .85rem;
+    }
+    #measureOut, #feaOut { margin-top: 8px; font-size: .9rem; color: var(--text); min-height: 1.2em; }
     #dimList { margin-top: 6px; font-size: .82rem; color: var(--dim); line-height: 1.45; }
     .hint { position: fixed; z-index: 2; left: 50%; bottom: 18px; transform: translateX(-50%);
       background: var(--panel); border: 1px solid rgba(255,255,255,.08);
@@ -49,6 +54,7 @@
       white-space: nowrap; pointer-events: none; user-select: none;
       box-shadow: 0 2px 10px rgba(0,0,0,.35);
     }
+    .slider-row { display: grid; gap: 4px; margin: 6px 0; font-size: .85rem; color: var(--muted); }
   </style>
 </head>
 <body>
@@ -62,6 +68,36 @@
       <h2>Parts</h2>
       <div class="toggles" id="toggles"></div>
       <div class="toggles" id="featureToggles"></div>
+      <div id="explodeBlock" hidden>
+        <h2>Explode</h2>
+        <div class="slider-row">
+          <label for="explodeRange">Separation <span id="explodePct">0%</span></label>
+          <input type="range" id="explodeRange" min="0" max="100" value="0" />
+        </div>
+      </div>
+      <div id="sectionBlock" hidden>
+        <h2>Section</h2>
+        <div class="row">
+          <label><input type="checkbox" id="chkSection"> Clip</label>
+          <select id="sectionPlane">
+            <option value="xy">XY (Z cut)</option>
+            <option value="xz">XZ (Y cut)</option>
+            <option value="yz">YZ (X cut)</option>
+          </select>
+        </div>
+        <div class="slider-row">
+          <label for="sectionRange">Cut <span id="sectionPct">50%</span></label>
+          <input type="range" id="sectionRange" min="0" max="100" value="50" />
+        </div>
+      </div>
+      <div id="feaBlock" hidden>
+        <h2>FEA (ranking)</h2>
+        <div class="row">
+          <label><input type="checkbox" id="chkFea"> Overlay</label>
+          <select id="feaCase"></select>
+        </div>
+        <div id="feaOut" class="muted"></div>
+      </div>
       <h2 id="measHeading">Measurements</h2>
       <div class="toggles" id="dimToggles"></div>
       <div class="row" id="measOffRow">
@@ -483,7 +519,53 @@
     "measure": true,
     "outline": true,
     "outline_depth_sensitivity": 320.0,
-    "outline_normal_sensitivity": 26.0
+    "outline_normal_sensitivity": 26.0,
+    "explode": true,
+    "explode_axis": [
+      0,
+      0,
+      1
+    ],
+    "explode_offsets_mm": {
+      "glass": 55,
+      "accents": 48,
+      "front": 28,
+      "pcb": 18,
+      "rear": -12,
+      "hatch": -38
+    },
+    "section": true,
+    "deeplink": true,
+    "fea": true,
+    "fea_part": "rear",
+    "fea_stl_stem": "bottom_eth",
+    "fea_offset_mm": [
+      0,
+      0,
+      -13.5
+    ],
+    "fea_cases": [
+      "long_edge_bend",
+      "corner_twist"
+    ],
+    "fea_overlays": [
+      {
+        "id": "long_edge_bend",
+        "url": "fea/long_edge_bend.json?v=3a7130d8cb",
+        "label": "Bend across the long axis (grip + push)",
+        "field": "von_mises_MPa",
+        "max": 23.491434,
+        "min": 0.0
+      },
+      {
+        "id": "corner_twist",
+        "url": "fea/corner_twist.json?v=ace6c4919d",
+        "label": "Diagonal twist (one corner up)",
+        "field": "von_mises_MPa",
+        "max": 25.006411,
+        "min": 0.0
+      }
+    ]
   },
   "pages_links": [
     {
@@ -519,6 +601,9 @@
       })
     );
     const PART_META = Object.fromEntries(PARTS.map((p) => [p.id, p]));
+    const FEA_OVERLAYS = FEATURES.fea_overlays || [];
+    const EXPLODE_AXIS = new THREE.Vector3(...(FEATURES.explode_axis || [0, 0, 1])).normalize();
+    const EXPLODE_OFFSETS = FEATURES.explode_offsets_mm || {};
 
     document.getElementById('title').textContent = MANIFEST.title || 'Assembly';
     document.getElementById('blurb').innerHTML = MANIFEST.blurb || '';
@@ -540,6 +625,22 @@
       const lab = document.createElement('label');
       lab.innerHTML = '<input type="checkbox" id="chkEdges"> Edge outline';
       featToggles.appendChild(lab);
+    }
+    if (FEATURES.explode) {
+      document.getElementById('explodeBlock').hidden = false;
+    }
+    if (FEATURES.section) {
+      document.getElementById('sectionBlock').hidden = false;
+    }
+    if (FEATURES.fea && FEA_OVERLAYS.length) {
+      document.getElementById('feaBlock').hidden = false;
+      const sel = document.getElementById('feaCase');
+      for (const o of FEA_OVERLAYS) {
+        const opt = document.createElement('option');
+        opt.value = o.id;
+        opt.textContent = o.label || o.id;
+        sel.appendChild(opt);
+      }
     }
     const dimToggles = document.getElementById('dimToggles');
     for (const g of DIM_GROUPS) {
@@ -570,6 +671,7 @@
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.35;
+    renderer.localClippingEnabled = true;
 
     const labelRenderer = new CSS2DRenderer();
     labelRenderer.setSize(innerWidth, innerHeight);
@@ -605,11 +707,21 @@
     const root = new THREE.Group();
     scene.add(root);
     const byName = {};
+    const partRoots = {};
+    const partBasePos = {};
     const dimRoot = new THREE.Group();
     scene.add(dimRoot);
     const dimByGroup = {};
     const markers = new THREE.Group();
     scene.add(markers);
+
+    const clipPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
+    const clipPlanes = [clipPlane];
+    let sectionOn = false;
+    let modelReady = false;
+    let suppressHash = false;
+    let feaCache = {};
+    let feaActive = null;
 
     const dimMat = new THREE.LineBasicMaterial({ color: 0xffd166 });
     const tickMat = new THREE.LineBasicMaterial({ color: 0xffd166 });
@@ -666,13 +778,13 @@
         wrap.traverse((o) => { o.visible = on; });
       }
       refreshDimList();
+      writeHash();
     }
     document.getElementById('dimToggles')?.addEventListener('change', applyDims);
     document.getElementById('btnDimsOff')?.addEventListener('click', () => {
       for (const i of document.querySelectorAll('input[data-dim]')) i.checked = false;
       applyDims();
     });
-    applyDims();
 
     // Screen-space outline: depth + normal second derivative (catches tangent blends).
     const depthSens = FEATURES.outline_depth_sensitivity ?? 320.0;
@@ -787,6 +899,287 @@
       markers.visible = markWas;
     }
 
+    function turbo(t) {
+      // Approximate turbo colormap (0..1 → RGB 0..1)
+      t = Math.min(1, Math.max(0, t));
+      const r = Math.max(0, Math.min(1, 1.5 - Math.abs(4 * t - 3)));
+      const g = Math.max(0, Math.min(1, 1.5 - Math.abs(4 * t - 2)));
+      const b = Math.max(0, Math.min(1, 1.5 - Math.abs(4 * t - 1)));
+      return new THREE.Color(r * 0.85 + 0.1, g * 0.9, b * 0.95);
+    }
+
+    function buildGrid(points, cell = 4.0) {
+      const grid = new Map();
+      for (const p of points) {
+        const kx = Math.floor(p[0] / cell);
+        const ky = Math.floor(p[1] / cell);
+        const kz = Math.floor(p[2] / cell);
+        const key = `${kx},${ky},${kz}`;
+        if (!grid.has(key)) grid.set(key, []);
+        grid.get(key).push(p);
+      }
+      return { grid, cell };
+    }
+
+    function nearestScalar(gridObj, x, y, z) {
+      const { grid, cell } = gridObj;
+      const cx = Math.floor(x / cell);
+      const cy = Math.floor(y / cell);
+      const cz = Math.floor(z / cell);
+      let best = Infinity;
+      let bestV = 0;
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dz = -1; dz <= 1; dz++) {
+            const bucket = grid.get(`${cx + dx},${cy + dy},${cz + dz}`);
+            if (!bucket) continue;
+            for (const p of bucket) {
+              const d = (p[0] - x) ** 2 + (p[1] - y) ** 2 + (p[2] - z) ** 2;
+              if (d < best) { best = d; bestV = p[3]; }
+            }
+          }
+        }
+      }
+      return best < Infinity ? bestV : null;
+    }
+
+    function clearFeaColors() {
+      const partId = FEATURES.fea_part || 'rear';
+      for (const mesh of (byName[partId] || [])) {
+        const mat = mesh.material;
+        if (!mat) continue;
+        mat.vertexColors = false;
+        if (mesh.userData.baseColor != null) mat.color.setHex(mesh.userData.baseColor);
+        mat.needsUpdate = true;
+        if (mesh.geometry.getAttribute('color')) {
+          mesh.geometry.deleteAttribute('color');
+        }
+      }
+      feaActive = null;
+      document.getElementById('feaOut').textContent = '';
+    }
+
+    async function applyFea() {
+      const on = !!document.getElementById('chkFea')?.checked;
+      if (!on) {
+        clearFeaColors();
+        writeHash();
+        return;
+      }
+      const caseId = document.getElementById('feaCase')?.value;
+      const meta = FEA_OVERLAYS.find((o) => o.id === caseId);
+      if (!meta) return;
+      if (!feaCache[caseId]) {
+        document.getElementById('feaOut').textContent = 'Loading FEA…';
+        try {
+          const res = await fetch(meta.url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          feaCache[caseId] = await res.json();
+        } catch (err) {
+          document.getElementById('feaOut').textContent = `FEA load failed: ${err.message}`;
+          document.getElementById('chkFea').checked = false;
+          writeHash();
+          return;
+        }
+      }
+      const data = feaCache[caseId];
+      if (!document.getElementById('chkFea')?.checked ||
+          document.getElementById('feaCase')?.value !== caseId) return;
+      const partId = FEATURES.fea_part || 'rear';
+      const meshes = byName[partId] || [];
+      if (!meshes.length) {
+        document.getElementById('feaOut').textContent = `No mesh for fea_part=${partId}`;
+        return;
+      }
+      const off = FEATURES.fea_offset_mm || [0, 0, 0];
+      const gridObj = buildGrid(data.points || []);
+      const vmin = data.min ?? 0;
+      const vmax = data.max ?? 1;
+      const span = Math.max(1e-9, vmax - vmin);
+      const explodedBy = partRoots[partId]?.position.clone()
+        .sub(partBasePos[partId] || new THREE.Vector3()) || new THREE.Vector3();
+      for (const mesh of meshes) {
+        const pos = mesh.geometry.getAttribute('position');
+        const colors = new Float32Array(pos.count * 3);
+        mesh.updateMatrixWorld(true);
+        const v = new THREE.Vector3();
+        for (let i = 0; i < pos.count; i++) {
+          v.fromBufferAttribute(pos, i);
+          mesh.localToWorld(v);
+          // Compare in the assembled frame even while this part is exploded.
+          v.sub(explodedBy);
+          // Scene is metres; FEA overlay is mm (+ optional frame offset).
+          const sx = nearestScalar(
+            gridObj,
+            v.x * 1000 - off[0],
+            v.y * 1000 - off[1],
+            v.z * 1000 - off[2],
+          );
+          const t = sx == null ? 0 : (sx - vmin) / span;
+          const c = turbo(t);
+          colors[i * 3] = c.r;
+          colors[i * 3 + 1] = c.g;
+          colors[i * 3 + 2] = c.b;
+        }
+        mesh.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        mesh.material.vertexColors = true;
+        mesh.material.color.setHex(0xffffff);
+        mesh.material.needsUpdate = true;
+      }
+      feaActive = caseId;
+      document.getElementById('feaOut').textContent =
+        `${data.label || caseId}: ${data.field} ${vmin.toFixed(2)}–${vmax.toFixed(2)}` +
+        (data.note ? ` · ${data.note}` : '');
+      writeHash();
+    }
+
+    function applyExplode() {
+      if (!FEATURES.explode || !modelReady) return;
+      const t = (Number(document.getElementById('explodeRange')?.value) || 0) / 100;
+      document.getElementById('explodePct').textContent = `${Math.round(t * 100)}%`;
+      for (const id of PART_IDS) {
+        const g = partRoots[id];
+        if (!g) continue;
+        const base = partBasePos[id] || new THREE.Vector3();
+        const mm = Number(EXPLODE_OFFSETS[id] ?? 0);
+        g.position.copy(base).addScaledVector(EXPLODE_AXIS, mm * 0.001 * t);
+      }
+      writeHash();
+    }
+
+    function worldBox() {
+      root.updateMatrixWorld(true);
+      return new THREE.Box3().setFromObject(root);
+    }
+
+    function applySection() {
+      sectionOn = !!document.getElementById('chkSection')?.checked;
+      const planeKey = document.getElementById('sectionPlane')?.value || 'xy';
+      const t = (Number(document.getElementById('sectionRange')?.value) || 50) / 100;
+      document.getElementById('sectionPct').textContent = `${Math.round(t * 100)}%`;
+      if (!modelReady) {
+        writeHash();
+        return;
+      }
+      const box = worldBox();
+      const min = box.min;
+      const max = box.max;
+      let normal, constant;
+      if (planeKey === 'yz') {
+        const x = min.x + (max.x - min.x) * t;
+        normal = new THREE.Vector3(1, 0, 0);
+        constant = -x;
+      } else if (planeKey === 'xz') {
+        const y = min.y + (max.y - min.y) * t;
+        normal = new THREE.Vector3(0, 1, 0);
+        constant = -y;
+      } else {
+        const z = min.z + (max.z - min.z) * t;
+        normal = new THREE.Vector3(0, 0, 1);
+        constant = -z;
+      }
+      clipPlane.normal.copy(normal);
+      clipPlane.constant = constant;
+      normalMaterial.clippingPlanes = sectionOn ? clipPlanes : [];
+      normalMaterial.needsUpdate = true;
+      root.traverse((o) => {
+        if (!o.isMesh || !o.material) return;
+        const mats = Array.isArray(o.material) ? o.material : [o.material];
+        for (const m of mats) {
+          m.clippingPlanes = sectionOn ? clipPlanes : [];
+          m.clipShadows = sectionOn;
+          m.needsUpdate = true;
+        }
+      });
+      writeHash();
+    }
+
+    function parseHash() {
+      if (!FEATURES.deeplink) return {};
+      const h = location.hash.replace(/^#/, '');
+      if (!h) return {};
+      const out = {};
+      for (const [key, value] of new URLSearchParams(h)) {
+        if (key) out[key] = value;
+      }
+      return out;
+    }
+
+    function writeHash() {
+      if (!FEATURES.deeplink || suppressHash || !modelReady) return;
+      const q = [];
+      q.push(`v=${encodeURIComponent(lastView)}`);
+      const partsOn = PART_IDS.filter(
+        (id) => document.querySelector(`input[data-part="${id}"]`)?.checked
+      );
+      q.push(`p=${encodeURIComponent(partsOn.join(','))}`);
+      const dimsOn = DIM_GROUPS.map((g) => g.id).filter(
+        (id) => document.querySelector(`input[data-dim="${id}"]`)?.checked
+      );
+      if (dimsOn.length) q.push(`d=${encodeURIComponent(dimsOn.join(','))}`);
+      if (document.getElementById('chkEdges')?.checked) q.push('o=1');
+      if (FEATURES.explode) {
+        const x = document.getElementById('explodeRange')?.value || '0';
+        if (x !== '0') q.push(`x=${x}`);
+      }
+      if (FEATURES.section && document.getElementById('chkSection')?.checked) {
+        const pl = document.getElementById('sectionPlane')?.value || 'xy';
+        const sp = document.getElementById('sectionRange')?.value || '50';
+        q.push(`s=${encodeURIComponent(pl + ':' + sp)}`);
+      }
+      if (FEATURES.fea && document.getElementById('chkFea')?.checked) {
+        const f = document.getElementById('feaCase')?.value;
+        if (f) q.push(`f=${encodeURIComponent(f)}`);
+      }
+      const next = '#' + q.join('&');
+      if (location.hash !== next) history.replaceState(null, '', next);
+    }
+
+    function applyHashState(state) {
+      suppressHash = true;
+      if (state.p != null) {
+        const set = new Set(state.p.split(',').filter(Boolean));
+        for (const id of PART_IDS) {
+          const el = document.querySelector(`input[data-part="${id}"]`);
+          if (el) el.checked = set.has(id);
+        }
+        applyVisibility();
+      }
+      if (state.d != null) {
+        const set = new Set(state.d.split(',').filter(Boolean));
+        for (const g of DIM_GROUPS) {
+          const el = document.querySelector(`input[data-dim="${g.id}"]`);
+          if (el) el.checked = set.has(g.id);
+        }
+      } else {
+        for (const i of document.querySelectorAll('input[data-dim]')) i.checked = false;
+      }
+      applyDims();
+      if (document.getElementById('chkEdges')) {
+        document.getElementById('chkEdges').checked = state.o === '1';
+        applyEdges();
+      }
+      if (FEATURES.explode && state.x != null) {
+        document.getElementById('explodeRange').value = state.x;
+        applyExplode();
+      }
+      if (FEATURES.section && state.s) {
+        const [pl, sp] = state.s.split(':');
+        if (pl) document.getElementById('sectionPlane').value = pl;
+        if (sp) document.getElementById('sectionRange').value = sp;
+        document.getElementById('chkSection').checked = true;
+        applySection();
+      }
+      if (FEATURES.fea && state.f && FEA_OVERLAYS.length) {
+        document.getElementById('feaCase').value = state.f;
+        document.getElementById('chkFea').checked = true;
+        applyFea();
+      }
+      if (state.v) setView(state.v);
+      suppressHash = false;
+      writeHash();
+    }
+
     const glbUrl = `${MANIFEST.glb}?v=${MANIFEST.glb_version || 1}`;
     const loader = new GLTFLoader();
     loader.load(glbUrl, (gltf) => {
@@ -814,15 +1207,38 @@
           transparent: isGlass,
           opacity: isGlass ? (meta.opacity ?? 0.6) : 1.0,
           vertexColors: false,
+          clippingPlanes: [],
         });
+        o.userData.baseColor = col;
+        o.userData.partId = partId;
       });
       const meshes = [];
       model.traverse((o) => { if (o.isMesh) meshes.push(o); });
       PART_IDS.forEach((id, i) => {
         if (!byName[id]?.length && meshes[i]) byName[id] = [meshes[i]];
       });
+
+      // Put the source scene under root first so Group.attach preserves any
+      // transforms from nested GLTF nodes while regrouping parts for explode.
       root.add(model);
+      model.updateMatrixWorld(true);
+      root.updateMatrixWorld(true);
+
+      // One group per part so explode can translate without fighting GLTF hierarchy.
+      for (const id of PART_IDS) {
+        const g = new THREE.Group();
+        g.name = `part_${id}`;
+        root.add(g);
+        for (const mesh of (byName[id] || [])) {
+          g.attach(mesh);
+        }
+        partRoots[id] = g;
+        partBasePos[id] = g.position.clone();
+      }
+      root.remove(model);
+
       applyVisibility();
+      modelReady = true;
 
       const box = new THREE.Box3().setFromObject(root);
       fit.center = box.getCenter(new THREE.Vector3());
@@ -831,7 +1247,17 @@
       fit.dim = Math.max(...size.toArray());
       camera.near = fit.dim / 100;
       camera.far = fit.dim * 20;
-      setView('front');
+
+      const hashState = parseHash();
+      if (Object.keys(hashState).length) {
+        applyHashState(hashState);
+      } else {
+        setView('front');
+        applyDims();
+        applyExplode();
+        applySection();
+        writeHash();
+      }
       document.getElementById('loading')?.remove();
     }, undefined, (err) => {
       document.getElementById('measureOut').textContent = 'Failed to load model: ' + err;
@@ -858,6 +1284,7 @@
         controls.target.add(right);
         controls.update();
       }
+      writeHash();
     }
     for (const b of document.querySelectorAll('button[data-view]')) {
       b.addEventListener('click', () => setView(b.dataset.view));
@@ -866,17 +1293,36 @@
     function applyVisibility() {
       for (const id of PART_IDS) {
         const on = document.querySelector(`input[data-part="${id}"]`)?.checked ?? true;
+        const g = partRoots[id];
+        if (g) g.visible = on;
         for (const o of (byName[id] || [])) o.visible = on;
       }
+      writeHash();
     }
     document.getElementById('toggles').addEventListener('change', applyVisibility);
 
     function applyEdges() {
       outlineOn = !!document.getElementById('chkEdges')?.checked;
       outlinePass.uniforms.enabled.value = outlineOn ? 1.0 : 0.0;
+      writeHash();
     }
     document.getElementById('chkEdges')?.addEventListener('change', applyEdges);
     applyEdges();
+
+    document.getElementById('explodeRange')?.addEventListener('input', applyExplode);
+    document.getElementById('chkSection')?.addEventListener('change', applySection);
+    document.getElementById('sectionPlane')?.addEventListener('change', applySection);
+    document.getElementById('sectionRange')?.addEventListener('input', applySection);
+    document.getElementById('chkFea')?.addEventListener('change', () => applyFea());
+    document.getElementById('feaCase')?.addEventListener('change', () => {
+      if (document.getElementById('chkFea')?.checked) applyFea();
+      else writeHash();
+    });
+
+    addEventListener('hashchange', () => {
+      if (suppressHash) return;
+      applyHashState(parseHash());
+    });
 
     let measureOn = false;
     let pts = [];

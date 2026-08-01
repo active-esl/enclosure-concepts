@@ -383,7 +383,53 @@
     "measure": true,
     "outline": true,
     "outline_depth_sensitivity": 320.0,
-    "outline_normal_sensitivity": 26.0
+    "outline_normal_sensitivity": 26.0,
+    "explode": true,
+    "explode_axis": [
+      0,
+      0,
+      1
+    ],
+    "explode_offsets_mm": {
+      "glass": 55,
+      "accents": 48,
+      "front": 28,
+      "pcb": 18,
+      "rear": -12,
+      "hatch": -38
+    },
+    "section": true,
+    "deeplink": true,
+    "fea": true,
+    "fea_part": "rear",
+    "fea_stl_stem": "bottom_eth",
+    "fea_offset_mm": [
+      0,
+      0,
+      -13.5
+    ],
+    "fea_cases": [
+      "long_edge_bend",
+      "corner_twist"
+    ],
+    "fea_overlays": [
+      {
+        "id": "long_edge_bend",
+        "url": "fea/long_edge_bend.json?v=3a7130d8cb",
+        "label": "Bend across the long axis (grip + push)",
+        "field": "von_mises_MPa",
+        "max": 23.491434,
+        "min": 0.0
+      },
+      {
+        "id": "corner_twist",
+        "url": "fea/corner_twist.json?v=ace6c4919d",
+        "label": "Diagonal twist (one corner up)",
+        "field": "von_mises_MPa",
+        "max": 25.006411,
+        "min": 0.0
+      }
+    ]
   },
   "pages_links": [
     {
