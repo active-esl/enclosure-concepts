@@ -768,7 +768,7 @@
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.35;
+    renderer.toneMappingExposure = 1.32;
     renderer.localClippingEnabled = true;
 
     const labelRenderer = new CSS2DRenderer();
@@ -789,18 +789,45 @@
 
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-    scene.environmentIntensity = 1.4;
+    scene.environmentIntensity = 1.25;
 
-    scene.add(new THREE.AmbientLight(0xffffff, 1.1));
-    const key = new THREE.DirectionalLight(0xffffff, 2.2);
-    key.position.set(0.4, 0.6, 0.5);
+    // Was Ambient 1.1 + white key 2.2 — readable but flat. Keep faces bright
+    // enough on the dark page, but let warm key / cool fill / rim model form.
+    // Camera-follow key/fill keep the viewed face lit while orbiting.
+    scene.add(new THREE.AmbientLight(0xffffff, 0.78));
+    const key = new THREE.DirectionalLight(0xfff1e0, 1.55);
     scene.add(key);
-    const fill = new THREE.DirectionalLight(0xffffff, 1.2);
-    fill.position.set(-0.5, 0.3, -0.6);
+    scene.add(key.target);
+    const fill = new THREE.DirectionalLight(0xd4e4ff, 0.55);
     scene.add(fill);
-    const rim = new THREE.DirectionalLight(0xffffff, 0.9);
-    rim.position.set(0.0, -0.5, -0.3);
+    scene.add(fill.target);
+    const rim = new THREE.DirectionalLight(0xeef3ff, 1.2);
+    rim.position.set(-0.2, 0.4, -0.85);
     scene.add(rim);
+    const top = new THREE.DirectionalLight(0xffffff, 0.45);
+    top.position.set(0.1, 1.1, 0.15);
+    scene.add(top);
+    // Fixed world key so default front/side presets still have form if the
+    // camera-follow lights are glancing.
+    const worldKey = new THREE.DirectionalLight(0xfff6ee, 0.95);
+    worldKey.position.set(0.5, 0.75, 0.85);
+    scene.add(worldKey);
+
+    const _lightKeyOff = new THREE.Vector3();
+    const _lightFillOff = new THREE.Vector3();
+    function updateCameraLights() {
+      _lightKeyOff.set(0.35, 0.5, 1.0).normalize().multiplyScalar(1.0);
+      _lightKeyOff.applyQuaternion(camera.quaternion);
+      key.position.copy(camera.position).add(_lightKeyOff);
+      key.target.position.copy(controls.target);
+      key.target.updateMatrixWorld();
+      _lightFillOff.set(-0.7, 0.1, 0.5).normalize().multiplyScalar(0.95);
+      _lightFillOff.applyQuaternion(camera.quaternion);
+      fill.position.copy(camera.position).add(_lightFillOff);
+      fill.target.position.copy(controls.target);
+      fill.target.updateMatrixWorld();
+    }
+    updateCameraLights();
 
     const root = new THREE.Group();
     scene.add(root);
@@ -1376,14 +1403,21 @@
           byName[partId].push(o);
         }
         const meta = PART_META[partId] || {};
-        const col = PART_COLOR[partId] || 0x8e9298;
+        let col = PART_COLOR[partId] || 0x8e9298;
         const isGlass = !!meta.transparent || partId === 'glass';
+        // Lift very dark part colours slightly so they read on the dark page
+        // without going back to the old flat ambient wash.
+        if (isGlass) {
+          const c = new THREE.Color(col);
+          c.offsetHSL(0, 0, 0.08);
+          col = c.getHex();
+        }
         o.material = new THREE.MeshStandardMaterial({
           color: col,
-          metalness: isGlass ? 0.1 : 0.35,
-          roughness: isGlass ? 0.12 : 0.45,
+          metalness: isGlass ? 0.08 : 0.38,
+          roughness: isGlass ? 0.22 : 0.4,
           transparent: isGlass,
-          opacity: isGlass ? (meta.opacity ?? 0.6) : 1.0,
+          opacity: isGlass ? (meta.opacity ?? 0.58) : 1.0,
           vertexColors: false,
           clippingPlanes: [],
         });
@@ -1765,6 +1799,7 @@
     (function animate() {
       requestAnimationFrame(animate);
       controls.update();
+      updateCameraLights();
       if (outlineOn) {
         outlinePass.uniforms.cameraNear.value = camera.near;
         outlinePass.uniforms.cameraFar.value = camera.far;
