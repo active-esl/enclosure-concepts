@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Active-ESL handheld slim — PLACEHOLDER</title>
+  <link rel="stylesheet" href="../site-nav.css" />
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
   <style>
     :root {
@@ -18,7 +19,8 @@
     }
     model-viewer { width: 100%; height: 100%; background: transparent; }
     .hud {
-      position: fixed; z-index: 2; left: 16px; right: 16px; top: 16px;
+      position: fixed; z-index: 2; left: 16px; right: 16px;
+      top: calc(16px + var(--site-nav-h, 46px));
       display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between;
       pointer-events: none;
     }
@@ -54,6 +56,8 @@
   </style>
 </head>
 <body>
+  <nav id="siteNav" class="site-nav" data-root="../" data-concept="slim" data-mode="look" aria-label="Concept site"></nav>
+  <script src="../site-nav.js" defer></script>
   <div class="hud">
     <div class="card">
       <div class="badge">Placeholder · slim · Look</div>
@@ -61,12 +65,9 @@
       <p>
         Thin ~7.6 mm slab · irregular 2Db PCB · rear-service (VESA 75 / ¼-20 / RF / wordmark).
         Networking via dock / USB‑C / PoE-when-docked. Not measured CAD.
-        This page is the beauty look — open Inspect to hide parts, explode, and measure.
+        Beauty look — use the top bar for Inspect, Eth, or Gallery.
       </p>
       <div class="mode-row">
-        <a href="assembly.html">Inspect assembly →</a>
-        <a class="secondary" href="../">All concepts</a>
-        <a class="secondary" href="../handheld-eth/">Eth</a>
         <a class="secondary" href="beauty_raytrace_baseline.png" target="_blank" rel="noopener">Still</a>
       </div>
     </div>

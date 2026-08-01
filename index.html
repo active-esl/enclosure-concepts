@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Active-ESL — enclosure concepts</title>
+  <link rel="stylesheet" href="site-nav.css" />
   <style>
     :root {
       --bg: #0b1220; --card: #121a2b; --text: #f4f7fb; --muted: #a9b4c7; --accent: #3ec6ff; --warn: #ffcc66;
@@ -14,7 +15,7 @@
       font-family: "Segoe UI", system-ui, sans-serif;
       color: var(--text);
       background: radial-gradient(1000px 600px at 80% 0%, #15233d 0%, var(--bg) 55%);
-      padding: 32px 20px 48px;
+      padding: calc(32px + var(--site-nav-h, 46px)) 20px 48px;
     }
     .wrap { max-width: 960px; margin: 0 auto; }
     .badge {
@@ -48,11 +49,14 @@
   </style>
 </head>
 <body>
+  <nav id="siteNav" class="site-nav" data-root="./" data-mode="gallery" aria-label="Concept site"></nav>
+  <script src="site-nav.js" defer></script>
   <div class="wrap">
     <div class="badge">Concept gallery</div>
     <h1>Active-ESL enclosure concepts</h1>
     <p class="lede">
       PLACEHOLDER ideas the team can open in the browser.
+      Use the top bar to move between concepts.
       <strong>Look</strong> is the beauty model — orbit and feel.
       <strong>Inspect</strong> is the assembly explorer — hide parts, explode, section, FEA.
       Not measured production CAD until labelled otherwise.

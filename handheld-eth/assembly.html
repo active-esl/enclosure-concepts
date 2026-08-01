@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Handheld eth — PLACEHOLDER</title>
+  <link rel="stylesheet" href="../site-nav.css" />
   <style>
     :root {
       --bg: #0b1220; --panel: rgba(12, 18, 32, 0.94); --text: #f4f7fb;
@@ -40,7 +41,7 @@
       left: calc(12px + var(--safe-left));
       top: calc(12px + var(--safe-top));
       width: min(360px, calc(100% - 24px - var(--safe-left) - var(--safe-right)));
-      max-height: calc(100% - 24px - var(--safe-top) - var(--safe-bottom));
+      max-height: calc(100% - 24px - var(--safe-top) - var(--safe-bottom) - var(--site-nav-h, 0px));
       overflow: auto; overscroll-behavior: contain;
       -webkit-overflow-scrolling: touch;
       transition: opacity .18s ease, transform .18s ease, visibility .18s;
@@ -184,6 +185,8 @@
   </style>
 </head>
 <body class="panel-open">
+  <nav id="siteNav" class="site-nav" data-root="../" data-concept="eth" data-mode="inspect" aria-label="Concept site"></nav>
+  <script src="../site-nav.js" defer></script>
   <canvas id="c"></canvas>
   <button type="button" id="btnPanel" aria-controls="hud" aria-expanded="true">Controls</button>
   <div class="hud" id="hud" role="region" aria-label="Assembly controls">
@@ -743,20 +746,7 @@
       }
     ]
   },
-  "pages_links": [
-    {
-      "label": "All concepts",
-      "href": "../"
-    },
-    {
-      "label": "Look",
-      "href": "./"
-    },
-    {
-      "label": "Slim",
-      "href": "../handheld/"
-    }
-  ]
+  "pages_links": []
 };
 
     const PARTS = MANIFEST.parts || [];
@@ -841,6 +831,8 @@
         const t = l.target ? ` target="${l.target}" rel="noopener"` : '';
         return `<a href="${l.href}"${t}>${l.label}</a>`;
       }).join('');
+    } else {
+      linksEl.hidden = true;
     } else {
       linksEl.remove();
     }
