@@ -402,31 +402,40 @@
     "deeplink": true,
     "fea": true,
     "fea_part": "rear",
-    "fea_stl_stem": "bottom_eth",
+    "fea_stl_stem": "rear",
     "fea_offset_mm": [
       0,
       0,
-      -13.5
+      0
     ],
     "fea_cases": [
+      "press_centre",
       "long_edge_bend",
       "corner_twist"
     ],
     "fea_overlays": [
       {
+        "id": "press_centre",
+        "url": "fea/press_centre.json?v=f5d977db3e",
+        "label": "Press the face centre (thumb on screen)",
+        "field": "von_mises_MPa",
+        "max": 0.051233,
+        "min": 0.0
+      },
+      {
         "id": "long_edge_bend",
-        "url": "fea/long_edge_bend.json?v=3a7130d8cb",
+        "url": "fea/long_edge_bend.json?v=f02bdc8043",
         "label": "Bend across the long axis (grip + push)",
         "field": "von_mises_MPa",
-        "max": 23.491434,
+        "max": 28.658026,
         "min": 0.0
       },
       {
         "id": "corner_twist",
-        "url": "fea/corner_twist.json?v=ace6c4919d",
+        "url": "fea/corner_twist.json?v=da8c440dcc",
         "label": "Diagonal twist (one corner up)",
         "field": "von_mises_MPa",
-        "max": 25.006411,
+        "max": 366.625842,
         "min": 0.0
       }
     ]
