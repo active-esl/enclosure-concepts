@@ -446,13 +446,12 @@
       "href": "../"
     },
     {
-      "label": "Slim",
-      "href": "../handheld/"
+      "label": "Look",
+      "href": "./"
     },
     {
-      "label": "Still",
-      "href": "beauty_card.png",
-      "target": "_blank"
+      "label": "Slim",
+      "href": "../handheld/"
     }
   ]
 }

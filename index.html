@@ -25,19 +25,26 @@
     h1 { margin: 12px 0 8px; font-size: 1.8rem; }
     .lede { color: var(--muted); max-width: 42rem; line-height: 1.5; margin-bottom: 28px; }
     .grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
-    a.card {
-      display: block; text-decoration: none; color: inherit;
+    .card {
+      display: flex; flex-direction: column; color: inherit;
       background: var(--card); border: 1px solid rgba(255,255,255,.08);
       border-radius: 16px; overflow: hidden;
       box-shadow: 0 12px 40px rgba(0,0,0,.35);
-      transition: transform .15s ease, border-color .15s ease;
     }
-    a.card:hover { transform: translateY(-2px); border-color: rgba(62,198,255,.45); }
-    a.card img { display: block; width: 100%; aspect-ratio: 4/3; object-fit: cover; background: #0a0f18; }
-    a.card .body { padding: 14px 16px 16px; }
-    a.card h2 { margin: 0 0 6px; font-size: 1.1rem; }
-    a.card p { margin: 0; color: var(--muted); font-size: .92rem; line-height: 1.4; }
-    .cta { color: var(--accent); font-size: .9rem; margin-top: 10px; display: inline-block; }
+    .card img { display: block; width: 100%; aspect-ratio: 4/3; object-fit: cover; background: #0a0f18; }
+    .card .body { padding: 14px 16px 16px; flex: 1; display: flex; flex-direction: column; }
+    .card h2 { margin: 0 0 6px; font-size: 1.1rem; }
+    .card p { margin: 0; color: var(--muted); font-size: .92rem; line-height: 1.4; flex: 1; }
+    .ctas { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .ctas a {
+      display: inline-flex; align-items: center; min-height: 36px; padding: 6px 12px;
+      border-radius: 999px; font-size: .88rem; font-weight: 650; text-decoration: none;
+      border: 1px solid rgba(62,198,255,.4); background: rgba(62,198,255,.14); color: var(--accent);
+    }
+    .ctas a.secondary {
+      background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.14); color: var(--muted);
+    }
+    .ctas a:hover { border-color: rgba(62,198,255,.7); }
   </style>
 </head>
 <body>
@@ -45,26 +52,34 @@
     <div class="badge">Concept gallery</div>
     <h1>Active-ESL enclosure concepts</h1>
     <p class="lede">
-      Interactive PLACEHOLDER ideas the team can open and rotate in the browser.
+      PLACEHOLDER ideas the team can open in the browser.
+      <strong>Look</strong> is the beauty model — orbit and feel.
+      <strong>Inspect</strong> is the assembly explorer — hide parts, explode, section, FEA.
       Not measured production CAD until labelled otherwise.
     </p>
     <div class="grid">
-      <a class="card" href="handheld/">
+      <div class="card">
         <img src="handheld/beauty_raytrace_baseline.png" alt="Handheld slim concept still" />
         <div class="body">
           <h2>Handheld — slim</h2>
           <p>~10″ tablet-class shell, uniform thin edge. Networking via dock / USB‑C / PoE-when-docked.</p>
-          <span class="cta">Open 3D viewer →</span>
+          <div class="ctas">
+            <a href="handheld/">Look →</a>
+            <a class="secondary" href="handheld/assembly.html">Inspect →</a>
+          </div>
         </div>
-      </a>
-      <a class="card" href="handheld-eth/">
+      </div>
+      <div class="card">
         <img src="handheld-eth/beauty_card.png" alt="Handheld eth Apple-language concept still" />
         <div class="body">
           <h2>Handheld — eth</h2>
           <p>Apple-language reveal body for onboard RJ45 + USB‑C. Thin visible edge; honest stack underneath.</p>
-          <span class="cta">Open 3D viewer →</span>
+          <div class="ctas">
+            <a href="handheld-eth/">Look →</a>
+            <a class="secondary" href="handheld-eth/assembly.html">Inspect →</a>
+          </div>
         </div>
-      </a>
+      </div>
     </div>
   </div>
 </body>
