@@ -1,0 +1,266 @@
+{
+  "id": "slim",
+  "title": "Handheld slim \u2014 PLACEHOLDER",
+  "blurb": "Thin ~7.6 mm slab \u00b7 no onboard RJ45 (dock / USB-C / PoE-when-docked). Irregular 2Db PCB ghost \u00b7 rear-service (VESA / \u00bc-20 / RF / wordmark). Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
+  "glb": "assembly.glb",
+  "glb_version": "6b0f59dc25",
+  "parts": [
+    {
+      "id": "body",
+      "label": "Enclosure body",
+      "visible": true,
+      "color": [
+        145,
+        148,
+        152
+      ]
+    },
+    {
+      "id": "glass",
+      "label": "LCD glass",
+      "visible": true,
+      "color": [
+        28,
+        36,
+        48
+      ],
+      "transparent": true,
+      "opacity": 0.6
+    },
+    {
+      "id": "accents",
+      "label": "Accents (cam ring / home)",
+      "visible": true,
+      "color": [
+        190,
+        192,
+        196
+      ]
+    },
+    {
+      "id": "pcb",
+      "label": "PCB ghost (2Db outline)",
+      "visible": false,
+      "color": [
+        28,
+        110,
+        55
+      ]
+    }
+  ],
+  "dim_groups": [
+    {
+      "id": "overall",
+      "label": "Overall body (W\u00d7H\u00d7D)",
+      "default": false,
+      "dims": [
+        {
+          "label": "W 222.9 mm",
+          "mm": 222.9,
+          "a": [
+            -0.00045000000000000004,
+            0.158,
+            0.0076
+          ],
+          "b": [
+            0.22244999999999998,
+            0.158,
+            0.0076
+          ]
+        },
+        {
+          "label": "H 150.0 mm",
+          "mm": 150.0,
+          "a": [
+            0.23045,
+            0.0,
+            0.0076
+          ],
+          "b": [
+            0.23045,
+            0.15,
+            0.0076
+          ]
+        },
+        {
+          "label": "D 7.6 mm",
+          "mm": 7.6,
+          "a": [
+            0.23045,
+            0.15,
+            0.0
+          ],
+          "b": [
+            0.23045,
+            0.15,
+            0.0076
+          ]
+        }
+      ]
+    },
+    {
+      "id": "glass",
+      "label": "Glass",
+      "default": false,
+      "dims": [
+        {
+          "label": "glass W 216.0 mm",
+          "mm": 216.0,
+          "a": [
+            0.003,
+            0.146,
+            0.00755
+          ],
+          "b": [
+            0.219,
+            0.146,
+            0.00755
+          ]
+        },
+        {
+          "label": "glass H 135.0 mm",
+          "mm": 135.0,
+          "a": [
+            0.227,
+            0.003,
+            0.00755
+          ],
+          "b": [
+            0.227,
+            0.138,
+            0.00755
+          ]
+        }
+      ]
+    },
+    {
+      "id": "accents",
+      "label": "Accents",
+      "default": false,
+      "dims": [
+        {
+          "label": "accents W 28.0 mm",
+          "mm": 28.0,
+          "a": [
+            0.097,
+            0.15515,
+            0.00764
+          ],
+          "b": [
+            0.125,
+            0.15515,
+            0.00764
+          ]
+        },
+        {
+          "label": "accents H 139.7 mm",
+          "mm": 139.65,
+          "a": [
+            0.133,
+            0.0075,
+            0.00764
+          ],
+          "b": [
+            0.133,
+            0.14715,
+            0.00764
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pcb",
+      "label": "Pcb",
+      "default": false,
+      "dims": [
+        {
+          "label": "pcb W 146.0 mm",
+          "mm": 145.99,
+          "a": [
+            0.038005000000000004,
+            0.13215000000000002,
+            0.003
+          ],
+          "b": [
+            0.18399700000000002,
+            0.13215000000000002,
+            0.003
+          ]
+        },
+        {
+          "label": "pcb H 98.3 mm",
+          "mm": 98.3,
+          "a": [
+            0.19199700000000003,
+            0.02585,
+            0.003
+          ],
+          "b": [
+            0.19199700000000003,
+            0.12415000000000001,
+            0.003
+          ]
+        }
+      ]
+    }
+  ],
+  "views": {
+    "front": [
+      0.75,
+      0.5,
+      1.15
+    ],
+    "rear": [
+      -0.75,
+      0.5,
+      -1.15
+    ],
+    "side": [
+      1.4,
+      0.25,
+      0.15
+    ],
+    "top": [
+      0.15,
+      1.4,
+      0.6
+    ]
+  },
+  "features": {
+    "measure": true,
+    "outline": true,
+    "outline_depth_sensitivity": 320.0,
+    "outline_normal_sensitivity": 26.0,
+    "explode": true,
+    "explode_axis": [
+      0,
+      0,
+      1
+    ],
+    "explode_offsets_mm": {
+      "glass": 40,
+      "accents": 35,
+      "body": 0,
+      "pcb": 18
+    },
+    "section": true,
+    "deeplink": true,
+    "fea": false,
+    "fea_overlays": []
+  },
+  "pages_links": [
+    {
+      "label": "All concepts",
+      "href": "../"
+    },
+    {
+      "label": "Eth",
+      "href": "../handheld-eth/"
+    },
+    {
+      "label": "Still",
+      "href": "beauty_raytrace_baseline.png",
+      "target": "_blank"
+    }
+  ]
+}
