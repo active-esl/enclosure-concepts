@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Handheld eth — hideable + measure</title>
+  <title>Handheld eth — PLACEHOLDER</title>
   <style>
     :root {
       --bg: #0b1220; --panel: rgba(12, 18, 32, 0.9); --text: #f4f7fb;
@@ -56,35 +56,20 @@
   <div class="hud">
     <div class="card">
       <div class="badge">Placeholder · hideable + measure</div>
-      <h1>Handheld eth — hideable + measure</h1>
-      <p>Toggle parts · view presets · show CAD dims · or Measure two clicks (mm). PLACEHOLDER — not measured CAD.</p>
-      
+      <h1 id="title"></h1>
+      <p id="blurb"></p>
+      <div id="extraLinks" class="muted"></div>
       <h2>Parts</h2>
-      <div class="toggles" id="toggles">      <label><input type="checkbox" data-part="body" checked> Enclosure body</label>
-      <label><input type="checkbox" data-part="hatch" checked> Service hatch cover</label>
-      <label><input type="checkbox" data-part="glass" checked> LCD glass</label>
-      <label><input type="checkbox" data-part="accents" checked> Accents (cam ring / home)</label>
-      <label><input type="checkbox" data-part="pcb"> PCB ghost</label></div>
-      <div class="toggles">
-        <label><input type="checkbox" id="chkEdges"> Edge outline</label>
-      </div>
-      <h2>Measurements</h2>
-      <div class="toggles" id="dimToggles">      <label><input type="checkbox" data-dim="overall"> Overall body (W×H×D)</label>
-      <label><input type="checkbox" data-dim="pad"> Rear pad (CAD)</label>
-      <label><input type="checkbox" data-dim="hatch"> Service hatch</label>
-      <label><input type="checkbox" data-dim="glass"> LCD glass</label>
-      <label><input type="checkbox" data-dim="pcb"> PCB</label></div>
-      <div class="row">
+      <div class="toggles" id="toggles"></div>
+      <div class="toggles" id="featureToggles"></div>
+      <h2 id="measHeading">Measurements</h2>
+      <div class="toggles" id="dimToggles"></div>
+      <div class="row" id="measOffRow">
         <button type="button" id="btnDimsOff">All measurements off</button>
       </div>
       <div id="dimList"></div>
-      <div class="row">
-        <button type="button" data-view="front">Front</button>
-        <button type="button" data-view="rear">Rear</button>
-        <button type="button" data-view="side">Side</button>
-        <button type="button" data-view="top">Top</button>
-      </div>
-      <div class="row">
+      <div class="row" id="viewRow"></div>
+      <div class="row" id="measureRow">
         <button type="button" id="btnMeasure">Measure</button>
         <button type="button" id="btnClear">Clear measure</button>
       </div>
@@ -113,8 +98,427 @@
     import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
     import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
-    const PART_IDS = ["body", "hatch", "glass", "accents", "pcb"];
-    const DIM_GROUPS = [{"id": "overall", "label": "Overall body (W\u00d7H\u00d7D)", "default": false, "dims": [{"label": "W 222.9 mm", "mm": 222.9, "a": [-0.00045000000000000004, 0.158, 0.008], "b": [0.22244999999999998, 0.158, 0.008]}, {"label": "H 150.0 mm", "mm": 150.0, "a": [0.23045, 0.0, 0.008], "b": [0.23045, 0.15, 0.008]}, {"label": "D 21.5 mm", "mm": 21.5, "a": [0.23045, 0.15, -0.0135], "b": [0.23045, 0.15, 0.008]}]}, {"id": "pad", "label": "Rear pad (CAD)", "default": false, "dims": [{"label": "pad W 156.0 mm", "mm": 155.99, "a": [0.03300499999999999, 0.008000000000000007, 0.0], "b": [0.188995, 0.008000000000000007, 0.0]}, {"label": "pad H 117.3 mm", "mm": 117.3, "a": [0.025004999999999996, 0.016000000000000007, 0.0], "b": [0.025004999999999996, 0.1333, 0.0]}, {"label": "raise 13.5 mm", "mm": 13.5, "a": [0.025004999999999996, 0.1333, -0.0135], "b": [0.025004999999999996, 0.1333, 0.0]}, {"label": "thin edge 8.0 mm", "mm": 8.0, "a": [0.23045, 0.01, 0.0], "b": [0.23045, 0.01, 0.008]}]}, {"id": "hatch", "label": "Service hatch", "default": false, "dims": [{"label": "hatch W 100.0 mm", "mm": 100.0, "a": [0.061, 0.076, -0.012], "b": [0.161, 0.076, -0.012]}, {"label": "hatch D 46.0 mm", "mm": 46.0, "a": [0.169, 0.022, -0.012], "b": [0.169, 0.068, -0.012]}]}, {"id": "glass", "label": "LCD glass", "default": false, "dims": [{"label": "glass W 216.0 mm", "mm": 216.0, "a": [0.003, 0.146, 0.00795], "b": [0.219, 0.146, 0.00795]}, {"label": "glass H 135.0 mm", "mm": 135.0, "a": [0.227, 0.003, 0.00795], "b": [0.227, 0.138, 0.00795]}]}, {"id": "pcb", "label": "PCB", "default": false, "dims": [{"label": "PCB W 146.0 mm", "mm": 145.99, "a": [0.038005000000000004, 0.13215000000000002, 0.005200000000000001], "b": [0.18399500000000002, 0.13215000000000002, 0.005200000000000001]}, {"label": "PCB H 98.3 mm", "mm": 98.3, "a": [0.191995, 0.02585, 0.005200000000000001], "b": [0.191995, 0.12415000000000001, 0.005200000000000001]}]}];
+    const MANIFEST = {
+  "id": "eth",
+  "title": "Handheld eth \u2014 PLACEHOLDER",
+  "blurb": "Stepped rear eth concept. Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
+  "glb": "assembly.glb",
+  "glb_version": "14fcf0e37c",
+  "parts": [
+    {
+      "id": "body",
+      "label": "Enclosure body",
+      "visible": true,
+      "color": [
+        145,
+        148,
+        152
+      ]
+    },
+    {
+      "id": "hatch",
+      "label": "Service hatch cover",
+      "visible": true,
+      "color": [
+        72,
+        78,
+        88
+      ]
+    },
+    {
+      "id": "glass",
+      "label": "LCD glass",
+      "visible": true,
+      "color": [
+        28,
+        36,
+        48
+      ],
+      "transparent": true,
+      "opacity": 0.6
+    },
+    {
+      "id": "accents",
+      "label": "Accents (cam ring / home)",
+      "visible": true,
+      "color": [
+        190,
+        192,
+        196
+      ]
+    },
+    {
+      "id": "pcb",
+      "label": "PCB ghost",
+      "visible": false,
+      "color": [
+        28,
+        110,
+        55
+      ]
+    }
+  ],
+  "dim_groups": [
+    {
+      "id": "overall",
+      "label": "Overall body (W\u00d7H\u00d7D)",
+      "default": false,
+      "dims": [
+        {
+          "label": "W 222.9 mm",
+          "mm": 222.9,
+          "a": [
+            -0.00045000000000000004,
+            0.158,
+            0.008
+          ],
+          "b": [
+            0.22244999999999998,
+            0.158,
+            0.008
+          ]
+        },
+        {
+          "label": "H 150.0 mm",
+          "mm": 150.0,
+          "a": [
+            0.23045,
+            0.0,
+            0.008
+          ],
+          "b": [
+            0.23045,
+            0.15,
+            0.008
+          ]
+        },
+        {
+          "label": "D 21.5 mm",
+          "mm": 21.5,
+          "a": [
+            0.23045,
+            0.15,
+            -0.0135
+          ],
+          "b": [
+            0.23045,
+            0.15,
+            0.008
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hatch",
+      "label": "Hatch",
+      "default": false,
+      "dims": [
+        {
+          "label": "hatch W 100.0 mm",
+          "mm": 100.0,
+          "a": [
+            0.061,
+            0.076,
+            -0.012
+          ],
+          "b": [
+            0.161,
+            0.076,
+            -0.012
+          ]
+        },
+        {
+          "label": "hatch H 46.0 mm",
+          "mm": 46.0,
+          "a": [
+            0.169,
+            0.022,
+            -0.012
+          ],
+          "b": [
+            0.169,
+            0.068,
+            -0.012
+          ]
+        }
+      ]
+    },
+    {
+      "id": "glass",
+      "label": "Glass",
+      "default": false,
+      "dims": [
+        {
+          "label": "glass W 216.0 mm",
+          "mm": 216.0,
+          "a": [
+            0.003,
+            0.146,
+            0.00795
+          ],
+          "b": [
+            0.219,
+            0.146,
+            0.00795
+          ]
+        },
+        {
+          "label": "glass H 135.0 mm",
+          "mm": 135.0,
+          "a": [
+            0.227,
+            0.003,
+            0.00795
+          ],
+          "b": [
+            0.227,
+            0.138,
+            0.00795
+          ]
+        }
+      ]
+    },
+    {
+      "id": "accents",
+      "label": "Accents",
+      "default": false,
+      "dims": [
+        {
+          "label": "accents W 28.0 mm",
+          "mm": 28.0,
+          "a": [
+            0.097,
+            0.15515,
+            0.008039999999999999
+          ],
+          "b": [
+            0.125,
+            0.15515,
+            0.008039999999999999
+          ]
+        },
+        {
+          "label": "accents H 139.7 mm",
+          "mm": 139.65,
+          "a": [
+            0.133,
+            0.0075,
+            0.008039999999999999
+          ],
+          "b": [
+            0.133,
+            0.14715,
+            0.008039999999999999
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pcb",
+      "label": "Pcb",
+      "default": false,
+      "dims": [
+        {
+          "label": "pcb W 146.0 mm",
+          "mm": 145.99,
+          "a": [
+            0.038005000000000004,
+            0.13215000000000002,
+            0.005200000000000001
+          ],
+          "b": [
+            0.18399500000000002,
+            0.13215000000000002,
+            0.005200000000000001
+          ]
+        },
+        {
+          "label": "pcb H 98.3 mm",
+          "mm": 98.3,
+          "a": [
+            0.191995,
+            0.02585,
+            0.005200000000000001
+          ],
+          "b": [
+            0.191995,
+            0.12415000000000001,
+            0.005200000000000001
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pad",
+      "label": "Rear pad (CAD)",
+      "default": false,
+      "dims": [
+        {
+          "label": "pad W 156.0 mm",
+          "mm": 155.99,
+          "a": [
+            0.03300499999999999,
+            0.008000000000000007,
+            0.0
+          ],
+          "b": [
+            0.188995,
+            0.008000000000000007,
+            0.0
+          ]
+        },
+        {
+          "label": "pad H 117.3 mm",
+          "mm": 117.3,
+          "a": [
+            0.025004999999999996,
+            0.016000000000000007,
+            0.0
+          ],
+          "b": [
+            0.025004999999999996,
+            0.1333,
+            0.0
+          ]
+        },
+        {
+          "label": "raise 13.5 mm",
+          "mm": 13.5,
+          "a": [
+            0.025004999999999996,
+            0.1333,
+            -0.0135
+          ],
+          "b": [
+            0.025004999999999996,
+            0.1333,
+            0.0
+          ]
+        },
+        {
+          "label": "thin edge 8.0 mm",
+          "mm": 8.0,
+          "a": [
+            0.23045,
+            0.01,
+            0.0
+          ],
+          "b": [
+            0.23045,
+            0.01,
+            0.008
+          ]
+        }
+      ]
+    }
+  ],
+  "views": {
+    "front": [
+      0.75,
+      0.5,
+      1.15
+    ],
+    "rear": [
+      -0.75,
+      0.5,
+      -1.15
+    ],
+    "side": [
+      1.4,
+      0.25,
+      0.15
+    ],
+    "top": [
+      0.15,
+      1.4,
+      0.6
+    ]
+  },
+  "features": {
+    "measure": true,
+    "outline": true,
+    "outline_depth_sensitivity": 320.0,
+    "outline_normal_sensitivity": 26.0
+  },
+  "pages_links": [
+    {
+      "label": "All concepts",
+      "href": "../"
+    },
+    {
+      "label": "Slim",
+      "href": "../handheld/"
+    },
+    {
+      "label": "Still",
+      "href": "beauty_card.png",
+      "target": "_blank"
+    }
+  ]
+};
+
+    const PARTS = MANIFEST.parts || [];
+    const PART_IDS = PARTS.map((p) => p.id);
+    const DIM_GROUPS = MANIFEST.dim_groups || [];
+    const FEATURES = MANIFEST.features || {};
+    const VIEW_DIRS = MANIFEST.views || {
+      front: [0.75, 0.5, 1.15],
+      rear: [-0.75, 0.5, -1.15],
+      side: [1.4, 0.25, 0.15],
+      top: [0.15, 1.4, 0.6],
+    };
+    const PART_COLOR = Object.fromEntries(
+      PARTS.map((p) => {
+        const c = p.color || [142, 146, 152];
+        return [p.id, (c[0] << 16) | (c[1] << 8) | c[2]];
+      })
+    );
+    const PART_META = Object.fromEntries(PARTS.map((p) => [p.id, p]));
+
+    document.getElementById('title').textContent = MANIFEST.title || 'Assembly';
+    document.getElementById('blurb').innerHTML = MANIFEST.blurb || '';
+    const linksEl = document.getElementById('extraLinks');
+    if (MANIFEST.pages_links?.length) {
+      linksEl.innerHTML = MANIFEST.pages_links.map((l) => {
+        const t = l.target ? ` target="${l.target}" rel="noopener"` : '';
+        return `<a href="${l.href}"${t}>${l.label}</a>`;
+      }).join(' · ');
+    }
+    const toggles = document.getElementById('toggles');
+    for (const p of PARTS) {
+      const lab = document.createElement('label');
+      lab.innerHTML = `<input type="checkbox" data-part="${p.id}"${p.visible ? ' checked' : ''}> ${p.label}`;
+      toggles.appendChild(lab);
+    }
+    const featToggles = document.getElementById('featureToggles');
+    if (FEATURES.outline) {
+      const lab = document.createElement('label');
+      lab.innerHTML = '<input type="checkbox" id="chkEdges"> Edge outline';
+      featToggles.appendChild(lab);
+    }
+    const dimToggles = document.getElementById('dimToggles');
+    for (const g of DIM_GROUPS) {
+      const lab = document.createElement('label');
+      lab.innerHTML = `<input type="checkbox" data-dim="${g.id}"${g.default ? ' checked' : ''}> ${g.label}`;
+      dimToggles.appendChild(lab);
+    }
+    if (!DIM_GROUPS.length) {
+      document.getElementById('measHeading').style.display = 'none';
+      document.getElementById('measOffRow').style.display = 'none';
+    }
+    const viewRow = document.getElementById('viewRow');
+    for (const name of Object.keys(VIEW_DIRS)) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.dataset.view = name;
+      b.textContent = name[0].toUpperCase() + name.slice(1);
+      viewRow.appendChild(b);
+    }
+    if (!FEATURES.measure) {
+      document.getElementById('measureRow').style.display = 'none';
+      document.getElementById('hint').textContent = 'Drag to orbit · scroll zoom';
+    }
+
     const canvas = document.getElementById('c');
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -171,9 +575,7 @@
       const b = new THREE.Vector3(...dim.b);
       const geo = new THREE.BufferGeometry().setFromPoints([a, b]);
       g.add(new THREE.Line(geo, dimMat));
-      // end ticks perpendicular to the dim axis (screen-ish size)
       const dir = b.clone().sub(a);
-      const len = dir.length() || 1;
       dir.normalize();
       let tick = new THREE.Vector3(0, 0, 1).cross(dir);
       if (tick.lengthSq() < 1e-6) tick = new THREE.Vector3(0, 1, 0).cross(dir);
@@ -216,7 +618,6 @@
         const on = !!document.querySelector(`input[data-dim="${group.id}"]`)?.checked;
         const wrap = dimByGroup[group.id];
         if (!wrap) continue;
-        // CSS2DRenderer only checks each object's own .visible, not ancestors.
         wrap.traverse((o) => { o.visible = on; });
       }
       refreshDimList();
@@ -228,6 +629,9 @@
     });
     applyDims();
 
+    // Screen-space outline: depth + normal second derivative (catches tangent blends).
+    const depthSens = FEATURES.outline_depth_sensitivity ?? 320.0;
+    const normalSens = FEATURES.outline_normal_sensitivity ?? 26.0;
     const OutlineShader = {
       uniforms: {
         tDiffuse: { value: null },
@@ -237,8 +641,8 @@
         cameraNear: { value: 0.01 },
         cameraFar: { value: 10.0 },
         outlineColor: { value: new THREE.Color(0xe8eef7) },
-        depthSensitivity: { value: 320.0 },
-        normalSensitivity: { value: 26.0 },
+        depthSensitivity: { value: depthSens },
+        normalSensitivity: { value: normalSens },
         thickness: { value: 1.15 },
         enabled: { value: 0.0 },
       },
@@ -287,9 +691,6 @@
           float dr = linearDepth(vUv + dx);
           float dd = linearDepth(vUv - dy);
           float du = linearDepth(vUv + dy);
-          // Second derivative, not gradient: a flat face seen at an angle has a
-          // large depth gradient but ~zero curvature, so only real steps fire.
-          // Divided by depth so the line holds at any zoom or model scale.
           float depthEdge = (abs((dl + dr) * 0.5 - d0) +
                              abs((dd + du) * 0.5 - d0)) / max(d0, 1e-5);
 
@@ -298,8 +699,6 @@
           vec3 nr = readNormal(vUv + dx);
           vec3 nd = readNormal(vUv - dy);
           vec3 nu = readNormal(vUv + dy);
-          // Same trick on normals: constant curvature (the bullnose band) stays
-          // quiet, a curvature break (where the raised pad leaves the back) fires.
           float normalEdge = length((nl + nr) * 0.5 - n0) +
                              length((nd + nu) * 0.5 - n0);
 
@@ -317,8 +716,6 @@
     });
     normalTarget.depthTexture = new THREE.DepthTexture(1, 1);
     normalTarget.depthTexture.format = THREE.DepthFormat;
-    // 32F, not 24-bit int: the second derivative amplifies depth quantisation
-    // into a dashed line at these near/far ratios.
     normalTarget.depthTexture.type = THREE.FloatType;
     const normalMaterial = new THREE.MeshNormalMaterial();
 
@@ -331,7 +728,6 @@
     let outlineOn = false;
 
     function renderNormalBuffer() {
-      // Annotations must not contribute edges.
       const dimWas = dimRoot.visible;
       const markWas = markers.visible;
       dimRoot.visible = false;
@@ -346,14 +742,10 @@
       markers.visible = markWas;
     }
 
-
+    const glbUrl = `${MANIFEST.glb}?v=${MANIFEST.glb_version || 1}`;
     const loader = new GLTFLoader();
-    loader.load('assembly.glb?v=4', (gltf) => {
+    loader.load(glbUrl, (gltf) => {
       const model = gltf.scene;
-      const PART_COLOR = {
-        body: 0x919498, hatch: 0x484e58, glass: 0x1c2430,
-        accents: 0xbec0c4, pcb: 0x1c6e37,
-      };
       model.traverse((o) => {
         if (!o.isMesh) return;
         o.castShadow = true;
@@ -367,13 +759,15 @@
           byName[partId] = byName[partId] || [];
           byName[partId].push(o);
         }
+        const meta = PART_META[partId] || {};
         const col = PART_COLOR[partId] || 0x8e9298;
+        const isGlass = !!meta.transparent || partId === 'glass';
         o.material = new THREE.MeshStandardMaterial({
           color: col,
-          metalness: partId === 'glass' ? 0.1 : 0.35,
-          roughness: partId === 'glass' ? 0.12 : 0.45,
-          transparent: partId === 'glass',
-          opacity: partId === 'glass' ? 0.6 : 1.0,
+          metalness: isGlass ? 0.1 : 0.35,
+          roughness: isGlass ? 0.12 : 0.45,
+          transparent: isGlass,
+          opacity: isGlass ? (meta.opacity ?? 0.6) : 1.0,
           vertexColors: false,
         });
       });
@@ -390,7 +784,6 @@
       const size = box.getSize(new THREE.Vector3());
       fit.radius = size.length() / 2;
       fit.dim = Math.max(...size.toArray());
-      // Kept tight: a huge far/near ratio wrecks the outline pass depth precision.
       camera.near = fit.dim / 100;
       camera.far = fit.dim * 20;
       setView('front');
@@ -400,15 +793,9 @@
     });
 
     const fit = { center: new THREE.Vector3(), dim: 0.25, radius: 0.14 };
-    const VIEW_DIRS = {
-      front: [0.75, 0.5, 1.15],
-      rear: [-0.75, 0.5, -1.15],
-      side: [1.4, 0.25, 0.15],
-      top: [0.15, 1.4, 0.6],
-    };
     let lastView = 'front';
     function setView(name) {
-      lastView = name in VIEW_DIRS ? name : 'front';
+      lastView = name in VIEW_DIRS ? name : Object.keys(VIEW_DIRS)[0];
       const dir = new THREE.Vector3(...VIEW_DIRS[lastView]).normalize();
       const fovV = THREE.MathUtils.degToRad(camera.fov);
       const fovH = 2 * Math.atan(Math.tan(fovV / 2) * camera.aspect);
@@ -457,16 +844,18 @@
     const out = document.getElementById('measureOut');
     const hint = document.getElementById('hint');
 
-    btnM.onclick = () => {
-      measureOn = !measureOn;
-      btnM.classList.toggle('active', measureOn);
-      controls.enabled = !measureOn;
-      hint.textContent = measureOn
-        ? 'Measure on — click point A, then point B'
-        : 'Drag to orbit · scroll zoom · Measure: two clicks';
-      if (!measureOn) clearMeasure();
-    };
-    btnC.onclick = () => clearMeasure();
+    if (FEATURES.measure) {
+      btnM.onclick = () => {
+        measureOn = !measureOn;
+        btnM.classList.toggle('active', measureOn);
+        controls.enabled = !measureOn;
+        hint.textContent = measureOn
+          ? 'Measure on — click point A, then point B'
+          : 'Drag to orbit · scroll zoom · Measure: two clicks';
+        if (!measureOn) clearMeasure();
+      };
+      btnC.onclick = () => clearMeasure();
+    }
 
     function clearMeasure() {
       pts = [];
