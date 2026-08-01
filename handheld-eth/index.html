@@ -3,81 +3,245 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Active-ESL handheld eth — PLACEHOLDER</title>
-  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+  <title>Handheld eth — PLACEHOLDER</title>
   <style>
     :root {
-      --bg: #0b1220; --panel: rgba(12, 18, 32, 0.78); --text: #f4f7fb; --muted: #a9b4c7; --accent: #3ec6ff; --warn: #ffcc66;
+      --bg: #0b1220; --panel: rgba(12, 18, 32, 0.9); --text: #f4f7fb;
+      --muted: #a9b4c7; --accent: #3ec6ff; --warn: #ffcc66;
     }
     * { box-sizing: border-box; }
-    html, body {
-      margin: 0; height: 100%;
+    html, body { margin: 0; height: 100%; overflow: hidden;
       background: radial-gradient(1200px 700px at 70% 10%, #15233d 0%, var(--bg) 55%);
-      color: var(--text);
-      font-family: "Segoe UI", system-ui, sans-serif;
-    }
-    model-viewer { width: 100%; height: 100%; background: transparent; }
-    .hud {
-      position: fixed; z-index: 2; left: 16px; right: 16px; top: 16px;
-      display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between;
-      pointer-events: none;
-    }
-    .card {
-      pointer-events: auto; background: var(--panel); backdrop-filter: blur(10px);
+      color: var(--text); font-family: "Segoe UI", system-ui, sans-serif; }
+    #c { position: absolute; inset: 0; display: block; }
+    .hud { position: fixed; z-index: 2; left: 16px; top: 16px; max-width: min(380px, calc(100% - 32px)); }
+    .card { background: var(--panel); backdrop-filter: blur(10px);
       border: 1px solid rgba(255,255,255,.08); border-radius: 14px;
-      padding: 14px 16px; max-width: min(560px, 100%);
-      box-shadow: 0 10px 40px rgba(0,0,0,.35);
-    }
-    .badge {
-      display: inline-block; margin-bottom: 8px; padding: 3px 8px; border-radius: 999px;
+      padding: 14px 16px; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
+    .badge { display: inline-block; margin-bottom: 8px; padding: 3px 8px; border-radius: 999px;
       background: rgba(255,204,102,.15); color: var(--warn);
-      font-size: .75rem; font-weight: 650; letter-spacing: .04em; text-transform: uppercase;
-    }
-    h1 { margin: 0 0 6px; font-size: 1.15rem; font-weight: 650; }
-    p { margin: 0; color: var(--muted); font-size: .92rem; line-height: 1.45; }
+      font-size: .75rem; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; }
+    h1 { margin: 0 0 6px; font-size: 1.1rem; font-weight: 650; }
+    p, .muted { margin: 0 0 10px; color: var(--muted); font-size: .88rem; line-height: 1.45; }
     a { color: var(--accent); }
-    .hint {
-      position: fixed; z-index: 2; left: 50%; bottom: 18px; transform: translateX(-50%);
+    .toggles { display: grid; gap: 8px; margin: 10px 0; }
+    .toggles label { display: flex; gap: 8px; align-items: center; font-size: .9rem; cursor: pointer; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    button {
+      background: rgba(62,198,255,.15); color: var(--accent); border: 1px solid rgba(62,198,255,.35);
+      border-radius: 999px; padding: 6px 12px; font-size: .85rem; cursor: pointer;
+    }
+    button.active { background: rgba(62,198,255,.35); }
+    #measureOut { margin-top: 8px; font-size: .9rem; color: var(--text); min-height: 1.2em; }
+    .hint { position: fixed; z-index: 2; left: 50%; bottom: 18px; transform: translateX(-50%);
       background: var(--panel); border: 1px solid rgba(255,255,255,.08);
       border-radius: 999px; padding: 8px 14px; color: var(--muted); font-size: .85rem;
-      pointer-events: none;
-    }
+      pointer-events: none; }
   </style>
 </head>
 <body>
+  <canvas id="c"></canvas>
   <div class="hud">
     <div class="card">
-      <div class="badge">Placeholder · eth · review</div>
-      <h1>Handheld — eth (stepped rear)</h1>
-      <p>
-        Thin outer rim + raised rear pad (~8 → ~21.5&nbsp;mm). RJ45 + USB‑C on the
-        inset step face so connectors sit in the plastic. Central service hatch over
-        the I/O bay; centre 1/4‑20; VESA dropped for room. Stack PLACEHOLDER — not measured CAD.
-        <a href="../">All concepts</a> ·
-        <a href="../handheld/">Slim variant</a> ·
-        <a href="beauty_card.png" target="_blank" rel="noopener">Sales still</a> ·
-        <a href="io_detail.png" target="_blank" rel="noopener">I/O bay</a> ·
-        <a href="back_detail.png" target="_blank" rel="noopener">Back</a> ·
-        <a href="assembly.html">Hideable assembly</a>
-      </p>
+      <div class="badge">Placeholder · hideable + measure</div>
+      <h1>Handheld eth — PLACEHOLDER</h1>
+      <p>Stepped rear eth concept. Toggle parts · Measure tool (mm). <a href="../">All concepts</a> · <a href="../handheld/">Slim</a> · <a href="beauty_card.png" target="_blank" rel="noopener">Still</a> · <a href="assembly.html">Assembly</a>. PLACEHOLDER — not measured CAD.</p>
+      
+      <div class="toggles" id="toggles">      <label><input type="checkbox" data-part="body" checked> Enclosure body</label>
+      <label><input type="checkbox" data-part="hatch" checked> Service hatch cover</label>
+      <label><input type="checkbox" data-part="glass" checked> LCD glass</label>
+      <label><input type="checkbox" data-part="accents" checked> Accents (cam ring / home)</label>
+      <label><input type="checkbox" data-part="pcb"> PCB ghost</label></div>
+      <div class="row">
+        <button type="button" id="btnMeasure">Measure</button>
+        <button type="button" id="btnClear">Clear measure</button>
+      </div>
+      <div id="measureOut"></div>
     </div>
   </div>
+  <div class="hint" id="hint">Drag to orbit · scroll zoom · Measure: two clicks</div>
 
-  <model-viewer
-    src="handheld.glb"
-    alt="Active-ESL handheld eth PLACEHOLDER — Apple-language reveal body with RJ45 stack"
-    camera-controls
-    touch-action="pan-y"
-    auto-rotate
-    auto-rotate-delay="0"
-    rotation-per-second="22deg"
-    camera-orbit="28deg 62deg auto"
-    shadow-intensity="0.85"
-    exposure="1.1"
-    environment-image="neutral"
-    interaction-prompt="auto"
-  ></model-viewer>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
-  <div class="hint">Drag to rotate · scroll / pinch to zoom · right-drag to pan · tilt below the shadow line for the RJ45 bay</div>
+    const PART_IDS = ["body", "hatch", "glass", "accents", "pcb"];
+    const canvas = document.getElementById('c');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, 2, 0.001, 20);
+    camera.position.set(0.28, 0.22, 0.32);
+
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.target.set(0.11, 0.075, 0.0);
+
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+    const key = new THREE.DirectionalLight(0xffffff, 1.1);
+    key.position.set(0.4, 0.6, 0.3);
+    scene.add(key);
+
+    const root = new THREE.Group();
+    scene.add(root);
+    const byName = {};
+
+    const loader = new GLTFLoader();
+    loader.load('assembly.glb', (gltf) => {
+      const model = gltf.scene;
+      model.traverse((o) => {
+        if (o.isMesh) {
+          o.castShadow = true;
+          o.receiveShadow = true;
+          // Prefer metallic look for enclosure parts
+          if (o.material && o.material.isMeshStandardMaterial) {
+            o.material.metalness = Math.min(0.85, (o.material.metalness || 0) + 0.55);
+            o.material.roughness = Math.max(0.25, Math.min(0.55, o.material.roughness || 0.4));
+          } else if (o.material) {
+            const c = o.material.color ? o.material.color.clone() : new THREE.Color(0x8e9298);
+            o.material = new THREE.MeshStandardMaterial({
+              color: c, metalness: 0.75, roughness: 0.38,
+              transparent: o.material.transparent, opacity: o.material.opacity ?? 1,
+            });
+          }
+          const n = (o.name || o.parent?.name || '').toLowerCase();
+          for (const id of PART_IDS) {
+            if (n === id || n.includes(id)) byName[id] = byName[id] || [];
+            if (n === id || n.includes(id)) byName[id].push(o);
+          }
+        }
+      });
+      // Fallback: order meshes if names missing
+      const meshes = [];
+      model.traverse((o) => { if (o.isMesh) meshes.push(o); });
+      PART_IDS.forEach((id, i) => {
+        if (!byName[id]?.length && meshes[i]) byName[id] = [meshes[i]];
+      });
+      root.add(model);
+      applyVisibility();
+      // Frame
+      const box = new THREE.Box3().setFromObject(root);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+      controls.target.copy(center);
+      const maxDim = Math.max(size.x, size.y, size.z);
+      camera.position.copy(center).add(new THREE.Vector3(maxDim * 1.1, maxDim * 0.7, maxDim * 1.2));
+      camera.near = maxDim / 200;
+      camera.far = maxDim * 20;
+      camera.updateProjectionMatrix();
+      controls.update();
+    }, undefined, (err) => {
+      document.getElementById('measureOut').textContent = 'Failed to load model: ' + err;
+    });
+
+    function applyVisibility() {
+      for (const id of PART_IDS) {
+        const on = document.querySelector(`input[data-part="${id}"]`)?.checked ?? true;
+        for (const o of (byName[id] || [])) o.visible = on;
+      }
+    }
+    document.getElementById('toggles').addEventListener('change', applyVisibility);
+
+    // Measure (metres in scene → mm)
+    let measureOn = false;
+    let pts = [];
+    const markers = new THREE.Group();
+    scene.add(markers);
+    const lineMat = new THREE.LineBasicMaterial({ color: 0x3ec6ff });
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+
+    const btnM = document.getElementById('btnMeasure');
+    const btnC = document.getElementById('btnClear');
+    const out = document.getElementById('measureOut');
+    const hint = document.getElementById('hint');
+
+    btnM.onclick = () => {
+      measureOn = !measureOn;
+      btnM.classList.toggle('active', measureOn);
+      controls.enabled = !measureOn;
+      hint.textContent = measureOn
+        ? 'Measure on — click point A, then point B'
+        : 'Drag to orbit · scroll zoom · Measure: two clicks';
+      if (!measureOn) clearMeasure();
+    };
+    btnC.onclick = () => clearMeasure();
+
+    function clearMeasure() {
+      pts = [];
+      while (markers.children.length) markers.remove(markers.children[0]);
+      out.textContent = '';
+    }
+
+    function addMarker(p) {
+      const m = new THREE.Mesh(
+        new THREE.SphereGeometry(0.0012, 16, 12),
+        new THREE.MeshBasicMaterial({ color: 0x3ec6ff })
+      );
+      m.position.copy(p);
+      markers.add(m);
+    }
+
+    canvas.addEventListener('pointerdown', (ev) => {
+      if (!measureOn) return;
+      const rect = canvas.getBoundingClientRect();
+      pointer.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+      const hitTargets = [];
+      root.traverse((o) => { if (o.isMesh && o.visible) hitTargets.push(o); });
+      const hits = raycaster.intersectObjects(hitTargets, true);
+      if (!hits.length) return;
+      const p = hits[0].point.clone();
+      if (pts.length >= 2) clearMeasure();
+      pts.push(p);
+      addMarker(p);
+      if (pts.length === 2) {
+        const geo = new THREE.BufferGeometry().setFromPoints(pts);
+        markers.add(new THREE.Line(geo, lineMat));
+        const mm = pts[0].distanceTo(pts[1]) * 1000;
+        out.textContent = `Distance: ${mm.toFixed(2)} mm`;
+        measureOn = false;
+        btnM.classList.remove('active');
+        controls.enabled = true;
+        hint.textContent = 'Drag to orbit · scroll zoom · Measure: two clicks';
+      } else {
+        out.textContent = 'Point A set — click point B';
+      }
+    });
+
+    function resize() {
+      const w = canvas.clientWidth || innerWidth;
+      const h = canvas.clientHeight || innerHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    addEventListener('resize', resize);
+    resize();
+
+    (function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    })();
+  </script>
 </body>
 </html>
