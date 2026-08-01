@@ -248,18 +248,5 @@
     "fea": false,
     "fea_overlays": []
   },
-  "pages_links": [
-    {
-      "label": "All concepts",
-      "href": "../"
-    },
-    {
-      "label": "Look",
-      "href": "./"
-    },
-    {
-      "label": "Eth",
-      "href": "../handheld-eth/"
-    }
-  ]
+  "pages_links": []
 }

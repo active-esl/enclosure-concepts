@@ -440,18 +440,5 @@
       }
     ]
   },
-  "pages_links": [
-    {
-      "label": "All concepts",
-      "href": "../"
-    },
-    {
-      "label": "Look",
-      "href": "./"
-    },
-    {
-      "label": "Slim",
-      "href": "../handheld/"
-    }
-  ]
+  "pages_links": []
 }
