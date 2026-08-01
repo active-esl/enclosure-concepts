@@ -57,7 +57,7 @@
     <div class="card">
       <div class="badge">Placeholder · hideable + measure</div>
       <h1>Handheld eth — PLACEHOLDER</h1>
-      <p>Stepped rear eth concept. Toggle parts · edges · dims · Measure (mm). <a href="../">All concepts</a> · <a href="../handheld/">Slim</a> · <a href="beauty_card.png" target="_blank" rel="noopener">Still</a>. PLACEHOLDER — not measured CAD.</p>
+      <p>Stepped rear eth concept. Toggle parts · outline · dims · Measure (mm). <a href="../">All concepts</a> · <a href="../handheld/">Slim</a> · <a href="beauty_card.png" target="_blank" rel="noopener">Still</a>. PLACEHOLDER — not measured CAD.</p>
       
       <h2>Parts</h2>
       <div class="toggles" id="toggles">      <label><input type="checkbox" data-part="body" checked> Enclosure body</label>
@@ -69,11 +69,14 @@
         <label><input type="checkbox" id="chkEdges"> Edge outline</label>
       </div>
       <h2>Measurements</h2>
-      <div class="toggles" id="dimToggles">      <label><input type="checkbox" data-dim="overall" checked> Overall body (W×H×D)</label>
-      <label><input type="checkbox" data-dim="pad" checked> Rear pad (CAD)</label>
+      <div class="toggles" id="dimToggles">      <label><input type="checkbox" data-dim="overall"> Overall body (W×H×D)</label>
+      <label><input type="checkbox" data-dim="pad"> Rear pad (CAD)</label>
       <label><input type="checkbox" data-dim="hatch"> Service hatch</label>
       <label><input type="checkbox" data-dim="glass"> LCD glass</label>
       <label><input type="checkbox" data-dim="pcb"> PCB</label></div>
+      <div class="row">
+        <button type="button" id="btnDimsOff">All measurements off</button>
+      </div>
       <div id="dimList"></div>
       <div class="row">
         <button type="button" data-view="front">Front</button>
@@ -105,9 +108,13 @@
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
     import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
     import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+    import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
     const PART_IDS = ["body", "hatch", "glass", "accents", "pcb"];
-    const DIM_GROUPS = [{"id": "overall", "label": "Overall body (W\u00d7H\u00d7D)", "default": true, "dims": [{"label": "W 222.9 mm", "mm": 222.9, "a": [-0.00045000000000000004, 0.158, 0.008], "b": [0.22244999999999998, 0.158, 0.008]}, {"label": "H 150.0 mm", "mm": 150.0, "a": [0.23045, 0.0, 0.008], "b": [0.23045, 0.15, 0.008]}, {"label": "D 21.5 mm", "mm": 21.5, "a": [0.23045, 0.15, -0.0135], "b": [0.23045, 0.15, 0.008]}]}, {"id": "pad", "label": "Rear pad (CAD)", "default": true, "dims": [{"label": "pad W 156.0 mm", "mm": 155.99, "a": [0.03300499999999999, 0.008000000000000007, 0.0], "b": [0.188995, 0.008000000000000007, 0.0]}, {"label": "pad H 117.3 mm", "mm": 117.3, "a": [0.025004999999999996, 0.016000000000000007, 0.0], "b": [0.025004999999999996, 0.1333, 0.0]}, {"label": "raise 13.5 mm", "mm": 13.5, "a": [0.025004999999999996, 0.1333, -0.0135], "b": [0.025004999999999996, 0.1333, 0.0]}, {"label": "thin edge 8.0 mm", "mm": 8.0, "a": [0.23045, 0.01, 0.0], "b": [0.23045, 0.01, 0.008]}]}, {"id": "hatch", "label": "Service hatch", "default": false, "dims": [{"label": "hatch W 100.0 mm", "mm": 100.0, "a": [0.061, 0.076, -0.01202], "b": [0.161, 0.076, -0.01202]}, {"label": "hatch D 46.0 mm", "mm": 46.0, "a": [0.169, 0.022, -0.01202], "b": [0.169, 0.068, -0.01202]}]}, {"id": "glass", "label": "LCD glass", "default": false, "dims": [{"label": "glass W 216.0 mm", "mm": 216.0, "a": [0.003, 0.146, 0.00795], "b": [0.219, 0.146, 0.00795]}, {"label": "glass H 135.0 mm", "mm": 135.0, "a": [0.227, 0.003, 0.00795], "b": [0.227, 0.138, 0.00795]}]}, {"id": "pcb", "label": "PCB", "default": false, "dims": [{"label": "PCB W 146.0 mm", "mm": 145.99, "a": [0.038005000000000004, 0.13215000000000002, 0.005200000000000001], "b": [0.18399500000000002, 0.13215000000000002, 0.005200000000000001]}, {"label": "PCB H 98.3 mm", "mm": 98.3, "a": [0.191995, 0.02585, 0.005200000000000001], "b": [0.191995, 0.12415000000000001, 0.005200000000000001]}]}];
+    const DIM_GROUPS = [{"id": "overall", "label": "Overall body (W\u00d7H\u00d7D)", "default": false, "dims": [{"label": "W 222.9 mm", "mm": 222.9, "a": [-0.00045000000000000004, 0.158, 0.008], "b": [0.22244999999999998, 0.158, 0.008]}, {"label": "H 150.0 mm", "mm": 150.0, "a": [0.23045, 0.0, 0.008], "b": [0.23045, 0.15, 0.008]}, {"label": "D 21.5 mm", "mm": 21.5, "a": [0.23045, 0.15, -0.0135], "b": [0.23045, 0.15, 0.008]}]}, {"id": "pad", "label": "Rear pad (CAD)", "default": false, "dims": [{"label": "pad W 156.0 mm", "mm": 155.99, "a": [0.03300499999999999, 0.008000000000000007, 0.0], "b": [0.188995, 0.008000000000000007, 0.0]}, {"label": "pad H 117.3 mm", "mm": 117.3, "a": [0.025004999999999996, 0.016000000000000007, 0.0], "b": [0.025004999999999996, 0.1333, 0.0]}, {"label": "raise 13.5 mm", "mm": 13.5, "a": [0.025004999999999996, 0.1333, -0.0135], "b": [0.025004999999999996, 0.1333, 0.0]}, {"label": "thin edge 8.0 mm", "mm": 8.0, "a": [0.23045, 0.01, 0.0], "b": [0.23045, 0.01, 0.008]}]}, {"id": "hatch", "label": "Service hatch", "default": false, "dims": [{"label": "hatch W 100.0 mm", "mm": 100.0, "a": [0.061, 0.076, -0.01202], "b": [0.161, 0.076, -0.01202]}, {"label": "hatch D 46.0 mm", "mm": 46.0, "a": [0.169, 0.022, -0.01202], "b": [0.169, 0.068, -0.01202]}]}, {"id": "glass", "label": "LCD glass", "default": false, "dims": [{"label": "glass W 216.0 mm", "mm": 216.0, "a": [0.003, 0.146, 0.00795], "b": [0.219, 0.146, 0.00795]}, {"label": "glass H 135.0 mm", "mm": 135.0, "a": [0.227, 0.003, 0.00795], "b": [0.227, 0.138, 0.00795]}]}, {"id": "pcb", "label": "PCB", "default": false, "dims": [{"label": "PCB W 146.0 mm", "mm": 145.99, "a": [0.038005000000000004, 0.13215000000000002, 0.005200000000000001], "b": [0.18399500000000002, 0.13215000000000002, 0.005200000000000001]}, {"label": "PCB H 98.3 mm", "mm": 98.3, "a": [0.191995, 0.02585, 0.005200000000000001], "b": [0.191995, 0.12415000000000001, 0.005200000000000001]}]}];
     const canvas = document.getElementById('c');
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -149,13 +156,11 @@
     const root = new THREE.Group();
     scene.add(root);
     const byName = {};
-    const edgeLines = [];
-    const edgeMat = new THREE.LineBasicMaterial({
-      color: 0xd7dde8, transparent: true, opacity: 0.92,
-    });
     const dimRoot = new THREE.Group();
     scene.add(dimRoot);
     const dimByGroup = {};
+    const markers = new THREE.Group();
+    scene.add(markers);
 
     const dimMat = new THREE.LineBasicMaterial({ color: 0xffd166 });
     const tickMat = new THREE.LineBasicMaterial({ color: 0xffd166 });
@@ -217,7 +222,130 @@
       refreshDimList();
     }
     document.getElementById('dimToggles')?.addEventListener('change', applyDims);
+    document.getElementById('btnDimsOff')?.addEventListener('click', () => {
+      for (const i of document.querySelectorAll('input[data-dim]')) i.checked = false;
+      applyDims();
+    });
     applyDims();
+
+    const OutlineShader = {
+      uniforms: {
+        tDiffuse: { value: null },
+        tNormal: { value: null },
+        tDepth: { value: null },
+        resolution: { value: new THREE.Vector2(1, 1) },
+        cameraNear: { value: 0.01 },
+        cameraFar: { value: 10.0 },
+        outlineColor: { value: new THREE.Color(0xe8eef7) },
+        depthSensitivity: { value: 320.0 },
+        normalSensitivity: { value: 26.0 },
+        thickness: { value: 1.15 },
+        enabled: { value: 0.0 },
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D tDiffuse;
+        uniform sampler2D tNormal;
+        uniform sampler2D tDepth;
+        uniform vec2 resolution;
+        uniform float cameraNear;
+        uniform float cameraFar;
+        uniform vec3 outlineColor;
+        uniform float depthSensitivity;
+        uniform float normalSensitivity;
+        uniform float thickness;
+        uniform float enabled;
+        varying vec2 vUv;
+
+        float linearDepth(vec2 uv) {
+          float d = texture2D(tDepth, uv).x;
+          float z = d * 2.0 - 1.0;
+          return (2.0 * cameraNear * cameraFar) /
+                 (cameraFar + cameraNear - z * (cameraFar - cameraNear));
+        }
+
+        vec3 readNormal(vec2 uv) {
+          return texture2D(tNormal, uv).xyz * 2.0 - 1.0;
+        }
+
+        void main() {
+          vec4 base = texture2D(tDiffuse, vUv);
+          if (enabled < 0.5) { gl_FragColor = base; return; }
+
+          vec2 texel = thickness / resolution;
+          vec2 dx = vec2(texel.x, 0.0);
+          vec2 dy = vec2(0.0, texel.y);
+
+          float d0 = linearDepth(vUv);
+          float dl = linearDepth(vUv - dx);
+          float dr = linearDepth(vUv + dx);
+          float dd = linearDepth(vUv - dy);
+          float du = linearDepth(vUv + dy);
+          // Second derivative, not gradient: a flat face seen at an angle has a
+          // large depth gradient but ~zero curvature, so only real steps fire.
+          // Divided by depth so the line holds at any zoom or model scale.
+          float depthEdge = (abs((dl + dr) * 0.5 - d0) +
+                             abs((dd + du) * 0.5 - d0)) / max(d0, 1e-5);
+
+          vec3 n0 = readNormal(vUv);
+          vec3 nl = readNormal(vUv - dx);
+          vec3 nr = readNormal(vUv + dx);
+          vec3 nd = readNormal(vUv - dy);
+          vec3 nu = readNormal(vUv + dy);
+          // Same trick on normals: constant curvature (the bullnose band) stays
+          // quiet, a curvature break (where the raised pad leaves the back) fires.
+          float normalEdge = length((nl + nr) * 0.5 - n0) +
+                             length((nd + nu) * 0.5 - n0);
+
+          float e = clamp(depthEdge * depthSensitivity +
+                          normalEdge * normalSensitivity, 0.0, 1.0);
+          e = smoothstep(0.16, 0.55, e);
+          gl_FragColor = vec4(mix(base.rgb, outlineColor, e), base.a);
+        }
+      `,
+    };
+
+    const normalTarget = new THREE.WebGLRenderTarget(1, 1, {
+      minFilter: THREE.NearestFilter,
+      magFilter: THREE.NearestFilter,
+    });
+    normalTarget.depthTexture = new THREE.DepthTexture(1, 1);
+    normalTarget.depthTexture.format = THREE.DepthFormat;
+    // 32F, not 24-bit int: the second derivative amplifies depth quantisation
+    // into a dashed line at these near/far ratios.
+    normalTarget.depthTexture.type = THREE.FloatType;
+    const normalMaterial = new THREE.MeshNormalMaterial();
+
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    const outlinePass = new ShaderPass(OutlineShader);
+    composer.addPass(outlinePass);
+    composer.addPass(new OutputPass());
+
+    let outlineOn = false;
+
+    function renderNormalBuffer() {
+      // Annotations must not contribute edges.
+      const dimWas = dimRoot.visible;
+      const markWas = markers.visible;
+      dimRoot.visible = false;
+      markers.visible = false;
+      scene.overrideMaterial = normalMaterial;
+      renderer.setRenderTarget(normalTarget);
+      renderer.clear();
+      renderer.render(scene, camera);
+      renderer.setRenderTarget(null);
+      scene.overrideMaterial = null;
+      dimRoot.visible = dimWas;
+      markers.visible = markWas;
+    }
+
 
     const loader = new GLTFLoader();
     loader.load('assembly.glb?v=3', (gltf) => {
@@ -248,14 +376,6 @@
           opacity: partId === 'glass' ? 0.6 : 1.0,
           vertexColors: false,
         });
-        // Feature edges (threshold skips soft triangulation noise)
-        const eg = new THREE.EdgesGeometry(o.geometry, 28);
-        const lines = new THREE.LineSegments(eg, edgeMat);
-        lines.renderOrder = 2;
-        lines.visible = false;
-        lines.userData.isEdge = true;
-        o.add(lines);
-        edgeLines.push(lines);
       });
       const meshes = [];
       model.traverse((o) => { if (o.isMesh) meshes.push(o); });
@@ -270,8 +390,9 @@
       const size = box.getSize(new THREE.Vector3());
       fit.radius = size.length() / 2;
       fit.dim = Math.max(...size.toArray());
-      camera.near = fit.dim / 500;
-      camera.far = fit.dim * 40;
+      // Kept tight: a huge far/near ratio wrecks the outline pass depth precision.
+      camera.near = fit.dim / 100;
+      camera.far = fit.dim * 20;
       setView('front');
       document.getElementById('loading')?.remove();
     }, undefined, (err) => {
@@ -319,15 +440,14 @@
     document.getElementById('toggles').addEventListener('change', applyVisibility);
 
     function applyEdges() {
-      const on = !!document.getElementById('chkEdges')?.checked;
-      for (const e of edgeLines) e.visible = on;
+      outlineOn = !!document.getElementById('chkEdges')?.checked;
+      outlinePass.uniforms.enabled.value = outlineOn ? 1.0 : 0.0;
     }
     document.getElementById('chkEdges')?.addEventListener('change', applyEdges);
+    applyEdges();
 
     let measureOn = false;
     let pts = [];
-    const markers = new THREE.Group();
-    scene.add(markers);
     const lineMat = new THREE.LineBasicMaterial({ color: 0x3ec6ff });
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
@@ -394,8 +514,12 @@
     function resize() {
       const w = Math.max(1, innerWidth);
       const h = Math.max(1, innerHeight);
+      const dpr = renderer.getPixelRatio();
       renderer.setSize(w, h, false);
       labelRenderer.setSize(w, h);
+      composer.setSize(w, h);
+      normalTarget.setSize(Math.round(w * dpr), Math.round(h * dpr));
+      outlinePass.uniforms.resolution.value.set(w * dpr, h * dpr);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
     }
@@ -406,7 +530,14 @@
     (function animate() {
       requestAnimationFrame(animate);
       controls.update();
-      renderer.render(scene, camera);
+      if (outlineOn) {
+        outlinePass.uniforms.cameraNear.value = camera.near;
+        outlinePass.uniforms.cameraFar.value = camera.far;
+        renderNormalBuffer();
+        outlinePass.uniforms.tNormal.value = normalTarget.texture;
+        outlinePass.uniforms.tDepth.value = normalTarget.depthTexture;
+      }
+      composer.render();
       labelRenderer.render(scene, camera);
     })();
   </script>
