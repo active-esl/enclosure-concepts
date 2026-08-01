@@ -783,6 +783,8 @@
 
     const btnPanel = document.getElementById('btnPanel');
     const btnPanelClose = document.getElementById('btnPanelClose');
+    // Guards the camera-dependent view offset until the camera exists.
+    let viewOffsetReady = false;
     const mqMobile = matchMedia('(max-width: 720px)');
     let panelOpen = true;
     let panelUserSet = false;
@@ -798,6 +800,7 @@
       document.body.classList.toggle('panel-closed', !panelOpen);
       btnPanel.setAttribute('aria-expanded', panelOpen ? 'true' : 'false');
       btnPanel.textContent = 'Controls';
+      applyPanelViewOffset();
       if (!skipHash) writeHash();
     }
 
@@ -1385,6 +1388,7 @@
         const mm = Number(EXPLODE_OFFSETS[id] ?? 0);
         g.position.copy(base).addScaledVector(EXPLODE_AXIS, mm * 0.001 * t);
       }
+      recenterPivot();
       writeHash();
     }
 
@@ -1620,6 +1624,7 @@
 
     const fit = { center: new THREE.Vector3(), dim: 0.25, radius: 0.14 };
     let lastView = 'front';
+    viewOffsetReady = true;
     function setView(name) {
       lastView = name in VIEW_DIRS ? name : Object.keys(VIEW_DIRS)[0];
       for (const b of document.querySelectorAll('button[data-view]')) {
@@ -1634,16 +1639,56 @@
       controls.target.copy(fit.center);
       camera.updateProjectionMatrix();
       controls.update();
-      // Nudge framing clear of the left desktop panel when it is open.
-      if (innerWidth > 900 && isPanelOpen()) {
-        camera.updateMatrixWorld();
-        const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
-        right.multiplyScalar(-dist * Math.tan(fovH / 2) * 0.22);
-        camera.position.add(right);
-        controls.target.add(right);
-        controls.update();
-      }
       writeHash();
+    }
+
+    // Shift the *projection* rather than the orbit target, so the model clears
+    // the desktop panel without moving the centre of rotation off the part.
+    function applyPanelViewOffset() {
+      if (!viewOffsetReady) return;
+      const w = Math.max(1, innerWidth);
+      const h = Math.max(1, innerHeight);
+      const hudEl = document.getElementById('hud');
+      const panelW = (innerWidth > 900 && isPanelOpen() && hudEl)
+        ? hudEl.getBoundingClientRect().right
+        : 0;
+      if (panelW > 0) {
+        camera.setViewOffset(w, h, -panelW / 2, 0, w, h);
+      } else {
+        camera.clearViewOffset();
+      }
+      camera.updateProjectionMatrix();
+    }
+
+    const _visBox = new THREE.Box3();
+    function visibleBox() {
+      root.updateMatrixWorld(true);
+      _visBox.makeEmpty();
+      let any = false;
+      root.traverse((o) => {
+        if (!o.isMesh || !o.visible) return;
+        for (let p = o.parent; p; p = p.parent) {
+          if (!p.visible) return;
+        }
+        _visBox.expandByObject(o);
+        any = true;
+      });
+      return any ? _visBox : null;
+    }
+
+    // Keep the pivot on whatever is actually on screen, without jerking the view.
+    function recenterPivot() {
+      if (!modelReady) return;
+      const box = visibleBox();
+      if (!box || box.isEmpty()) return;
+      const c = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+      const delta = c.clone().sub(controls.target);
+      controls.target.copy(c);
+      camera.position.add(delta);
+      controls.update();
+      fit.center.copy(c);
+      fit.radius = Math.max(size.length() / 2, 1e-4);
     }
     for (const b of document.querySelectorAll('button[data-view]')) {
       b.addEventListener('click', () => setView(b.dataset.view));
@@ -1656,6 +1701,7 @@
         if (g) g.visible = on;
         for (const o of (byName[id] || [])) o.visible = on;
       }
+      recenterPivot();
       writeHash();
     }
     document.getElementById('toggles').addEventListener('change', () => {
@@ -1864,6 +1910,23 @@
       }
     });
 
+    // Double-click / double-tap focuses the orbit pivot on the point you picked.
+    canvas.addEventListener('dblclick', (ev) => {
+      if (measureOn) return;
+      const rect = canvas.getBoundingClientRect();
+      pointer.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+      const hitTargets = [];
+      root.traverse((o) => { if (o.isMesh && o.visible) hitTargets.push(o); });
+      const hits = raycaster.intersectObjects(hitTargets, true);
+      if (!hits.length) return;
+      controls.target.copy(hits[0].point);
+      controls.update();
+      fit.center.copy(hits[0].point);
+      showHint('Pivot set here — a view button recentres');
+    });
+
     function resize() {
       const w = Math.max(1, innerWidth);
       const h = Math.max(1, innerHeight);
@@ -1874,7 +1937,7 @@
       normalTarget.setSize(Math.round(w * dpr), Math.round(h * dpr));
       outlinePass.uniforms.resolution.value.set(w * dpr, h * dpr);
       camera.aspect = w / h;
-      camera.updateProjectionMatrix();
+      applyPanelViewOffset();
     }
     addEventListener('resize', resize);
     new ResizeObserver(resize).observe(document.body);
