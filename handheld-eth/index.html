@@ -81,7 +81,7 @@
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
+    renderer.toneMappingExposure = 0.85;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(40, 2, 0.001, 20);
@@ -104,29 +104,34 @@
     const byName = {};
 
     const loader = new GLTFLoader();
-    loader.load('assembly.glb', (gltf) => {
+    loader.load('assembly.glb?v=2', (gltf) => {
       const model = gltf.scene;
+      const PART_COLOR = {
+        body: 0x919498, hatch: 0x484e58, glass: 0x1c2430,
+        accents: 0xbec0c4, pcb: 0x1c6e37,
+      };
       model.traverse((o) => {
-        if (o.isMesh) {
-          o.castShadow = true;
-          o.receiveShadow = true;
-          // Prefer metallic look for enclosure parts
-          if (o.material && o.material.isMeshStandardMaterial) {
-            o.material.metalness = Math.min(0.85, (o.material.metalness || 0) + 0.55);
-            o.material.roughness = Math.max(0.25, Math.min(0.55, o.material.roughness || 0.4));
-          } else if (o.material) {
-            const c = o.material.color ? o.material.color.clone() : new THREE.Color(0x8e9298);
-            o.material = new THREE.MeshStandardMaterial({
-              color: c, metalness: 0.75, roughness: 0.38,
-              transparent: o.material.transparent, opacity: o.material.opacity ?? 1,
-            });
-          }
-          const n = (o.name || o.parent?.name || '').toLowerCase();
-          for (const id of PART_IDS) {
-            if (n === id || n.includes(id)) byName[id] = byName[id] || [];
-            if (n === id || n.includes(id)) byName[id].push(o);
-          }
+        if (!o.isMesh) return;
+        o.castShadow = true;
+        o.receiveShadow = true;
+        const n = (o.name || o.parent?.name || '').toLowerCase();
+        let partId = null;
+        for (const id of PART_IDS) {
+          if (n === id || n.includes(id)) { partId = id; break; }
         }
+        if (partId) {
+          byName[partId] = byName[partId] || [];
+          byName[partId].push(o);
+        }
+        const col = PART_COLOR[partId] || 0x8e9298;
+        o.material = new THREE.MeshStandardMaterial({
+          color: col,
+          metalness: partId === 'glass' ? 0.05 : 0.55,
+          roughness: partId === 'glass' ? 0.15 : 0.42,
+          transparent: partId === 'glass',
+          opacity: partId === 'glass' ? 0.85 : 1.0,
+          vertexColors: false,
+        });
       });
       // Fallback: order meshes if names missing
       const meshes = [];
