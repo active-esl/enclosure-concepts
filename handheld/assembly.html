@@ -2,25 +2,65 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Handheld slim — PLACEHOLDER</title>
   <style>
     :root {
-      --bg: #0b1220; --panel: rgba(12, 18, 32, 0.9); --text: #f4f7fb;
+      --bg: #0b1220; --panel: rgba(12, 18, 32, 0.94); --text: #f4f7fb;
       --muted: #a9b4c7; --accent: #3ec6ff; --warn: #ffcc66; --dim: #ffd166;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-right: env(safe-area-inset-right, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left: env(safe-area-inset-left, 0px);
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; height: 100%; overflow: hidden;
       background: radial-gradient(1200px 700px at 70% 10%, #15233d 0%, var(--bg) 55%);
-      color: var(--text); font-family: "Segoe UI", system-ui, sans-serif; }
+      color: var(--text); font-family: "Segoe UI", system-ui, sans-serif;
+      -webkit-text-size-adjust: 100%; }
     #c { position: fixed; inset: 0; width: 100%; height: 100%;
       display: block; touch-action: none; }
-    .hud { position: fixed; z-index: 2; left: 16px; top: 16px;
-      max-width: min(400px, calc(100% - 32px)); max-height: calc(100% - 32px);
-      overflow: auto; }
+    #btnPanel {
+      position: fixed; z-index: 4;
+      top: calc(12px + var(--safe-top));
+      left: calc(12px + var(--safe-left));
+      min-width: 44px; min-height: 44px;
+      padding: 10px 14px;
+      background: rgba(12, 18, 32, 0.92); color: var(--accent);
+      border: 1px solid rgba(62,198,255,.45); border-radius: 999px;
+      font-size: .9rem; font-weight: 650; cursor: pointer;
+      box-shadow: 0 8px 28px rgba(0,0,0,.4);
+      -webkit-tap-highlight-color: transparent;
+    }
+    #btnPanel:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .hud {
+      position: fixed; z-index: 3;
+      left: calc(12px + var(--safe-left));
+      top: calc(64px + var(--safe-top));
+      width: min(400px, calc(100% - 24px - var(--safe-left) - var(--safe-right)));
+      max-height: calc(100% - 76px - var(--safe-top) - var(--safe-bottom));
+      overflow: auto; overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      transition: opacity .18s ease, transform .18s ease, visibility .18s;
+    }
+    body.panel-closed .hud {
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transform: translateY(-8px);
+    }
     .card { background: var(--panel); backdrop-filter: blur(10px);
       border: 1px solid rgba(255,255,255,.08); border-radius: 14px;
       padding: 14px 16px; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
+    .card-head { display: flex; gap: 10px; align-items: flex-start;
+      justify-content: space-between; margin-bottom: 4px; }
+    .card-head-main { min-width: 0; flex: 1; }
+    #btnPanelClose {
+      flex: 0 0 auto; min-width: 44px; min-height: 44px;
+      padding: 8px 12px; margin: -6px -4px 0 0;
+      background: rgba(255,255,255,.06); color: var(--muted);
+      border: 1px solid rgba(255,255,255,.12); border-radius: 999px;
+      font-size: .85rem; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
     .badge { display: inline-block; margin-bottom: 8px; padding: 3px 8px; border-radius: 999px;
       background: rgba(255,204,102,.15); color: var(--warn);
       font-size: .75rem; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; }
@@ -30,24 +70,30 @@
     p, .muted { margin: 0 0 10px; color: var(--muted); font-size: .88rem; line-height: 1.45; }
     a { color: var(--accent); }
     .toggles { display: grid; gap: 8px; margin: 6px 0 4px; }
-    .toggles label { display: flex; gap: 8px; align-items: center; font-size: .9rem; cursor: pointer; }
+    .toggles label { display: flex; gap: 10px; align-items: center; font-size: .95rem;
+      cursor: pointer; min-height: 44px; padding: 2px 0;
+      -webkit-tap-highlight-color: transparent; }
+    .toggles input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 auto; }
     .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
     button {
       background: rgba(62,198,255,.15); color: var(--accent); border: 1px solid rgba(62,198,255,.35);
-      border-radius: 999px; padding: 6px 12px; font-size: .85rem; cursor: pointer;
+      border-radius: 999px; padding: 10px 14px; font-size: .9rem; cursor: pointer;
+      min-height: 44px; -webkit-tap-highlight-color: transparent;
     }
     button.active { background: rgba(62,198,255,.35); }
-    input[type="range"] { width: 100%; accent-color: var(--accent); }
+    input[type="range"] { width: 100%; accent-color: var(--accent); height: 32px; }
     select {
       background: rgba(255,255,255,.06); color: var(--text); border: 1px solid rgba(255,255,255,.15);
-      border-radius: 8px; padding: 4px 8px; font-size: .85rem;
+      border-radius: 8px; padding: 10px 12px; font-size: .9rem; min-height: 44px;
     }
     #measureOut, #feaOut { margin-top: 8px; font-size: .9rem; color: var(--text); min-height: 1.2em; }
     #dimList { margin-top: 6px; font-size: .82rem; color: var(--dim); line-height: 1.45; }
-    .hint { position: fixed; z-index: 2; left: 50%; bottom: 18px; transform: translateX(-50%);
+    .hint { position: fixed; z-index: 2; left: 50%;
+      bottom: calc(14px + var(--safe-bottom)); transform: translateX(-50%);
       background: var(--panel); border: 1px solid rgba(255,255,255,.08);
-      border-radius: 999px; padding: 8px 14px; color: var(--muted); font-size: .85rem;
-      pointer-events: none; }
+      border-radius: 999px; padding: 8px 14px; color: var(--muted); font-size: .8rem;
+      pointer-events: none; max-width: calc(100% - 24px); text-align: center; }
+    body.panel-closed .hint { opacity: .95; }
     .dim-label {
       color: #1a1408; background: rgba(255,209,102,.92); border: 1px solid rgba(255,209,102,.95);
       border-radius: 6px; padding: 2px 7px; font: 650 12px/1.3 "Segoe UI", system-ui, sans-serif;
@@ -55,14 +101,40 @@
       box-shadow: 0 2px 10px rgba(0,0,0,.35);
     }
     .slider-row { display: grid; gap: 4px; margin: 6px 0; font-size: .85rem; color: var(--muted); }
+    @media (max-width: 720px) {
+      #btnPanel {
+        top: auto; left: auto;
+        right: calc(12px + var(--safe-right));
+        bottom: calc(12px + var(--safe-bottom));
+      }
+      .hud {
+        left: calc(8px + var(--safe-left));
+        right: calc(8px + var(--safe-right));
+        top: auto;
+        bottom: calc(68px + var(--safe-bottom));
+        width: auto;
+        max-height: min(52vh, calc(100% - 90px - var(--safe-top) - var(--safe-bottom)));
+      }
+      body.panel-closed .hud { transform: translateY(12px); }
+      .card { border-radius: 16px 16px 12px 12px; padding: 12px 14px 16px; }
+      .hint { bottom: calc(68px + var(--safe-bottom)); font-size: .75rem; }
+      body.panel-open .hint { opacity: 0; }
+      h1 { font-size: 1rem; }
+    }
   </style>
 </head>
-<body>
+<body class="panel-open">
   <canvas id="c"></canvas>
-  <div class="hud">
+  <button type="button" id="btnPanel" aria-controls="hud" aria-expanded="true">Hide panel</button>
+  <div class="hud" id="hud" role="region" aria-label="Assembly controls">
     <div class="card">
-      <div class="badge">Placeholder · hideable + measure</div>
-      <h1 id="title"></h1>
+      <div class="card-head">
+        <div class="card-head-main">
+          <div class="badge">Placeholder · hideable + measure</div>
+          <h1 id="title"></h1>
+        </div>
+        <button type="button" id="btnPanelClose" aria-label="Hide panel">Hide</button>
+      </div>
       <p id="blurb"></p>
       <div id="extraLinks" class="muted"></div>
       <h2>Parts</h2>
@@ -421,6 +493,38 @@
     const FEA_OVERLAYS = FEATURES.fea_overlays || [];
     const EXPLODE_AXIS = new THREE.Vector3(...(FEATURES.explode_axis || [0, 0, 1])).normalize();
     const EXPLODE_OFFSETS = FEATURES.explode_offsets_mm || {};
+
+    const btnPanel = document.getElementById('btnPanel');
+    const btnPanelClose = document.getElementById('btnPanelClose');
+    const mqMobile = matchMedia('(max-width: 720px)');
+    let panelOpen = true;
+    let panelUserSet = false;
+
+    function isPanelOpen() {
+      return document.body.classList.contains('panel-open');
+    }
+
+    function setPanelOpen(open, { fromUser = false, skipHash = false } = {}) {
+      panelOpen = !!open;
+      if (fromUser) panelUserSet = true;
+      document.body.classList.toggle('panel-open', panelOpen);
+      document.body.classList.toggle('panel-closed', !panelOpen);
+      btnPanel.setAttribute('aria-expanded', panelOpen ? 'true' : 'false');
+      btnPanel.textContent = panelOpen ? 'Hide panel' : 'Show panel';
+      if (!skipHash) writeHash();
+    }
+
+    function defaultPanelOpen() {
+      return !mqMobile.matches;
+    }
+
+    btnPanel.addEventListener('click', () => setPanelOpen(!isPanelOpen(), { fromUser: true }));
+    btnPanelClose.addEventListener('click', () => setPanelOpen(false, { fromUser: true }));
+    mqMobile.addEventListener('change', () => {
+      if (!panelUserSet) setPanelOpen(defaultPanelOpen(), { fromUser: false });
+    });
+    // Mobile starts collapsed so the model fills the screen; desktop starts open.
+    setPanelOpen(defaultPanelOpen(), { skipHash: true });
 
     document.getElementById('title').textContent = MANIFEST.title || 'Assembly';
     document.getElementById('blurb').innerHTML = MANIFEST.blurb || '';
@@ -948,12 +1052,17 @@
         const f = document.getElementById('feaCase')?.value;
         if (f) q.push(`f=${encodeURIComponent(f)}`);
       }
+      q.push(`ui=${isPanelOpen() ? '1' : '0'}`);
       const next = '#' + q.join('&');
       if (location.hash !== next) history.replaceState(null, '', next);
     }
 
     function applyHashState(state) {
       suppressHash = true;
+      if (state.ui === '0' || state.ui === '1') {
+        panelUserSet = true;
+        setPanelOpen(state.ui === '1', { skipHash: true });
+      }
       if (state.p != null) {
         const set = new Set(state.p.split(',').filter(Boolean));
         for (const id of PART_IDS) {
@@ -1093,7 +1202,8 @@
       controls.target.copy(fit.center);
       camera.updateProjectionMatrix();
       controls.update();
-      if (innerWidth > 900) {
+      // Nudge framing clear of the left desktop panel when it is open.
+      if (innerWidth > 900 && isPanelOpen()) {
         camera.updateMatrixWorld();
         const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
         right.multiplyScalar(-dist * Math.tan(fovH / 2) * 0.22);
