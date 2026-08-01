@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Handheld eth — hideable assembly</title>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b1220; --panel: rgba(12, 18, 32, 0.88); --text: #f4f7fb;
+      --muted: #a9b4c7; --accent: #3ec6ff; --warn: #ffcc66;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; height: 100%;
+      background: radial-gradient(1200px 700px at 70% 10%, #15233d 0%, var(--bg) 55%);
+      color: var(--text);
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
+    model-viewer { width: 100%; height: 100%; background: transparent; }
+    .hud {
+      position: fixed; z-index: 2; left: 16px; top: 16px; max-width: min(360px, calc(100% - 32px));
+    }
+    .card {
+      background: var(--panel); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,.08); border-radius: 14px;
+      padding: 14px 16px; box-shadow: 0 10px 40px rgba(0,0,0,.35);
+    }
+    .badge {
+      display: inline-block; margin-bottom: 8px; padding: 3px 8px; border-radius: 999px;
+      background: rgba(255,204,102,.15); color: var(--warn);
+      font-size: .75rem; font-weight: 650; letter-spacing: .04em; text-transform: uppercase;
+    }
+    h1 { margin: 0 0 6px; font-size: 1.1rem; font-weight: 650; }
+    p, .muted { margin: 0 0 10px; color: var(--muted); font-size: .88rem; line-height: 1.45; }
+    a { color: var(--accent); }
+    .toggles { display: grid; gap: 8px; margin-top: 8px; }
+    .toggles label {
+      display: flex; gap: 8px; align-items: center; font-size: .9rem; cursor: pointer;
+    }
+    .hint {
+      position: fixed; z-index: 2; left: 50%; bottom: 18px; transform: translateX(-50%);
+      background: var(--panel); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 999px; padding: 8px 14px; color: var(--muted); font-size: .85rem;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="hud">
+    <div class="card">
+      <div class="badge">Placeholder · hideable assembly</div>
+      <h1>Handheld eth — hideable assembly</h1>
+      <p>Toggle components on/off. Orbit with drag / pinch. PLACEHOLDER stack — not measured CAD.</p>
+      
+      <div class="toggles" id="toggles">
+      <label><input type="checkbox" data-part="body" checked> Enclosure body</label>
+      <label><input type="checkbox" data-part="hatch" checked> Service hatch cover</label>
+      <label><input type="checkbox" data-part="glass" checked> LCD glass</label>
+      <label><input type="checkbox" data-part="accents" checked> Accents (cam ring / home)</label>
+      <label><input type="checkbox" data-part="pcb"> PCB ghost</label>
+      </div>
+    </div>
+  </div>
+
+  <model-viewer
+    id="mv"
+    src="assembly.glb"
+    alt="Handheld eth — hideable assembly"
+    camera-controls
+    touch-action="pan-y"
+    auto-rotate
+    auto-rotate-delay="0"
+    rotation-per-second="18deg"
+    camera-orbit="35deg 65deg auto"
+    shadow-intensity="0.85"
+    exposure="1.1"
+    environment-image="neutral"
+  ></model-viewer>
+  <div class="hint">Drag to orbit · scroll to zoom · uncheck parts to hide</div>
+
+  <script type="module">
+    const mv = document.getElementById('mv');
+    const defaults = {"body": true, "hatch": true, "glass": true, "accents": true, "pcb": false};
+
+    function applyVisibility() {
+      const root = mv.model;
+      if (!root) return;
+      // model-viewer scene graph: each top-level mesh/node named in GLB
+      const names = Object.keys(defaults);
+      for (const name of names) {
+        const on = document.querySelector(`input[data-part="${name}"]`)?.checked ?? true;
+        // Walk scene
+        mv.model.traverse((obj) => {
+          if (obj.name === name || obj.name?.startsWith(name)) {
+            obj.visible = on;
+          }
+        });
+      }
+      // Fallback: hide by material/mesh index order matching PARTS
+      const meshes = [];
+      mv.model.traverse((obj) => {
+        if (obj.isMesh) meshes.push(obj);
+      });
+      names.forEach((name, i) => {
+        const on = document.querySelector(`input[data-part="${name}"]`)?.checked ?? true;
+        if (meshes[i]) meshes[i].visible = on;
+      });
+    }
+
+    mv.addEventListener('load', () => {
+      applyVisibility();
+      document.getElementById('toggles').addEventListener('change', applyVisibility);
+    });
+  </script>
+</body>
+</html>
