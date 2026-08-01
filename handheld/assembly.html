@@ -90,9 +90,25 @@
     .nav-links a:hover { color: var(--accent); border-color: rgba(62,198,255,.35); }
     .toggles { display: grid; gap: 2px; margin: 2px 0 2px; }
     .toggles label { display: flex; gap: 10px; align-items: center; font-size: .9rem;
-      cursor: pointer; min-height: 40px; padding: 2px 0;
+      cursor: pointer; min-height: 40px; padding: 2px 0; min-width: 0; flex: 1;
       -webkit-tap-highlight-color: transparent; }
     .toggles input[type="checkbox"] { width: 18px; height: 18px; flex: 0 0 auto; }
+    .part-row {
+      display: flex; gap: 6px; align-items: center; min-height: 40px;
+    }
+    .part-row label { min-height: 36px; }
+    .solo-btn {
+      flex: 0 0 auto; min-height: 32px; padding: 4px 10px; font-size: .75rem;
+      background: rgba(255,255,255,.05); color: var(--muted);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .solo-btn.active, .solo-btn[aria-pressed="true"] {
+      background: rgba(62,198,255,.28); color: #fff; border-color: rgba(62,198,255,.55);
+    }
+    .parts-tools { margin: 2px 0 4px; }
+    .parts-tools button { min-height: 34px; padding: 6px 12px; font-size: .8rem; }
+    #btnShare.copied { background: rgba(110, 220, 160, .2); color: #9eecc0;
+      border-color: rgba(110, 220, 160, .45); }
     .row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; align-items: center; }
     .view-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 4px; }
     .view-row button { width: 100%; padding: 8px 6px; font-size: .82rem; }
@@ -187,6 +203,10 @@
       <div class="row view-row" id="viewRow"></div>
 
       <h2>Parts</h2>
+      <div class="row parts-tools">
+        <button type="button" id="btnPartsAll">Show all</button>
+        <button type="button" id="btnShare" title="Copy URL with current view and toggles">Copy link</button>
+      </div>
       <div class="toggles" id="toggles"></div>
 
       <div id="displayBlock">
@@ -632,9 +652,20 @@
     }
     const toggles = document.getElementById('toggles');
     for (const p of PARTS) {
+      const row = document.createElement('div');
+      row.className = 'part-row';
       const lab = document.createElement('label');
       lab.innerHTML = `<input type="checkbox" data-part="${p.id}"${p.visible ? ' checked' : ''}> ${p.label}`;
-      toggles.appendChild(lab);
+      const solo = document.createElement('button');
+      solo.type = 'button';
+      solo.className = 'solo-btn';
+      solo.dataset.solo = p.id;
+      solo.textContent = 'Solo';
+      solo.title = `Show only ${p.label}`;
+      solo.setAttribute('aria-pressed', 'false');
+      row.appendChild(lab);
+      row.appendChild(solo);
+      toggles.appendChild(row);
     }
     const featToggles = document.getElementById('featureToggles');
     if (FEATURES.outline) {
@@ -765,6 +796,7 @@
     const dimRoot = new THREE.Group();
     scene.add(dimRoot);
     const dimByGroup = {};
+    const dimLabelEntries = [];
     const markers = new THREE.Group();
     scene.add(markers);
 
@@ -775,11 +807,13 @@
     let suppressHash = false;
     let feaCache = {};
     let feaActive = null;
+    let partSnapshot = null;
+    let soloPartId = null;
 
     const dimMat = new THREE.LineBasicMaterial({ color: 0xffd166 });
     const tickMat = new THREE.LineBasicMaterial({ color: 0xffd166 });
 
-    function makeDim(dim) {
+    function makeDim(dim, staggerIndex = 0) {
       const g = new THREE.Group();
       const a = new THREE.Vector3(...dim.a);
       const b = new THREE.Vector3(...dim.b);
@@ -797,21 +831,78 @@
         g.add(new THREE.Line(tgeo, tickMat));
       }
       const mid = a.clone().add(b).multiplyScalar(0.5);
+      // Stagger midpoints so W/H/D for the same part don't start stacked.
+      mid.addScaledVector(tick.clone().normalize(), 0.005 * ((staggerIndex % 5) - 2));
       const el = document.createElement('div');
       el.className = 'dim-label';
       el.textContent = dim.label;
       const label = new CSS2DObject(el);
       label.position.copy(mid);
       g.add(label);
+      dimLabelEntries.push({ label, el, base: mid.clone() });
       return g;
     }
 
     for (const group of DIM_GROUPS) {
       const wrap = new THREE.Group();
       wrap.visible = !!document.querySelector(`input[data-dim="${group.id}"]`)?.checked;
-      for (const d of group.dims) wrap.add(makeDim(d));
+      group.dims.forEach((d, i) => wrap.add(makeDim(d, i)));
       dimRoot.add(wrap);
       dimByGroup[group.id] = wrap;
+    }
+
+    const _proj = new THREE.Vector3();
+    function resolveDimLabelCollisions() {
+      if (!dimLabelEntries.length) return;
+      const w = innerWidth;
+      const h = innerHeight;
+      const items = [];
+      for (const entry of dimLabelEntries) {
+        let visible = true;
+        let p = entry.label;
+        while (p) {
+          if (p.visible === false) { visible = false; break; }
+          p = p.parent;
+        }
+        if (!visible) {
+          entry.el.style.marginLeft = '0px';
+          entry.el.style.marginTop = '0px';
+          continue;
+        }
+        _proj.copy(entry.base).project(camera);
+        if (_proj.z < -1 || _proj.z > 1) {
+          entry.el.style.marginLeft = '0px';
+          entry.el.style.marginTop = '0px';
+          continue;
+        }
+        const x = (_proj.x * 0.5 + 0.5) * w;
+        const y = (-_proj.y * 0.5 + 0.5) * h;
+        const bw = entry.el.offsetWidth || 88;
+        const bh = entry.el.offsetHeight || 18;
+        items.push({ entry, x, y, bw, bh, dx: 0, dy: 0 });
+      }
+      items.sort((a, b) => (a.y - b.y) || (a.x - b.x));
+      const pad = 3;
+      for (let i = 0; i < items.length; i++) {
+        for (let j = 0; j < i; j++) {
+          const A = items[i];
+          const B = items[j];
+          const ax = A.x + A.dx;
+          const ay = A.y + A.dy;
+          const bx = B.x + B.dx;
+          const by = B.y + B.dy;
+          const overlapX = Math.abs(ax - bx) < (A.bw + B.bw) / 2 + pad;
+          const overlapY = Math.abs(ay - by) < (A.bh + B.bh) / 2 + pad;
+          if (overlapX && overlapY) {
+            const need = (B.bh + A.bh) / 2 + pad - Math.abs(ay - by);
+            A.dy += (ay >= by ? 1 : -1) * Math.max(need, A.bh * 0.85 + pad);
+          }
+        }
+      }
+      for (const it of items) {
+        it.entry.el.style.marginLeft = `${Math.round(it.dx)}px`;
+        it.entry.el.style.marginTop = `${Math.round(it.dy)}px`;
+      }
     }
 
     function refreshDimList() {
@@ -1209,7 +1300,10 @@
           const el = document.querySelector(`input[data-part="${id}"]`);
           if (el) el.checked = set.has(id);
         }
+        soloPartId = null;
+        partSnapshot = null;
         applyVisibility();
+        syncSoloButtons();
       }
       if (state.d != null) {
         const set = new Set(state.d.split(',').filter(Boolean));
@@ -1372,7 +1466,109 @@
       }
       writeHash();
     }
-    document.getElementById('toggles').addEventListener('change', applyVisibility);
+    document.getElementById('toggles').addEventListener('change', () => {
+      // Manual checkbox edits leave solo mode.
+      soloPartId = null;
+      partSnapshot = null;
+      syncSoloButtons();
+      applyVisibility();
+    });
+
+    function syncSoloButtons() {
+      for (const b of document.querySelectorAll('button[data-solo]')) {
+        const on = b.dataset.solo === soloPartId;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        b.textContent = on ? 'Solo ✓' : 'Solo';
+      }
+    }
+    function soloPart(id) {
+      if (soloPartId === id) {
+        // Toggle off → restore previous visibility snapshot.
+        if (partSnapshot) {
+          for (const pid of PART_IDS) {
+            const el = document.querySelector(`input[data-part="${pid}"]`);
+            if (el && pid in partSnapshot) el.checked = partSnapshot[pid];
+          }
+        }
+        soloPartId = null;
+        partSnapshot = null;
+        syncSoloButtons();
+        applyVisibility();
+        return;
+      }
+      if (!partSnapshot) {
+        partSnapshot = {};
+        for (const pid of PART_IDS) {
+          partSnapshot[pid] = !!document.querySelector(`input[data-part="${pid}"]`)?.checked;
+        }
+      }
+      for (const pid of PART_IDS) {
+        const el = document.querySelector(`input[data-part="${pid}"]`);
+        if (el) el.checked = pid === id;
+      }
+      soloPartId = id;
+      syncSoloButtons();
+      applyVisibility();
+    }
+    function showAllParts() {
+      if (partSnapshot) {
+        for (const pid of PART_IDS) {
+          const el = document.querySelector(`input[data-part="${pid}"]`);
+          if (el && pid in partSnapshot) el.checked = partSnapshot[pid];
+        }
+        partSnapshot = null;
+      } else {
+        for (const el of document.querySelectorAll('input[data-part]')) el.checked = true;
+      }
+      soloPartId = null;
+      syncSoloButtons();
+      applyVisibility();
+    }
+    document.getElementById('toggles').addEventListener('click', (ev) => {
+      const btn = ev.target.closest('button[data-solo]');
+      if (!btn) return;
+      ev.preventDefault();
+      soloPart(btn.dataset.solo);
+    });
+    document.getElementById('btnPartsAll')?.addEventListener('click', showAllParts);
+
+    let shareTimer = null;
+    document.getElementById('btnShare')?.addEventListener('click', async () => {
+      const btn = document.getElementById('btnShare');
+      writeHash();
+      const url = location.href;
+      let ok = false;
+      try {
+        await navigator.clipboard.writeText(url);
+        ok = true;
+      } catch {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = url;
+          ta.style.position = 'fixed';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          ok = document.execCommand('copy');
+          ta.remove();
+        } catch { /* ignore */ }
+      }
+      clearTimeout(shareTimer);
+      if (ok) {
+        btn.textContent = 'Copied';
+        btn.classList.add('copied');
+        showHint('Link copied — includes view, parts, and tools', { sticky: false });
+        shareTimer = setTimeout(() => {
+          btn.textContent = 'Copy link';
+          btn.classList.remove('copied');
+        }, 1600);
+      } else {
+        btn.textContent = 'Copy failed';
+        shareTimer = setTimeout(() => { btn.textContent = 'Copy link'; }, 1600);
+        window.prompt('Copy this link:', url);
+      }
+    });
 
     function applyEdges() {
       outlineOn = !!document.getElementById('chkEdges')?.checked;
@@ -1503,6 +1699,7 @@
         outlinePass.uniforms.tDepth.value = normalTarget.depthTexture;
       }
       composer.render();
+      resolveDimLabelCollisions();
       labelRenderer.render(scene, camera);
     })();
   </script>
