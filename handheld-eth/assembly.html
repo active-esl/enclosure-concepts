@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260802T192529Z-78649e1b5a" />
+  <meta name="aesl-build" content="20260802T192907Z-2a0290833a" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -110,13 +110,16 @@
       display: flex; gap: 6px; align-items: center; min-height: 40px;
     }
     .part-row label { min-height: 36px; }
-    .solo-btn {
+    .solo-btn, .spot-btn {
       flex: 0 0 auto; min-height: 32px; padding: 4px 10px; font-size: .75rem;
       background: rgba(255,255,255,.05); color: var(--muted);
       border: 1px solid rgba(255,255,255,.12);
     }
     .solo-btn.active, .solo-btn[aria-pressed="true"] {
       background: rgba(62,198,255,.28); color: #fff; border-color: rgba(62,198,255,.55);
+    }
+    .spot-btn.active, .spot-btn[aria-pressed="true"] {
+      background: rgba(255,204,102,.28); color: #fff; border-color: rgba(255,204,102,.55);
     }
     .parts-tools { margin: 2px 0 4px; }
     .parts-tools button { min-height: 34px; padding: 6px 12px; font-size: .8rem; }
@@ -417,9 +420,9 @@
     const MANIFEST = {
   "id": "eth",
   "title": "Handheld eth \u2014 PLACEHOLDER",
-  "blurb": "Stepped rear eth \u00b7 front housing + rear housing + hatch. Ghost internals (V3Room populated board) through shell by default. Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
+  "blurb": "Stepped rear eth \u00b7 front housing + rear housing + hatch. Ghost internals (V3Room populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "3252cc0b94",
+  "glb_version": "c1e8ac0930",
   "parts": [
     {
       "id": "front",
@@ -508,12 +511,12 @@
     },
     {
       "id": "poe",
-      "label": "PoE transformer (RED)",
+      "label": "PoE transformer",
       "visible": true,
       "color": [
-        220,
-        30,
-        30
+        200,
+        72,
+        56
       ],
       "highlight": true,
       "opacity": 1.0
@@ -1070,15 +1073,25 @@
       const row = document.createElement('div');
       row.className = 'part-row';
       const lab = document.createElement('label');
-      lab.innerHTML = `<input type="checkbox" data-part="${p.id}"${p.visible ? ' checked' : ''}> ${p.label}`;
+      const baseLabel = String(p.label || p.id).replace(/\s*\(RED\)\s*$/i, '').trim();
+      p._baseLabel = baseLabel;
+      lab.innerHTML = `<input type="checkbox" data-part="${p.id}"${p.visible ? ' checked' : ''}> ${baseLabel}`;
+      const spot = document.createElement('button');
+      spot.type = 'button';
+      spot.className = 'spot-btn';
+      spot.dataset.spot = p.id;
+      spot.textContent = 'Spot';
+      spot.title = `Spotlight ${baseLabel} (dim others)`;
+      spot.setAttribute('aria-pressed', 'false');
       const solo = document.createElement('button');
       solo.type = 'button';
       solo.className = 'solo-btn';
       solo.dataset.solo = p.id;
       solo.textContent = 'Solo';
-      solo.title = `Show only ${p.label}`;
+      solo.title = `Show only ${baseLabel}`;
       solo.setAttribute('aria-pressed', 'false');
       row.appendChild(lab);
+      row.appendChild(spot);
       row.appendChild(solo);
       toggles.appendChild(row);
     }
@@ -1254,6 +1267,9 @@
     let feaActive = null;
     let partSnapshot = null;
     let soloPartId = null;
+    // Spot = one-part attention (dim/desaturate others + mild accent).
+    // YAML highlight:true seeds default; ?spot= / #spot= override; empty spot= clears.
+    let spotPartId = null;
 
     const dimMat = new THREE.LineBasicMaterial({ color: 0xffd166 });
     const tickMat = new THREE.LineBasicMaterial({ color: 0xffd166 });
@@ -1578,6 +1594,8 @@
       }
       feaActive = null;
       document.getElementById('feaOut').textContent = '';
+      // Restore Spot dim/accent after FEA forced opaque turbo colours.
+      applySpot({ skipHash: true });
     }
 
     async function applyFea() {
@@ -1807,9 +1825,16 @@
         const f = document.getElementById('feaCase')?.value;
         if (f) q.push(`f=${encodeURIComponent(f)}`);
       }
+      // Always emit spot= (possibly empty) so "off" ≠ "reseed from YAML highlight".
+      q.push(`spot=${encodeURIComponent(spotPartId || '')}`);
       q.push(`ui=${isPanelOpen() ? '1' : '0'}`);
-      const next = '#' + q.join('&');
-      if (location.hash !== next) history.replaceState(null, '', next);
+      const nextHash = '#' + q.join('&');
+      const url = new URL(location.href);
+      if (spotPartId) url.searchParams.set('spot', spotPartId);
+      else url.searchParams.delete('spot');
+      const next = url.pathname + url.search + nextHash;
+      const cur = location.pathname + location.search + location.hash;
+      if (cur !== next) history.replaceState(null, '', next);
     }
 
     function applyHashState(state) {
@@ -1863,6 +1888,11 @@
         document.getElementById('feaCase').value = state.f;
         document.getElementById('chkFea').checked = true;
         applyFea();
+      }
+      if ('spot' in state) {
+        const sid = state.spot || '';
+        spotPartId = sid && PART_IDS.includes(sid) ? sid : null;
+        applySpot({ skipHash: true });
       }
       if (state.v) setView(state.v);
       suppressHash = false;
@@ -1949,9 +1979,9 @@
         const meta = PART_META[partId] || {};
         let col = PART_COLOR[partId] || 0x8e9298;
         const isGhost = !!meta.ghost;
-        // PoE (and meta.highlight): stay vivid through translucent ghost PCB —
-        // opaque + emissive + renderOrder above ghost (Alex 2026-08-02).
-        const isHighlight = partId === 'poe' || !!meta.highlight;
+        // Opaque overlay parts (e.g. PoE body) sit above ghost PCB — not always-on
+        // emissive paint. Spot attention mode handles dim/accent separately.
+        const isOverlay = partId === 'poe' || (!!meta.highlight && !isGhost && !meta.transparent);
         const splash = partId ? splashTex[partId] : null;
         // lcd = emissive glass art; print = matte UV/film decal (alpha corners).
         // Transparent shells / PCB ghost keep plastic shading — only the LCD
@@ -1960,8 +1990,8 @@
           || (partId === 'glass' ? 'lcd' : (splash ? 'print' : null));
         const isPrintSplash = !!splash && splashStyle === 'print';
         const isLcdSplash = !!splash && !isPrintSplash;
-        const isGlass = !isGhost && !isHighlight && (partId === 'glass' || isLcdSplash);
-        const isAlpha = !isHighlight && (
+        const isGlass = !isGhost && !isOverlay && (partId === 'glass' || isLcdSplash);
+        const isAlpha = !isOverlay && (
           isGhost || isGlass || isPrintSplash || !!meta.transparent
           || (typeof meta.opacity === 'number' && meta.opacity < 1)
         );
@@ -1971,8 +2001,8 @@
           c.getHSL(hsl);
           // Hatch / dark plastics sit near black; without a floor they read as holes.
           // Keep ghost PCB green unsaturated-lift off (ghost wants FR4 read).
-          // Highlight parts keep YAML colour (PoE red must not get lifted/greyed).
-          if (!isGlass && !isGhost && !isPrintSplash && !isHighlight && hsl.l < 0.30) {
+          // Overlay parts keep YAML colour (no lift/grey).
+          if (!isGlass && !isGhost && !isPrintSplash && !isOverlay && hsl.l < 0.30) {
             c.setHSL(hsl.h, Math.min(hsl.s, 0.22), 0.36);
           }
           if (isGlass && !splash) c.offsetHSL(0, 0, 0.06);
@@ -1987,17 +2017,17 @@
         o.material = new THREE.MeshStandardMaterial({
           color: splash ? 0xffffff : col,
           map: splash || null,
-          emissive: isLcdSplash ? 0xffffff : (isHighlight ? col : 0x000000),
+          emissive: isLcdSplash ? 0xffffff : 0x000000,
           emissiveMap: isLcdSplash ? splash : null,
-          emissiveIntensity: isLcdSplash ? 1.35 : (isHighlight ? 1.0 : 0),
+          emissiveIntensity: isLcdSplash ? 1.35 : 0,
           // Matte plastic: higher metalness + RoomEnvironment stamps a hard
           // horizon band onto flat faces as you orbit.
-          metalness: isHighlight ? 0.05 : (isGlass ? 0.04 : (isPrintSplash ? 0.06 : 0.12)),
-          roughness: isHighlight ? 0.45 : (isLcdSplash ? 0.35 : (isPrintSplash ? 0.55 : (isGlass ? 0.2 : 0.62))),
-          envMapIntensity: isHighlight ? 0.25 : (isGlass ? (splash ? 0.55 : 1.4) : (isPrintSplash ? 0.35 : 0.45)),
+          metalness: isOverlay ? 0.08 : (isGlass ? 0.04 : (isPrintSplash ? 0.06 : 0.12)),
+          roughness: isOverlay ? 0.5 : (isLcdSplash ? 0.35 : (isPrintSplash ? 0.55 : (isGlass ? 0.2 : 0.62))),
+          envMapIntensity: isOverlay ? 0.4 : (isGlass ? (splash ? 0.55 : 1.4) : (isPrintSplash ? 0.35 : 0.45)),
           transparent: isAlpha,
           // Splash needs enough opacity to read; ghost PCB / shells use YAML.
-          opacity: isHighlight
+          opacity: isOverlay
             ? 1.0
             : (isLcdSplash
               ? (meta.opacity ?? 0.92)
@@ -2005,16 +2035,26 @@
                 : (isAlpha ? (meta.opacity ?? 0.55) : 1.0))),
           alphaTest: isPrintSplash ? 0.35 : 0,
           // Ghost / see-through shells: no depth write so PCB composites inside.
-          // Highlight (PoE) always depth-writes so it wins over ghost blend.
-          depthWrite: isHighlight || isLcdSplash || isPrintSplash ? true : !isAlpha,
+          // Overlay (PoE) always depth-writes so it wins over ghost blend.
+          depthWrite: isOverlay || isLcdSplash || isPrintSplash ? true : !isAlpha,
           side: (isPrintSplash || isGhost) ? THREE.DoubleSide : THREE.FrontSide,
           vertexColors: false,
           clippingPlanes: [],
         });
-        if (isHighlight) o.renderOrder = 3;
+        if (isOverlay) o.renderOrder = 3;
         else if (isGhost) o.renderOrder = 2;
         o.userData.baseColor = splash ? 0xffffff : col;
         o.userData.partId = partId;
+        o.userData.isLcdSplash = isLcdSplash;
+        o.userData.isOverlay = isOverlay;
+        o.userData.matBase = {
+          color: splash ? 0xffffff : col,
+          emissive: isLcdSplash ? 0xffffff : 0x000000,
+          emissiveIntensity: isLcdSplash ? 1.35 : 0,
+          opacity: o.material.opacity,
+          envMapIntensity: o.material.envMapIntensity,
+          renderOrder: o.renderOrder || 0,
+        };
       });
       const meshes = [];
       model.traverse((o) => { if (o.isMesh) meshes.push(o); });
@@ -2053,6 +2093,16 @@
       camera.far = fit.dim * 20;
 
       const hashState = parseHash();
+      const qSpot = new URLSearchParams(location.search).get('spot');
+      if (qSpot != null) {
+        spotPartId = PART_IDS.includes(qSpot) ? qSpot : null;
+      } else if ('spot' in hashState) {
+        const sid = hashState.spot || '';
+        spotPartId = sid && PART_IDS.includes(sid) ? sid : null;
+      } else {
+        const seed = PARTS.find((p) => p.highlight)?.id;
+        spotPartId = seed && PART_IDS.includes(seed) ? seed : null;
+      }
       if (Object.keys(hashState).length) {
         applyHashState(hashState);
       } else {
@@ -2060,8 +2110,12 @@
         applyDims();
         applyExplode();
         applySection();
+        applySpot({ skipHash: true });
         writeHash();
       }
+      // applyHashState may have set spot; ensure materials + buttons match.
+      applySpot({ skipHash: true });
+      syncSpotButtons();
       document.getElementById('loading')?.remove();
     }, undefined, (err) => {
       document.getElementById('measureOut').textContent = 'Failed to load model: ' + err;
@@ -2227,6 +2281,113 @@
         b.textContent = on ? 'Solo ✓' : 'Solo';
       }
     }
+    function syncPartLabels() {
+      for (const p of PARTS) {
+        const input = document.querySelector(`input[data-part="${p.id}"]`);
+        if (!input || !input.parentElement) continue;
+        const base = p._baseLabel || String(p.label || p.id).replace(/\s*\(RED\)\s*$/i, '').trim();
+        // Everyday PoE label omits (RED); show it only while that part is spotted.
+        const text = (p.id === 'poe' && spotPartId === 'poe') ? `${base} (RED)` : base;
+        while (input.nextSibling) input.nextSibling.remove();
+        input.parentElement.appendChild(document.createTextNode(` ${text}`));
+      }
+    }
+    function syncSpotButtons() {
+      for (const b of document.querySelectorAll('button[data-spot]')) {
+        const on = b.dataset.spot === spotPartId;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        b.textContent = on ? 'Spot ✓' : 'Spot';
+      }
+      syncPartLabels();
+    }
+    function ensureMatBase(mesh) {
+      if (mesh.userData.matBase || !mesh.material) return;
+      const m = mesh.material;
+      mesh.userData.matBase = {
+        color: m.color.getHex(),
+        emissive: m.emissive.getHex(),
+        emissiveIntensity: m.emissiveIntensity,
+        opacity: m.opacity,
+        envMapIntensity: m.envMapIntensity,
+        renderOrder: mesh.renderOrder || 0,
+      };
+    }
+    function applySpot({ skipHash = false } = {}) {
+      if (!modelReady) {
+        syncSpotButtons();
+        return;
+      }
+      const ACCENT = 0xffcc66; // review attention (warn), not real material paint
+      for (const id of PART_IDS) {
+        for (const mesh of (byName[id] || [])) {
+          const mat = mesh.material;
+          if (!mat || !mat.color) continue;
+          // Leave FEA turbo colours alone while ranking overlay is active.
+          if (mesh.userData.feaSavedMat) continue;
+          ensureMatBase(mesh);
+          const base = mesh.userData.matBase;
+          const isLcd = !!mesh.userData.isLcdSplash;
+          if (!spotPartId) {
+            mat.color.setHex(base.color);
+            mat.emissive.setHex(base.emissive);
+            mat.emissiveIntensity = base.emissiveIntensity;
+            mat.opacity = base.opacity;
+            mat.envMapIntensity = base.envMapIntensity;
+            mesh.renderOrder = base.renderOrder;
+            mat.needsUpdate = true;
+            continue;
+          }
+          if (id === spotPartId) {
+            mat.color.setHex(base.color);
+            if (isLcd) {
+              mat.emissive.setHex(base.emissive);
+              mat.emissiveIntensity = base.emissiveIntensity;
+            } else {
+              // Mild accent on the target — attention wash, not full emissive RED.
+              mat.emissive.setHex(ACCENT);
+              mat.emissiveIntensity = 0.28;
+            }
+            mat.opacity = base.opacity;
+            mat.envMapIntensity = Math.min(1.2, base.envMapIntensity + 0.2);
+            mesh.renderOrder = Math.max(base.renderOrder, 3);
+          } else {
+            const c = new THREE.Color(base.color);
+            const hsl = { h: 0, s: 0, l: 0 };
+            c.getHSL(hsl);
+            c.setHSL(hsl.h, hsl.s * 0.18, Math.max(0.08, hsl.l * 0.52));
+            mat.color.copy(c);
+            if (isLcd) {
+              mat.emissive.setHex(base.emissive);
+              mat.emissiveIntensity = base.emissiveIntensity * 0.28;
+            } else {
+              mat.emissive.setHex(0x000000);
+              mat.emissiveIntensity = 0;
+            }
+            // Keep ghosts/shells translucent; just pull them back.
+            mat.opacity = Math.max(0.12, base.opacity * (base.opacity < 1 ? 0.62 : 0.78));
+            mat.envMapIntensity = base.envMapIntensity * 0.3;
+            mesh.renderOrder = base.renderOrder;
+          }
+          mat.needsUpdate = true;
+        }
+      }
+      syncSpotButtons();
+      if (!skipHash) writeHash();
+    }
+    function spotPart(id) {
+      if (spotPartId === id) {
+        spotPartId = null;
+      } else {
+        spotPartId = id;
+      }
+      applySpot();
+      showHint(
+        spotPartId
+          ? `Spot on ${PART_META[spotPartId]?._baseLabel || spotPartId} — others dimmed`
+          : 'Spot off',
+      );
+    }
     function soloPart(id) {
       if (soloPartId === id) {
         // Toggle off → restore previous visibility snapshot.
@@ -2271,10 +2432,16 @@
       applyVisibility();
     }
     document.getElementById('toggles').addEventListener('click', (ev) => {
-      const btn = ev.target.closest('button[data-solo]');
-      if (!btn) return;
+      const spotBtn = ev.target.closest('button[data-spot]');
+      if (spotBtn) {
+        ev.preventDefault();
+        spotPart(spotBtn.dataset.spot);
+        return;
+      }
+      const soloBtn = ev.target.closest('button[data-solo]');
+      if (!soloBtn) return;
       ev.preventDefault();
-      soloPart(btn.dataset.solo);
+      soloPart(soloBtn.dataset.solo);
     });
     document.getElementById('btnPartsAll')?.addEventListener('click', showAllParts);
 
@@ -2303,7 +2470,7 @@
       if (ok) {
         btn.textContent = 'Copied';
         btn.classList.add('copied');
-        showHint('Link copied — includes view, parts, and tools', { sticky: false });
+        showHint('Link copied — includes view, parts, Spot, and tools', { sticky: false });
         shareTimer = setTimeout(() => {
           btn.textContent = 'Copy link';
           btn.classList.remove('copied');
