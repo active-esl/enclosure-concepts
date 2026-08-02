@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="../site-nav.css?v=3" />
   <style>
     :root {
+      color-scheme: dark;
       --bg: #0b1220; --panel: rgba(12, 18, 32, 0.94); --text: #f4f7fb;
       --muted: #a9b4c7; --accent: #3ec6ff; --warn: #ffcc66; --dim: #ffd166;
       --safe-top: env(safe-area-inset-top, 0px);
@@ -45,6 +46,13 @@
       overflow: auto; overscroll-behavior: contain;
       -webkit-overflow-scrolling: touch;
       transition: opacity .18s ease, transform .18s ease, visibility .18s;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(169,180,199,.45) rgba(255,255,255,.06);
+    }
+    .hud::-webkit-scrollbar { width: 8px; }
+    .hud::-webkit-scrollbar-track { background: rgba(255,255,255,.06); border-radius: 999px; }
+    .hud::-webkit-scrollbar-thumb {
+      background: rgba(169,180,199,.45); border-radius: 999px;
     }
     body.panel-closed .hud {
       opacity: 0; visibility: hidden; pointer-events: none;
@@ -120,9 +128,39 @@
     }
     button.active { background: rgba(62,198,255,.4); color: #fff; border-color: rgba(62,198,255,.7); }
     input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; }
+    /* Dark Inspect chrome: native <select> menuboxes default to white OS chrome
+       with light text (unreadable). color-scheme + option colours fix both
+       closed field and open list (FEA cases + section plane). */
     select {
-      background: rgba(255,255,255,.06); color: var(--text); border: 1px solid rgba(255,255,255,.15);
-      border-radius: 8px; padding: 8px 10px; font-size: .85rem; min-height: 40px; flex: 1;
+      color-scheme: dark;
+      appearance: none;
+      -webkit-appearance: none;
+      background-color: #141c2e;
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+      background-position:
+        calc(100% - 16px) calc(50% - 2px),
+        calc(100% - 10px) calc(50% - 2px);
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 8px; padding: 8px 28px 8px 10px; font-size: .85rem;
+      min-height: 40px; flex: 1;
+    }
+    select:hover { border-color: rgba(62,198,255,.4); }
+    select:focus {
+      outline: 2px solid rgba(62,198,255,.55); outline-offset: 1px;
+      border-color: rgba(62,198,255,.55);
+    }
+    select option, select optgroup {
+      background-color: #141c2e;
+      color: #f4f7fb;
+    }
+    select option:checked, select option:hover, select option:focus {
+      background-color: #1e3a55;
+      color: #ffffff;
     }
     #measureOut, #feaOut { margin-top: 6px; font-size: .85rem; color: var(--text); min-height: 1.2em; }
     #dimList { margin-top: 4px; font-size: .78rem; color: var(--dim); line-height: 1.4; }
@@ -158,10 +196,10 @@
     }
     .hint.faded { opacity: 0; }
     body.panel-closed .hint:not(.faded) { opacity: .95; }
-    /* Start hidden: CSS2DRenderer only checks object.visible (not parents), so
-       labels must not paint before JS sets per-object visibility from default_on. */
+    /* Do NOT set display:none here — CSS2DRenderer shows labels with
+       element.style.display = '' which cannot override a stylesheet rule.
+       Initial hide is JS-only (el.style.display + CSS2DObject.visible). */
     .dim-label {
-      display: none;
       color: #1a1408; background: rgba(255,209,102,.92); border: 1px solid rgba(255,209,102,.95);
       border-radius: 6px; padding: 2px 7px; font: 650 12px/1.3 "Segoe UI", system-ui, sans-serif;
       white-space: nowrap; pointer-events: none; user-select: none;
@@ -325,9 +363,9 @@
     const MANIFEST = {
   "id": "eth",
   "title": "Handheld eth \u2014 PLACEHOLDER",
-  "blurb": "Stepped rear eth \u00b7 front housing + rear housing + hatch. Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
+  "blurb": "Stepped rear eth \u00b7 front housing + rear housing + hatch. Ghost internals (V3Room populated board) through shell by default. Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "0ee3d06b1c",
+  "glb_version": "a179c0ace6",
   "parts": [
     {
       "id": "front",
@@ -337,7 +375,9 @@
         168,
         172,
         178
-      ]
+      ],
+      "transparent": true,
+      "opacity": 0.45
     },
     {
       "id": "rear",
@@ -347,7 +387,9 @@
         145,
         148,
         152
-      ]
+      ],
+      "transparent": true,
+      "opacity": 0.45
     },
     {
       "id": "hatch",
@@ -357,11 +399,13 @@
         72,
         78,
         88
-      ]
+      ],
+      "transparent": true,
+      "opacity": 0.5
     },
     {
       "id": "glass",
-      "label": "LCD+CTP+cover (bonded stack)",
+      "label": "LCD+CTP+cover (ST1010 STEP)",
       "visible": true,
       "color": [
         28,
@@ -403,7 +447,10 @@
         28,
         110,
         55
-      ]
+      ],
+      "ghost": true,
+      "transparent": true,
+      "opacity": 0.7
     }
   ],
   "dim_groups": [
@@ -532,31 +579,31 @@
       "default": false,
       "dims": [
         {
-          "label": "glass W 216.0 mm",
-          "mm": 216.0,
+          "label": "glass W 249.1 mm",
+          "mm": 249.1,
           "a": [
-            0.004,
-            0.147,
-            0.011949999999999999
+            -0.012550000190734864,
+            0.19560336303710937,
+            0.012
           ],
           "b": [
-            0.22,
-            0.147,
-            0.011949999999999999
+            0.23655000305175783,
+            0.19560336303710937,
+            0.012
           ]
         },
         {
-          "label": "glass H 135.0 mm",
-          "mm": 135.0,
+          "label": "glass H 224.2 mm",
+          "mm": 224.21,
           "a": [
-            0.228,
-            0.004,
-            0.011949999999999999
+            0.2445500030517578,
+            -0.036610000610351565,
+            0.012
           ],
           "b": [
-            0.228,
-            0.139,
-            0.011949999999999999
+            0.2445500030517578,
+            0.18760336303710937,
+            0.012
           ]
         }
       ]
@@ -784,7 +831,6 @@
       0
     ],
     "fea_cases": [
-      "press_centre",
       "long_edge_bend",
       "corner_twist"
     ],
@@ -1223,6 +1269,16 @@
         // Set every node (incl. CSS2DObject) — renderer does not walk parents.
         wrap.traverse((o) => { o.visible = on; });
       }
+      // Belt: sync DOM display so mm text cannot stick hidden after a CSS flash fix.
+      for (const entry of dimLabelEntries) {
+        let on = true;
+        let p = entry.label;
+        while (p) {
+          if (p.visible === false) { on = false; break; }
+          p = p.parent;
+        }
+        entry.el.style.display = on ? '' : 'none';
+      }
       if (any) document.getElementById('measDetails').open = true;
       refreshDimList();
       writeHash();
@@ -1402,6 +1458,14 @@
         if (!mat) continue;
         mat.vertexColors = false;
         if (mesh.userData.baseColor != null) mat.color.setHex(mesh.userData.baseColor);
+        // Restore shell opacity/depthWrite if FEA forced them opaque for ranking.
+        if (mesh.userData.feaSavedMat) {
+          const s = mesh.userData.feaSavedMat;
+          mat.opacity = s.opacity;
+          mat.transparent = s.transparent;
+          mat.depthWrite = s.depthWrite;
+          delete mesh.userData.feaSavedMat;
+        }
         mat.needsUpdate = true;
         if (mesh.geometry.getAttribute('color')) {
           mesh.geometry.deleteAttribute('color');
@@ -1494,6 +1558,17 @@
         mesh.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
         mesh.material.vertexColors = true;
         mesh.material.color.setHex(0xffffff);
+        // Ghost/see-through shells wash out turbo; force opaque while FEA is on.
+        if (!mesh.userData.feaSavedMat) {
+          mesh.userData.feaSavedMat = {
+            opacity: mesh.material.opacity,
+            transparent: mesh.material.transparent,
+            depthWrite: mesh.material.depthWrite,
+          };
+        }
+        mesh.material.transparent = false;
+        mesh.material.opacity = 1;
+        mesh.material.depthWrite = true;
         mesh.material.needsUpdate = true;
       }
       feaActive = caseId;
@@ -1760,19 +1835,25 @@
         }
         const meta = PART_META[partId] || {};
         let col = PART_COLOR[partId] || 0x8e9298;
-        const isGlass = !!meta.transparent || partId === 'glass';
+        const isGhost = !!meta.ghost;
         const splash = partId ? splashTex[partId] : null;
         // lcd = emissive glass art; print = matte UV/film decal (alpha corners).
+        // Transparent shells / PCB ghost keep plastic shading — only the LCD
+        // stack uses glass (Alex 2026-08-02 PCB-through-shell).
         const splashStyle = meta.splash_style
-          || (isGlass ? 'lcd' : (splash ? 'print' : null));
+          || (partId === 'glass' ? 'lcd' : (splash ? 'print' : null));
         const isPrintSplash = !!splash && splashStyle === 'print';
         const isLcdSplash = !!splash && !isPrintSplash;
+        const isGlass = !isGhost && (partId === 'glass' || isLcdSplash);
+        const isAlpha = isGhost || isGlass || isPrintSplash || !!meta.transparent
+          || (typeof meta.opacity === 'number' && meta.opacity < 1);
         {
           const c = new THREE.Color(col);
           const hsl = { h: 0, s: 0, l: 0 };
           c.getHSL(hsl);
-          // Hatch / PCB sit near black; without a floor they read as holes.
-          if (!isGlass && !isPrintSplash && hsl.l < 0.30) {
+          // Hatch / dark plastics sit near black; without a floor they read as holes.
+          // Keep ghost PCB green unsaturated-lift off (ghost wants FR4 read).
+          if (!isGlass && !isGhost && !isPrintSplash && hsl.l < 0.30) {
             c.setHSL(hsl.h, Math.min(hsl.s, 0.22), 0.36);
           }
           if (isGlass && !splash) c.offsetHSL(0, 0, 0.06);
@@ -1794,17 +1875,20 @@
           metalness: isGlass ? 0.04 : (isPrintSplash ? 0.06 : 0.12),
           roughness: isLcdSplash ? 0.35 : (isPrintSplash ? 0.55 : (isGlass ? 0.2 : 0.62)),
           envMapIntensity: isGlass ? (splash ? 0.55 : 1.4) : (isPrintSplash ? 0.35 : 0.45),
-          transparent: isGlass || isPrintSplash,
-          // Splash needs enough opacity to read; plain glass stays tinted.
+          transparent: isAlpha,
+          // Splash needs enough opacity to read; ghost PCB / shells use YAML.
           opacity: isLcdSplash
             ? (meta.opacity ?? 0.92)
-            : (isGlass ? (meta.opacity ?? 0.58) : 1.0),
+            : (isGhost ? (meta.opacity ?? 0.55)
+              : (isAlpha ? (meta.opacity ?? 0.55) : 1.0)),
           alphaTest: isPrintSplash ? 0.35 : 0,
-          depthWrite: !isGlass || !!splash || isPrintSplash,
-          side: isPrintSplash ? THREE.DoubleSide : THREE.FrontSide,
+          // Ghost / see-through shells: no depth write so PCB composites inside.
+          depthWrite: isLcdSplash || isPrintSplash ? true : !isAlpha,
+          side: (isPrintSplash || isGhost) ? THREE.DoubleSide : THREE.FrontSide,
           vertexColors: false,
           clippingPlanes: [],
         });
+        if (isGhost) o.renderOrder = 2;
         o.userData.baseColor = splash ? 0xffffff : col;
         o.userData.partId = partId;
       });

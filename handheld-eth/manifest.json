@@ -1,9 +1,9 @@
 {
   "id": "eth",
   "title": "Handheld eth \u2014 PLACEHOLDER",
-  "blurb": "Stepped rear eth \u00b7 front housing + rear housing + hatch. Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
+  "blurb": "Stepped rear eth \u00b7 front housing + rear housing + hatch. Ghost internals (V3Room populated board) through shell by default. Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "0ee3d06b1c",
+  "glb_version": "a179c0ace6",
   "parts": [
     {
       "id": "front",
@@ -13,7 +13,9 @@
         168,
         172,
         178
-      ]
+      ],
+      "transparent": true,
+      "opacity": 0.45
     },
     {
       "id": "rear",
@@ -23,7 +25,9 @@
         145,
         148,
         152
-      ]
+      ],
+      "transparent": true,
+      "opacity": 0.45
     },
     {
       "id": "hatch",
@@ -33,11 +37,13 @@
         72,
         78,
         88
-      ]
+      ],
+      "transparent": true,
+      "opacity": 0.5
     },
     {
       "id": "glass",
-      "label": "LCD+CTP+cover (bonded stack)",
+      "label": "LCD+CTP+cover (ST1010 STEP)",
       "visible": true,
       "color": [
         28,
@@ -79,7 +85,10 @@
         28,
         110,
         55
-      ]
+      ],
+      "ghost": true,
+      "transparent": true,
+      "opacity": 0.7
     }
   ],
   "dim_groups": [
@@ -208,31 +217,31 @@
       "default": false,
       "dims": [
         {
-          "label": "glass W 216.0 mm",
-          "mm": 216.0,
+          "label": "glass W 249.1 mm",
+          "mm": 249.1,
           "a": [
-            0.004,
-            0.147,
-            0.011949999999999999
+            -0.012550000190734864,
+            0.19560336303710937,
+            0.012
           ],
           "b": [
-            0.22,
-            0.147,
-            0.011949999999999999
+            0.23655000305175783,
+            0.19560336303710937,
+            0.012
           ]
         },
         {
-          "label": "glass H 135.0 mm",
-          "mm": 135.0,
+          "label": "glass H 224.2 mm",
+          "mm": 224.21,
           "a": [
-            0.228,
-            0.004,
-            0.011949999999999999
+            0.2445500030517578,
+            -0.036610000610351565,
+            0.012
           ],
           "b": [
-            0.228,
-            0.139,
-            0.011949999999999999
+            0.2445500030517578,
+            0.18760336303710937,
+            0.012
           ]
         }
       ]
@@ -460,7 +469,6 @@
       0
     ],
     "fea_cases": [
-      "press_centre",
       "long_edge_bend",
       "corner_twist"
     ],
