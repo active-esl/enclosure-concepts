@@ -327,7 +327,7 @@
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front housing + rear housing + hatch. Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "3b33ac87f9",
+  "glb_version": "2483970369",
   "parts": [
     {
       "id": "front",
@@ -370,7 +370,20 @@
       ],
       "transparent": true,
       "opacity": 0.92,
-      "splash": "lcd_splash_active_esl.png"
+      "splash": "lcd_splash_active_esl.png",
+      "splash_style": "lcd"
+    },
+    {
+      "id": "uv_badge",
+      "label": "UV badge (brand-full swatch)",
+      "visible": true,
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "splash": "active-esl-uv-badge-28x10-brand-full-600dpi.png",
+      "splash_style": "print"
     },
     {
       "id": "accents",
@@ -549,6 +562,41 @@
       ]
     },
     {
+      "id": "uv_badge",
+      "label": "Uv_badge",
+      "default": false,
+      "dims": [
+        {
+          "label": "uv_badge W 28.0 mm",
+          "mm": 28.0,
+          "a": [
+            0.024,
+            0.157,
+            0.011800000190734863
+          ],
+          "b": [
+            0.052000000000000005,
+            0.157,
+            0.011800000190734863
+          ]
+        },
+        {
+          "label": "uv_badge H 10.0 mm",
+          "mm": 10.0,
+          "a": [
+            0.06,
+            0.139,
+            0.011800000190734863
+          ],
+          "b": [
+            0.06,
+            0.149,
+            0.011800000190734863
+          ]
+        }
+      ]
+    },
+    {
       "id": "accents",
       "label": "Accents",
       "default": false,
@@ -717,6 +765,7 @@
     ],
     "explode_offsets_mm": {
       "glass": 55,
+      "uv_badge": 52,
       "accents": 48,
       "front": 28,
       "pcb": 18,
@@ -1648,7 +1697,9 @@
       writeHash();
     }
 
-    // Look-mode parity: XY UV over glass bounds + flip_u/flip_v (stl_to_glb_lcd.py).
+    // XY UV over bounds (same projection as stl_to_glb_lcd.py).
+    // Look GLB uses flip_u=True,flip_v=True. Inspect LCD + TextureLoader
+    // (flipY=false) needs flipU inverted or ACTIVE-ESL reads mirrored.
     function projectXyUvs(geometry, flipU = true, flipV = true) {
       geometry.computeBoundingBox();
       const box = geometry.boundingBox;
@@ -1718,33 +1769,45 @@
         let col = PART_COLOR[partId] || 0x8e9298;
         const isGlass = !!meta.transparent || partId === 'glass';
         const splash = partId ? splashTex[partId] : null;
+        // lcd = emissive glass art; print = matte UV/film decal (alpha corners).
+        const splashStyle = meta.splash_style
+          || (isGlass ? 'lcd' : (splash ? 'print' : null));
+        const isPrintSplash = !!splash && splashStyle === 'print';
+        const isLcdSplash = !!splash && !isPrintSplash;
         {
           const c = new THREE.Color(col);
           const hsl = { h: 0, s: 0, l: 0 };
           c.getHSL(hsl);
           // Hatch / PCB sit near black; without a floor they read as holes.
-          if (!isGlass && hsl.l < 0.30) c.setHSL(hsl.h, Math.min(hsl.s, 0.22), 0.36);
+          if (!isGlass && !isPrintSplash && hsl.l < 0.30) {
+            c.setHSL(hsl.h, Math.min(hsl.s, 0.22), 0.36);
+          }
           if (isGlass && !splash) c.offsetHSL(0, 0, 0.06);
           col = c.getHex();
         }
         if (splash) {
-          projectXyUvs(o.geometry, false, true); // lcd: invert Look flip_u
+          // lcd: flipU=false (Look's flip_u inverted). print badge: keep flipU.
+          projectXyUvs(o.geometry, !isLcdSplash, true);
         }
         o.material = new THREE.MeshStandardMaterial({
           color: splash ? 0xffffff : col,
           map: splash || null,
-          emissive: splash ? 0xffffff : 0x000000,
-          emissiveMap: splash || null,
-          emissiveIntensity: splash ? 1.35 : 0,
+          emissive: isLcdSplash ? 0xffffff : 0x000000,
+          emissiveMap: isLcdSplash ? splash : null,
+          emissiveIntensity: isLcdSplash ? 1.35 : 0,
           // Matte plastic: higher metalness + RoomEnvironment stamps a hard
           // horizon band onto flat faces as you orbit.
-          metalness: isGlass ? 0.04 : 0.12,
-          roughness: splash ? 0.35 : (isGlass ? 0.2 : 0.62),
-          envMapIntensity: isGlass ? (splash ? 0.55 : 1.4) : 0.45,
-          transparent: isGlass,
+          metalness: isGlass ? 0.04 : (isPrintSplash ? 0.06 : 0.12),
+          roughness: isLcdSplash ? 0.35 : (isPrintSplash ? 0.55 : (isGlass ? 0.2 : 0.62)),
+          envMapIntensity: isGlass ? (splash ? 0.55 : 1.4) : (isPrintSplash ? 0.35 : 0.45),
+          transparent: isGlass || isPrintSplash,
           // Splash needs enough opacity to read; plain glass stays tinted.
-          opacity: isGlass ? (splash ? (meta.opacity ?? 0.92) : (meta.opacity ?? 0.58)) : 1.0,
-          depthWrite: !isGlass || !!splash,
+          opacity: isLcdSplash
+            ? (meta.opacity ?? 0.92)
+            : (isGlass ? (meta.opacity ?? 0.58) : 1.0),
+          alphaTest: isPrintSplash ? 0.35 : 0,
+          depthWrite: !isGlass || !!splash || isPrintSplash,
+          side: isPrintSplash ? THREE.DoubleSide : THREE.FrontSide,
           vertexColors: false,
           clippingPlanes: [],
         });
