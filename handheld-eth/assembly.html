@@ -158,7 +158,10 @@
     }
     .hint.faded { opacity: 0; }
     body.panel-closed .hint:not(.faded) { opacity: .95; }
+    /* Start hidden: CSS2DRenderer only checks object.visible (not parents), so
+       labels must not paint before JS sets per-object visibility from default_on. */
     .dim-label {
+      display: none;
       color: #1a1408; background: rgba(255,209,102,.92); border: 1px solid rgba(255,209,102,.95);
       border-radius: 6px; padding: 2px 7px; font: 650 12px/1.3 "Segoe UI", system-ui, sans-serif;
       white-space: nowrap; pointer-events: none; user-select: none;
@@ -324,7 +327,7 @@
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front housing + rear housing + hatch. Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "a4eac2f882",
+  "glb_version": "3b33ac87f9",
   "parts": [
     {
       "id": "front",
@@ -366,7 +369,8 @@
         48
       ],
       "transparent": true,
-      "opacity": 0.6
+      "opacity": 0.92,
+      "splash": "lcd_splash_active_esl.png"
     },
     {
       "id": "accents",
@@ -1084,8 +1088,11 @@
       mid.addScaledVector(tick.clone().normalize(), 0.005 * ((staggerIndex % 5) - 2));
       const el = document.createElement('div');
       el.className = 'dim-label';
+      el.style.display = 'none';
       el.textContent = dim.label;
       const label = new CSS2DObject(el);
+      // CSS2DRenderer ignores parent.visible — keep labels off until applyDims.
+      label.visible = false;
       label.position.copy(mid);
       g.add(label);
       dimLabelEntries.push({ label, el, base: mid.clone() });
@@ -1094,8 +1101,10 @@
 
     for (const group of DIM_GROUPS) {
       const wrap = new THREE.Group();
-      wrap.visible = !!document.querySelector(`input[data-dim="${group.id}"]`)?.checked;
+      // Off until applyDims; do not infer "on" from parent Group alone (CSS2D).
+      wrap.visible = false;
       group.dims.forEach((d, i) => wrap.add(makeDim(d, i)));
+      wrap.traverse((o) => { o.visible = false; });
       dimRoot.add(wrap);
       dimByGroup[group.id] = wrap;
     }
@@ -1170,12 +1179,15 @@
         any = any || on;
         const wrap = dimByGroup[group.id];
         if (!wrap) continue;
+        // Set every node (incl. CSS2DObject) — renderer does not walk parents.
         wrap.traverse((o) => { o.visible = on; });
       }
       if (any) document.getElementById('measDetails').open = true;
       refreshDimList();
       writeHash();
     }
+    // Apply default_on (checkbox state) immediately — before GLB load / first paint.
+    applyDims();
     document.getElementById('dimToggles')?.addEventListener('change', applyDims);
     document.getElementById('btnDimsOff')?.addEventListener('click', () => {
       for (const i of document.querySelectorAll('input[data-dim]')) i.checked = false;
@@ -1556,7 +1568,8 @@
       const dimsOn = DIM_GROUPS.map((g) => g.id).filter(
         (id) => document.querySelector(`input[data-dim="${id}"]`)?.checked
       );
-      if (dimsOn.length) q.push(`d=${encodeURIComponent(dimsOn.join(','))}`);
+      // Always emit d= (possibly empty) so "all off" ≠ "use default_on".
+      q.push(`d=${encodeURIComponent(dimsOn.join(','))}`);
       if (FEATURES.outline && document.getElementById('chkEdges')) {
         q.push(document.getElementById('chkEdges').checked ? 'o=1' : 'o=0');
       }
@@ -1601,9 +1614,11 @@
           const el = document.querySelector(`input[data-dim="${g.id}"]`);
           if (el) el.checked = set.has(g.id);
         }
-      } else {
+      } else if ('d' in state) {
+        // Explicit empty d= → all off (deeplink "none").
         for (const i of document.querySelectorAll('input[data-dim]')) i.checked = false;
       }
+      // No d key: leave checkboxes as built from dim_groups[].default (default_on).
       applyDims();
       if (document.getElementById('chkEdges')) {
         // Default is on; only override when the hash explicitly sets o.
@@ -1633,9 +1648,58 @@
       writeHash();
     }
 
+    // Look-mode parity: XY UV over glass bounds + flip_u/flip_v (stl_to_glb_lcd.py).
+    function projectXyUvs(geometry, flipU = true, flipV = true) {
+      geometry.computeBoundingBox();
+      const box = geometry.boundingBox;
+      const pos = geometry.attributes.position;
+      if (!box || !pos) return;
+      const dx = Math.max(box.max.x - box.min.x, 1e-9);
+      const dy = Math.max(box.max.y - box.min.y, 1e-9);
+      const uvs = new Float32Array(pos.count * 2);
+      for (let i = 0; i < pos.count; i++) {
+        let u = (pos.getX(i) - box.min.x) / dx;
+        let v = (pos.getY(i) - box.min.y) / dy;
+        if (flipU) u = 1 - u;
+        if (flipV) v = 1 - v;
+        uvs[i * 2] = u;
+        uvs[i * 2 + 1] = v;
+      }
+      geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+    }
+
     const glbUrl = `${MANIFEST.glb}?v=${MANIFEST.glb_version || 1}`;
+    const splashByPart = {};
+    for (const p of PARTS) {
+      if (p.splash) {
+        splashByPart[p.id] = `${p.splash}?v=${MANIFEST.glb_version || 1}`;
+      }
+    }
+    const texLoader = new THREE.TextureLoader();
+    const splashPromises = Object.fromEntries(
+      Object.entries(splashByPart).map(([id, url]) => [
+        id,
+        texLoader.loadAsync(url).then((tex) => {
+          tex.colorSpace = THREE.SRGBColorSpace;
+          // UV space matches Look (Blender embed); don't re-flip the PNG.
+          tex.flipY = false;
+          tex.wrapS = THREE.ClampToEdgeWrapping;
+          tex.wrapT = THREE.ClampToEdgeWrapping;
+          return tex;
+        }).catch((err) => {
+          console.warn('splash load failed', id, err);
+          return null;
+        }),
+      ])
+    );
+
     const loader = new GLTFLoader();
-    loader.load(glbUrl, (gltf) => {
+    loader.load(glbUrl, async (gltf) => {
+      const splashTex = {};
+      await Promise.all(Object.entries(splashPromises).map(async ([id, prom]) => {
+        splashTex[id] = await prom;
+      }));
+
       const model = gltf.scene;
       model.traverse((o) => {
         if (!o.isMesh) return;
@@ -1653,28 +1717,38 @@
         const meta = PART_META[partId] || {};
         let col = PART_COLOR[partId] || 0x8e9298;
         const isGlass = !!meta.transparent || partId === 'glass';
+        const splash = partId ? splashTex[partId] : null;
         {
           const c = new THREE.Color(col);
           const hsl = { h: 0, s: 0, l: 0 };
           c.getHSL(hsl);
           // Hatch / PCB sit near black; without a floor they read as holes.
           if (!isGlass && hsl.l < 0.30) c.setHSL(hsl.h, Math.min(hsl.s, 0.22), 0.36);
-          if (isGlass) c.offsetHSL(0, 0, 0.06);
+          if (isGlass && !splash) c.offsetHSL(0, 0, 0.06);
           col = c.getHex();
         }
+        if (splash) {
+          projectXyUvs(o.geometry, true, true);
+        }
         o.material = new THREE.MeshStandardMaterial({
-          color: col,
+          color: splash ? 0xffffff : col,
+          map: splash || null,
+          emissive: splash ? 0xffffff : 0x000000,
+          emissiveMap: splash || null,
+          emissiveIntensity: splash ? 1.35 : 0,
           // Matte plastic: higher metalness + RoomEnvironment stamps a hard
           // horizon band onto flat faces as you orbit.
           metalness: isGlass ? 0.04 : 0.12,
-          roughness: isGlass ? 0.2 : 0.62,
-          envMapIntensity: isGlass ? 1.4 : 0.45,
+          roughness: splash ? 0.35 : (isGlass ? 0.2 : 0.62),
+          envMapIntensity: isGlass ? (splash ? 0.55 : 1.4) : 0.45,
           transparent: isGlass,
-          opacity: isGlass ? (meta.opacity ?? 0.58) : 1.0,
+          // Splash needs enough opacity to read; plain glass stays tinted.
+          opacity: isGlass ? (splash ? (meta.opacity ?? 0.92) : (meta.opacity ?? 0.58)) : 1.0,
+          depthWrite: !isGlass || !!splash,
           vertexColors: false,
           clippingPlanes: [],
         });
-        o.userData.baseColor = col;
+        o.userData.baseColor = splash ? 0xffffff : col;
         o.userData.partId = partId;
       });
       const meshes = [];
