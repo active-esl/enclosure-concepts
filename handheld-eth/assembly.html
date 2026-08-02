@@ -1786,8 +1786,9 @@
           col = c.getHex();
         }
         if (splash) {
-          // lcd: flipU=false (Look's flip_u inverted). print badge: keep flipU.
-          projectXyUvs(o.geometry, !isLcdSplash, true);
+          // lcd + print: flipU=false (Look's flip_u inverted for TextureLoader
+          // flipY=false). flipV stays true. Print badge had the same mirror bug.
+          projectXyUvs(o.geometry, false, true);
         }
         o.material = new THREE.MeshStandardMaterial({
           color: splash ? 0xffffff : col,
