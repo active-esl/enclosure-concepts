@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Active-ESL — beauty still</title>
+  <link rel="stylesheet" href="site-nav.css?v=3" />
+  <style>
+    :root {
+      --bg: #0b1220; --panel: rgba(12, 18, 32, 0.88); --text: #f4f7fb;
+      --muted: #a9b4c7; --accent: #3ec6ff;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; min-height: 100%;
+      background: #05080f;
+      color: var(--text);
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
+    .still-bar {
+      position: fixed; z-index: 15;
+      left: 12px; right: 12px;
+      top: calc(10px + var(--site-nav-h, 46px));
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; pointer-events: none;
+    }
+    .still-bar > * { pointer-events: auto; }
+    .still-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .still-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 40px; padding: 8px 16px; border-radius: 999px;
+      font-size: 0.92rem; font-weight: 700; text-decoration: none;
+      border: 1px solid rgba(62,198,255,.55); background: rgba(62,198,255,.2);
+      color: #fff; cursor: pointer;
+      box-shadow: 0 8px 28px rgba(0,0,0,.4);
+    }
+    .still-btn:hover { border-color: rgba(62,198,255,.85); background: rgba(62,198,255,.32); }
+    .still-btn.secondary {
+      background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.2); color: var(--muted);
+    }
+    .still-meta {
+      background: var(--panel); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,.08); border-radius: 12px;
+      padding: 8px 12px; max-width: min(420px, 100%);
+    }
+    .still-meta h1 {
+      margin: 0; font-size: 0.95rem; font-weight: 650;
+    }
+    .still-meta p {
+      margin: 2px 0 0; color: var(--muted); font-size: 0.8rem;
+    }
+    #stillStage {
+      min-height: 100vh;
+      padding: calc(88px + var(--site-nav-h, 46px)) 16px 56px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: zoom-out;
+    }
+    #stillImg {
+      display: block; max-width: min(1200px, 100%);
+      max-height: calc(100vh - var(--site-nav-h, 46px) - 140px);
+      width: auto; height: auto; object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 16px 60px rgba(0,0,0,.55);
+      cursor: default;
+      background: #0a0f18;
+    }
+    #stillError {
+      color: var(--muted); text-align: center; padding: 48px 20px;
+    }
+    .still-hint {
+      position: fixed; z-index: 15; left: 50%; bottom: 14px;
+      transform: translateX(-50%);
+      background: var(--panel); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 999px; padding: 7px 14px; color: var(--muted);
+      font-size: 0.8rem; pointer-events: none; white-space: nowrap;
+    }
+    @media (max-width: 640px) {
+      .still-bar {
+        top: calc(8px + var(--site-nav-h, 84px));
+        flex-direction: column; align-items: stretch;
+      }
+      .still-meta { max-width: 100%; }
+      .still-actions { width: 100%; }
+      .still-btn { flex: 1; min-height: 44px; }
+      #stillStage {
+        padding: calc(150px + var(--site-nav-h, 84px)) 10px 52px;
+      }
+      #stillImg { max-height: calc(100vh - var(--site-nav-h, 84px) - 200px); }
+      .still-hint { font-size: 0.72rem; max-width: calc(100% - 16px); white-space: normal; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <nav id="siteNav" class="site-nav" data-root="./" data-mode="still" aria-label="Concept site"></nav>
+  <script>
+    (() => {
+      const c = (new URLSearchParams(location.search).get("c") || "").toLowerCase();
+      const el = document.getElementById("siteNav");
+      if (el && (c === "slim" || c === "eth")) el.dataset.concept = c;
+    })();
+  </script>
+  <script src="site-nav.js?v=3" defer></script>
+
+  <div class="still-bar">
+    <div class="still-actions">
+      <a class="still-btn" data-still-back href="./">← Back</a>
+      <button type="button" class="still-btn secondary" data-still-back aria-label="Close still">Close</button>
+    </div>
+    <div class="still-meta">
+      <h1 id="stillTitle">Beauty still</h1>
+      <p id="stillCaption">Sales / review render</p>
+    </div>
+  </div>
+
+  <div id="stillStage">
+    <img id="stillImg" alt="" />
+    <p id="stillError" hidden></p>
+  </div>
+  <div class="still-hint">Esc · Back · Close · click frame — return to Look</div>
+
+  <script src="still.js?v=1" defer></script>
+</body>
+</html>

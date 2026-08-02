@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Active-ESL — enclosure concepts</title>
-  <link rel="stylesheet" href="site-nav.css?v=2" />
+  <link rel="stylesheet" href="site-nav.css?v=3" />
   <style>
     :root {
       --bg: #0b1220; --card: #121a2b; --text: #f4f7fb; --muted: #a9b4c7; --accent: #3ec6ff; --warn: #ffcc66;
@@ -36,7 +36,9 @@
       border-radius: 16px; overflow: hidden;
       box-shadow: 0 12px 40px rgba(0,0,0,.35);
     }
+    .card-still { display: block; color: inherit; }
     .card img { display: block; width: 100%; aspect-ratio: 4/3; object-fit: cover; background: #0a0f18; }
+    .card-still:hover img { opacity: 0.92; }
     .card .body { padding: 14px 16px 16px; flex: 1; display: flex; flex-direction: column; }
     .card h2 { margin: 0 0 6px; font-size: 1.1rem; }
     .card p { margin: 0; color: var(--muted); font-size: .92rem; line-height: 1.4; flex: 1; }
@@ -54,7 +56,7 @@
 </head>
 <body>
   <nav id="siteNav" class="site-nav" data-root="./" data-mode="gallery" aria-label="Concept site"></nav>
-  <script src="site-nav.js?v=2" defer></script>
+  <script src="site-nav.js?v=3" defer></script>
   <div class="wrap">
     <div class="badge">Concept gallery</div>
     <h1>Active-ESL enclosure concepts</h1>
@@ -63,28 +65,35 @@
       Use the top bar to move between concepts.
       <strong>Look</strong> is the beauty model — orbit and feel.
       <strong>Inspect</strong> is the assembly explorer — hide parts, explode, section, FEA.
+      <strong>Still</strong> is the sales / review render — Back or Esc returns.
       Not measured production CAD until labelled otherwise.
     </p>
     <div class="grid">
       <div class="card">
-        <img src="handheld/beauty_raytrace_baseline.png" alt="Handheld slim concept still" />
+        <a class="card-still" href="still.html?c=slim" aria-label="Open slim beauty still">
+          <img src="handheld/beauty_raytrace_baseline.png" alt="Handheld slim concept still" />
+        </a>
         <div class="body">
           <h2>Handheld — slim</h2>
           <p>~10″ tablet-class shell, uniform thin edge. Networking via dock / USB‑C / PoE-when-docked.</p>
           <div class="ctas">
             <a href="handheld/">Look →</a>
             <a class="secondary" href="handheld/assembly.html">Inspect →</a>
+            <a class="secondary" href="still.html?c=slim">Still →</a>
           </div>
         </div>
       </div>
       <div class="card">
-        <img src="handheld-eth/beauty_card.png" alt="Handheld eth Apple-language concept still" />
+        <a class="card-still" href="still.html?c=eth" aria-label="Open eth beauty still">
+          <img src="handheld-eth/beauty_card.png" alt="Handheld eth Apple-language concept still" />
+        </a>
         <div class="body">
           <h2>Handheld — eth</h2>
           <p>Apple-language reveal body for onboard RJ45 + USB‑C. Thin visible edge; honest stack underneath.</p>
           <div class="ctas">
             <a href="handheld-eth/">Look →</a>
             <a class="secondary" href="handheld-eth/assembly.html">Inspect →</a>
+            <a class="secondary" href="still.html?c=eth">Still →</a>
           </div>
         </div>
       </div>

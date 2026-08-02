@@ -7,15 +7,33 @@
   const mode = el.dataset.mode || "gallery";
 
   const concepts = [
-    { id: "slim", label: "Slim", look: `${root}handheld/`, inspect: `${root}handheld/assembly.html` },
-    { id: "eth", label: "Eth", look: `${root}handheld-eth/`, inspect: `${root}handheld-eth/assembly.html` },
+    {
+      id: "slim",
+      label: "Slim",
+      look: `${root}handheld/`,
+      inspect: `${root}handheld/assembly.html`,
+      still: `${root}still.html?c=slim`,
+    },
+    {
+      id: "eth",
+      label: "Eth",
+      look: `${root}handheld-eth/`,
+      inspect: `${root}handheld-eth/assembly.html`,
+      still: `${root}still.html?c=eth`,
+    },
   ];
 
-  const conceptHref = (c) => (mode === "inspect" ? c.inspect : c.look);
+  const conceptHref = (c) => {
+    if (mode === "inspect") return c.inspect;
+    if (mode === "still") return c.still;
+    return c.look;
+  };
   const modeHref = (m) => {
     const cur = concepts.find((c) => c.id === concept);
     if (!cur) return `${root}`;
-    return m === "inspect" ? cur.inspect : cur.look;
+    if (m === "inspect") return cur.inspect;
+    if (m === "still") return cur.still;
+    return cur.look;
   };
 
   const pill = (href, label, current) =>
@@ -32,6 +50,8 @@
         pill(modeHref("look"), "Look", mode === "look")
       }${
         pill(modeHref("inspect"), "Inspect", mode === "inspect")
+      }${
+        pill(modeHref("still"), "Still", mode === "still")
       }</div>`
     : "";
 
