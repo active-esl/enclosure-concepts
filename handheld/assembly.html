@@ -327,7 +327,7 @@
   "title": "Handheld slim \u2014 PLACEHOLDER",
   "blurb": "Thin ~7.6 mm slab \u00b7 front housing + rear housing \u00b7 no onboard RJ45 (dock / USB-C / PoE-when-docked). Irregular 2Db PCB ghost \u00b7 rear-service (VESA / \u00bc-20 / RF / wordmark). Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "7d72d56d7a",
+  "glb_version": "6d34dce5b1",
   "parts": [
     {
       "id": "front",
@@ -362,6 +362,18 @@
       "opacity": 0.92,
       "splash": "lcd_splash_active_esl.png",
       "splash_style": "lcd"
+    },
+    {
+      "id": "uv_badge",
+      "label": "UV badge (brand-full swatch)",
+      "visible": true,
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "splash": "active-esl-uv-badge-28x10-brand-full-600dpi.png",
+      "splash_style": "print"
     },
     {
       "id": "accents",
@@ -505,6 +517,41 @@
       ]
     },
     {
+      "id": "uv_badge",
+      "label": "Uv_badge",
+      "default": false,
+      "dims": [
+        {
+          "label": "uv_badge W 28.0 mm",
+          "mm": 28.0,
+          "a": [
+            0.024,
+            0.158,
+            0.007400000095367432
+          ],
+          "b": [
+            0.052000000000000005,
+            0.158,
+            0.007400000095367432
+          ]
+        },
+        {
+          "label": "uv_badge H 10.0 mm",
+          "mm": 10.0,
+          "a": [
+            0.06,
+            0.14,
+            0.007400000095367432
+          ],
+          "b": [
+            0.06,
+            0.15,
+            0.007400000095367432
+          ]
+        }
+      ]
+    },
+    {
       "id": "accents",
       "label": "Accents",
       "default": false,
@@ -610,6 +657,7 @@
     ],
     "explode_offsets_mm": {
       "glass": 40,
+      "uv_badge": 38,
       "accents": 35,
       "front": 22,
       "pcb": 14,
@@ -1573,19 +1621,25 @@
         }
         const meta = PART_META[partId] || {};
         let col = PART_COLOR[partId] || 0x8e9298;
-        const isGlass = !!meta.transparent || partId === 'glass';
+        const isGhost = !!meta.ghost;
         const splash = partId ? splashTex[partId] : null;
         // lcd = emissive glass art; print = matte UV/film decal (alpha corners).
+        // Transparent shells / PCB ghost keep plastic shading — only the LCD
+        // stack uses glass (Alex 2026-08-02 PCB-through-shell).
         const splashStyle = meta.splash_style
-          || (isGlass ? 'lcd' : (splash ? 'print' : null));
+          || (partId === 'glass' ? 'lcd' : (splash ? 'print' : null));
         const isPrintSplash = !!splash && splashStyle === 'print';
         const isLcdSplash = !!splash && !isPrintSplash;
+        const isGlass = !isGhost && (partId === 'glass' || isLcdSplash);
+        const isAlpha = isGhost || isGlass || isPrintSplash || !!meta.transparent
+          || (typeof meta.opacity === 'number' && meta.opacity < 1);
         {
           const c = new THREE.Color(col);
           const hsl = { h: 0, s: 0, l: 0 };
           c.getHSL(hsl);
-          // Hatch / PCB sit near black; without a floor they read as holes.
-          if (!isGlass && !isPrintSplash && hsl.l < 0.30) {
+          // Hatch / dark plastics sit near black; without a floor they read as holes.
+          // Keep ghost PCB green unsaturated-lift off (ghost wants FR4 read).
+          if (!isGlass && !isGhost && !isPrintSplash && hsl.l < 0.30) {
             c.setHSL(hsl.h, Math.min(hsl.s, 0.22), 0.36);
           }
           if (isGlass && !splash) c.offsetHSL(0, 0, 0.06);
@@ -1607,17 +1661,20 @@
           metalness: isGlass ? 0.04 : (isPrintSplash ? 0.06 : 0.12),
           roughness: isLcdSplash ? 0.35 : (isPrintSplash ? 0.55 : (isGlass ? 0.2 : 0.62)),
           envMapIntensity: isGlass ? (splash ? 0.55 : 1.4) : (isPrintSplash ? 0.35 : 0.45),
-          transparent: isGlass || isPrintSplash,
-          // Splash needs enough opacity to read; plain glass stays tinted.
+          transparent: isAlpha,
+          // Splash needs enough opacity to read; ghost PCB / shells use YAML.
           opacity: isLcdSplash
             ? (meta.opacity ?? 0.92)
-            : (isGlass ? (meta.opacity ?? 0.58) : 1.0),
+            : (isGhost ? (meta.opacity ?? 0.55)
+              : (isAlpha ? (meta.opacity ?? 0.55) : 1.0)),
           alphaTest: isPrintSplash ? 0.35 : 0,
-          depthWrite: !isGlass || !!splash || isPrintSplash,
-          side: isPrintSplash ? THREE.DoubleSide : THREE.FrontSide,
+          // Ghost / see-through shells: no depth write so PCB composites inside.
+          depthWrite: isLcdSplash || isPrintSplash ? true : !isAlpha,
+          side: (isPrintSplash || isGhost) ? THREE.DoubleSide : THREE.FrontSide,
           vertexColors: false,
           clippingPlanes: [],
         });
+        if (isGhost) o.renderOrder = 2;
         o.userData.baseColor = splash ? 0xffffff : col;
         o.userData.partId = partId;
       });
