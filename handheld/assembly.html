@@ -327,7 +327,7 @@
   "title": "Handheld slim \u2014 PLACEHOLDER",
   "blurb": "Thin ~7.6 mm slab \u00b7 front housing + rear housing \u00b7 no onboard RJ45 (dock / USB-C / PoE-when-docked). Irregular 2Db PCB ghost \u00b7 rear-service (VESA / \u00bc-20 / RF / wordmark). Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "0fbab2bdf1",
+  "glb_version": "7d72d56d7a",
   "parts": [
     {
       "id": "front",
@@ -359,7 +359,9 @@
         48
       ],
       "transparent": true,
-      "opacity": 0.6
+      "opacity": 0.92,
+      "splash": "lcd_splash_active_esl.png",
+      "splash_style": "lcd"
     },
     {
       "id": "accents",
@@ -389,30 +391,30 @@
       "default": false,
       "dims": [
         {
-          "label": "W 222.9 mm",
-          "mm": 222.9,
+          "label": "W 224.9 mm",
+          "mm": 224.9,
           "a": [
             -0.00045000000000000004,
-            0.158,
+            0.159,
             0.005200000000000001
           ],
           "b": [
-            0.22244999999999998,
-            0.158,
+            0.22444999999999998,
+            0.159,
             0.005200000000000001
           ]
         },
         {
-          "label": "H 150.0 mm",
-          "mm": 150.0,
+          "label": "H 151.0 mm",
+          "mm": 151.0,
           "a": [
-            0.23045,
+            0.23245,
             0.0,
             0.005200000000000001
           ],
           "b": [
-            0.23045,
-            0.15,
+            0.23245,
+            0.151,
             0.005200000000000001
           ]
         },
@@ -420,13 +422,13 @@
           "label": "D 5.2 mm",
           "mm": 5.2,
           "a": [
-            0.23045,
-            0.15,
+            0.23245,
+            0.151,
             0.0
           ],
           "b": [
-            0.23045,
-            0.15,
+            0.23245,
+            0.151,
             0.005200000000000001
           ]
         }
@@ -438,30 +440,30 @@
       "default": false,
       "dims": [
         {
-          "label": "front W 222.0 mm",
-          "mm": 222.0,
+          "label": "front W 224.0 mm",
+          "mm": 224.0,
           "a": [
             0.0,
-            0.158,
+            0.159,
             0.0076
           ],
           "b": [
-            0.222,
-            0.158,
+            0.224,
+            0.159,
             0.0076
           ]
         },
         {
-          "label": "front H 150.0 mm",
-          "mm": 150.0,
+          "label": "front H 151.0 mm",
+          "mm": 151.0,
           "a": [
-            0.23,
+            0.232,
             0.0,
             0.0076
           ],
           "b": [
-            0.23,
-            0.15,
+            0.232,
+            0.151,
             0.0076
           ]
         }
@@ -476,13 +478,13 @@
           "label": "glass W 216.0 mm",
           "mm": 216.0,
           "a": [
-            0.003,
-            0.146,
+            0.004,
+            0.147,
             0.00755
           ],
           "b": [
-            0.219,
-            0.146,
+            0.22,
+            0.147,
             0.00755
           ]
         },
@@ -490,13 +492,13 @@
           "label": "glass H 135.0 mm",
           "mm": 135.0,
           "a": [
-            0.227,
-            0.003,
+            0.228,
+            0.004,
             0.00755
           ],
           "b": [
-            0.227,
-            0.138,
+            0.228,
+            0.139,
             0.00755
           ]
         }
@@ -511,13 +513,13 @@
           "label": "accents W 28.0 mm",
           "mm": 28.0,
           "a": [
-            0.097,
-            0.15515,
+            0.098,
+            0.15615,
             0.00764
           ],
           "b": [
-            0.125,
-            0.15515,
+            0.126,
+            0.15615,
             0.00764
           ]
         },
@@ -525,13 +527,13 @@
           "label": "accents H 139.7 mm",
           "mm": 139.65,
           "a": [
-            0.133,
-            0.0075,
+            0.134,
+            0.0085,
             0.00764
           ],
           "b": [
-            0.133,
-            0.14715,
+            0.134,
+            0.14815,
             0.00764
           ]
         }
@@ -546,28 +548,28 @@
           "label": "pcb W 146.0 mm",
           "mm": 145.99,
           "a": [
-            0.038005000000000004,
-            0.13215000000000002,
-            0.003
+            0.039005000000000005,
+            0.13265000000000002,
+            0.004900000000000001
           ],
           "b": [
-            0.18399700000000002,
-            0.13215000000000002,
-            0.003
+            0.18499700000000002,
+            0.13265000000000002,
+            0.004900000000000001
           ]
         },
         {
           "label": "pcb H 98.3 mm",
           "mm": 98.3,
           "a": [
-            0.19199700000000003,
-            0.02585,
-            0.003
+            0.19299700000000003,
+            0.026350000000000002,
+            0.004900000000000001
           ],
           "b": [
-            0.19199700000000003,
-            0.12415000000000001,
-            0.003
+            0.19299700000000003,
+            0.12465000000000001,
+            0.004900000000000001
           ]
         }
       ]
@@ -1500,7 +1502,10 @@
       writeHash();
     }
 
-    // Look-mode parity: XY UV over glass bounds + flip_u/flip_v (stl_to_glb_lcd.py).
+    // XY UV over bounds (same projection as stl_to_glb_lcd.py).
+    // GOTCHA: Look vs Inspect flip flags may differ (TextureLoader flipY=false).
+    // SoT = readable text on device front — see design-share-3d reference.md
+    // § Texture orientation; update that table after any flip change + PNG proof.
     function projectXyUvs(geometry, flipU = true, flipV = true) {
       geometry.computeBoundingBox();
       const box = geometry.boundingBox;
@@ -1570,33 +1575,46 @@
         let col = PART_COLOR[partId] || 0x8e9298;
         const isGlass = !!meta.transparent || partId === 'glass';
         const splash = partId ? splashTex[partId] : null;
+        // lcd = emissive glass art; print = matte UV/film decal (alpha corners).
+        const splashStyle = meta.splash_style
+          || (isGlass ? 'lcd' : (splash ? 'print' : null));
+        const isPrintSplash = !!splash && splashStyle === 'print';
+        const isLcdSplash = !!splash && !isPrintSplash;
         {
           const c = new THREE.Color(col);
           const hsl = { h: 0, s: 0, l: 0 };
           c.getHSL(hsl);
           // Hatch / PCB sit near black; without a floor they read as holes.
-          if (!isGlass && hsl.l < 0.30) c.setHSL(hsl.h, Math.min(hsl.s, 0.22), 0.36);
+          if (!isGlass && !isPrintSplash && hsl.l < 0.30) {
+            c.setHSL(hsl.h, Math.min(hsl.s, 0.22), 0.36);
+          }
           if (isGlass && !splash) c.offsetHSL(0, 0, 0.06);
           col = c.getHex();
         }
         if (splash) {
-          projectXyUvs(o.geometry, false, true); // lcd: invert Look flip_u
+          // lcd + print: flipU=false (Look's flip_u inverted for TextureLoader
+          // flipY=false). flipV stays true. Print badge had the same mirror bug.
+          projectXyUvs(o.geometry, false, true);
         }
         o.material = new THREE.MeshStandardMaterial({
           color: splash ? 0xffffff : col,
           map: splash || null,
-          emissive: splash ? 0xffffff : 0x000000,
-          emissiveMap: splash || null,
-          emissiveIntensity: splash ? 1.35 : 0,
+          emissive: isLcdSplash ? 0xffffff : 0x000000,
+          emissiveMap: isLcdSplash ? splash : null,
+          emissiveIntensity: isLcdSplash ? 1.35 : 0,
           // Matte plastic: higher metalness + RoomEnvironment stamps a hard
           // horizon band onto flat faces as you orbit.
-          metalness: isGlass ? 0.04 : 0.12,
-          roughness: splash ? 0.35 : (isGlass ? 0.2 : 0.62),
-          envMapIntensity: isGlass ? (splash ? 0.55 : 1.4) : 0.45,
-          transparent: isGlass,
+          metalness: isGlass ? 0.04 : (isPrintSplash ? 0.06 : 0.12),
+          roughness: isLcdSplash ? 0.35 : (isPrintSplash ? 0.55 : (isGlass ? 0.2 : 0.62)),
+          envMapIntensity: isGlass ? (splash ? 0.55 : 1.4) : (isPrintSplash ? 0.35 : 0.45),
+          transparent: isGlass || isPrintSplash,
           // Splash needs enough opacity to read; plain glass stays tinted.
-          opacity: isGlass ? (splash ? (meta.opacity ?? 0.92) : (meta.opacity ?? 0.58)) : 1.0,
-          depthWrite: !isGlass || !!splash,
+          opacity: isLcdSplash
+            ? (meta.opacity ?? 0.92)
+            : (isGlass ? (meta.opacity ?? 0.58) : 1.0),
+          alphaTest: isPrintSplash ? 0.35 : 0,
+          depthWrite: !isGlass || !!splash || isPrintSplash,
+          side: isPrintSplash ? THREE.DoubleSide : THREE.FrontSide,
           vertexColors: false,
           clippingPlanes: [],
         });
