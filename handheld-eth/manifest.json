@@ -53,7 +53,9 @@
       "transparent": true,
       "opacity": 0.92,
       "splash": "lcd_splash_active_esl.png",
-      "splash_style": "lcd"
+      "splash_style": "lcd",
+      "splash_flip_u": false,
+      "splash_flip_v": true
     },
     {
       "id": "uv_badge",
@@ -65,7 +67,9 @@
         255
       ],
       "splash": "active-esl-uv-badge-28x10-brand-full-600dpi.png",
-      "splash_style": "print"
+      "splash_style": "print",
+      "splash_flip_u": false,
+      "splash_flip_v": true
     },
     {
       "id": "accents",
@@ -408,21 +412,21 @@
           "mm": 155.99,
           "a": [
             0.045004999999999996,
-            0.03463,
+            0.022350000000000002,
             0.0
           ],
           "b": [
             0.200995,
-            0.03463,
+            0.022350000000000002,
             0.0
           ]
         },
         {
-          "label": "pad H 96.0 mm",
-          "mm": 96.02,
+          "label": "pad H 108.3 mm",
+          "mm": 108.3,
           "a": [
             0.037004999999999996,
-            0.04263,
+            0.030350000000000002,
             0.0
           ],
           "b": [

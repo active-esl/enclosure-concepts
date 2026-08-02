@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260802T200816Z-fbda1719ab" />
+  <meta name="aesl-build" content="20260802T202318Z-fbda1719ab" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -472,7 +472,9 @@
       "transparent": true,
       "opacity": 0.92,
       "splash": "lcd_splash_active_esl.png",
-      "splash_style": "lcd"
+      "splash_style": "lcd",
+      "splash_flip_u": false,
+      "splash_flip_v": true
     },
     {
       "id": "uv_badge",
@@ -484,7 +486,9 @@
         255
       ],
       "splash": "active-esl-uv-badge-28x10-brand-full-600dpi.png",
-      "splash_style": "print"
+      "splash_style": "print",
+      "splash_flip_u": false,
+      "splash_flip_v": true
     },
     {
       "id": "accents",
@@ -827,21 +831,21 @@
           "mm": 155.99,
           "a": [
             0.045004999999999996,
-            0.03463,
+            0.022350000000000002,
             0.0
           ],
           "b": [
             0.200995,
-            0.03463,
+            0.022350000000000002,
             0.0
           ]
         },
         {
-          "label": "pad H 96.0 mm",
-          "mm": 96.02,
+          "label": "pad H 108.3 mm",
+          "mm": 108.3,
           "a": [
             0.037004999999999996,
-            0.04263,
+            0.030350000000000002,
             0.0
           ],
           "b": [
@@ -2009,10 +2013,12 @@
           col = c.getHex();
         }
         if (splash) {
-          // lcd + print Inspect: flipU=false, flipV=true (TextureLoader
-          // flipY=false). Look bake is flip_u=True, flip_v=False — different
-          // pipeline; never copy booleans. PNG-proof product-front readable.
-          projectXyUvs(o.geometry, false, true);
+          // Inspect flips from YAML part meta (splash_flip_u / splash_flip_v).
+          // Look bake may differ — never blind-copy. TextureLoader flipY=false.
+          // SoT: product-front readable; gate: readable_marks_check.py + PNG.
+          const flipU = meta.splash_flip_u === true;
+          const flipV = meta.splash_flip_v !== false; // default true (historical)
+          projectXyUvs(o.geometry, flipU, flipV);
         }
         o.material = new THREE.MeshStandardMaterial({
           color: splash ? 0xffffff : col,
