@@ -3,7 +3,7 @@
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front housing + rear housing + hatch. Ghost internals (V3Room populated board) through shell by default. Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "5475f4138a",
+  "glb_version": "9370eee042",
   "parts": [
     {
       "id": "front",
@@ -89,6 +89,17 @@
       "ghost": true,
       "transparent": true,
       "opacity": 0.7
+    },
+    {
+      "id": "poe",
+      "label": "PoE transformer (RED)",
+      "visible": true,
+      "color": [
+        220,
+        30,
+        30
+      ],
+      "opacity": 1.0
     }
   ],
   "dim_groups": [
@@ -347,6 +358,41 @@
             0.2039969024658203,
             0.13364999389648438,
             0.0032997703552246093
+          ]
+        }
+      ]
+    },
+    {
+      "id": "poe",
+      "label": "Poe",
+      "default": false,
+      "dims": [
+        {
+          "label": "poe W 15.3 mm",
+          "mm": 15.3,
+          "a": [
+            0.12393206787109375,
+            0.09642098999023438,
+            -0.006779000282287598
+          ],
+          "b": [
+            0.13923207092285156,
+            0.09642098999023438,
+            -0.006779000282287598
+          ]
+        },
+        {
+          "label": "poe H 7.5 mm",
+          "mm": 7.55,
+          "a": [
+            0.14723207092285157,
+            0.0808709945678711,
+            -0.006779000282287598
+          ],
+          "b": [
+            0.14723207092285157,
+            0.08842098999023437,
+            -0.006779000282287598
           ]
         }
       ]
