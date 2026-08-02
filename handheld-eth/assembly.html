@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260802T221650Z-94b7252b58" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
   <title>Handheld eth — PLACEHOLDER</title>
   <!-- Critical: paint dark before site-nav.css / body CSS — kills FOUC white flash -->
   <style>html,body{background-color:#0b1220;color-scheme:dark}</style>
-  <link rel="stylesheet" href="../site-nav.css?v=6d880fe881" />
+  <link rel="stylesheet" href="../site-nav.css?v=3" />
   <style>
     :root {
       color-scheme: dark;
@@ -281,7 +280,7 @@
 </head>
 <body class="panel-open" style="background-color:#0b1220;margin:0">
   <nav id="siteNav" class="site-nav" data-root="../" data-concept="eth" data-mode="inspect" aria-label="Concept site"></nav>
-  <script src="../site-nav.js?v=b30e3047b9" defer></script>
+  <script src="../site-nav.js?v=3" defer></script>
   <canvas id="c"></canvas>
   <button type="button" id="btnPanel" aria-controls="hud" aria-expanded="true">Controls</button>
   <div id="camStack" role="toolbar" aria-label="Camera controls">
@@ -421,8 +420,8 @@
   "id": "eth",
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front housing + rear housing + hatch. Ghost internals (V3Room populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
-  "glb": "assembly.glb",
-  "glb_version": "4f17ce9676",
+  "glb": "eth-assembly.glb",
+  "glb_version": "2aa23ee21b",
   "parts": [
     {
       "id": "front",
@@ -617,15 +616,15 @@
       "default": false,
       "dims": [
         {
-          "label": "hatch W 60.3 mm",
+          "label": "hatch W 60.2 mm",
           "mm": 60.25,
           "a": [
-            0.08846,
+            0.092875,
             0.08983000000000001,
             -0.013734999999999999
           ],
           "b": [
-            0.14871,
+            0.153125,
             0.08983000000000001,
             -0.013734999999999999
           ]
@@ -634,12 +633,12 @@
           "label": "hatch H 26.0 mm",
           "mm": 26.0,
           "a": [
-            0.15671000000000002,
+            0.161125,
             0.05583,
             -0.013734999999999999
           ],
           "b": [
-            0.15671000000000002,
+            0.161125,
             0.08183,
             -0.013734999999999999
           ]
@@ -2652,6 +2651,5 @@
       labelRenderer.render(scene, camera);
     })();
   </script>
-<script src="../pages-update.js?v=e0b693ae57" defer></script>
 </body>
 </html>
