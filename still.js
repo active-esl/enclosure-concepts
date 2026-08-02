@@ -1,6 +1,6 @@
 (() => {
   /**
-   * Beauty-still viewer: Esc / Back / Close return to Look (or history.back).
+   * Beauty-still viewer: Esc / Back / click frame return to Look (or history.back).
    * Query: ?c=slim|eth
    */
   const STILLS = {

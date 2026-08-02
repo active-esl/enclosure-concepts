@@ -35,9 +35,6 @@
       box-shadow: 0 8px 28px rgba(0,0,0,.4);
     }
     .still-btn:hover { border-color: rgba(62,198,255,.85); background: rgba(62,198,255,.32); }
-    .still-btn.secondary {
-      background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.2); color: var(--muted);
-    }
     .still-meta {
       background: var(--panel); backdrop-filter: blur(10px);
       border: 1px solid rgba(255,255,255,.08); border-radius: 12px;
@@ -104,7 +101,6 @@
   <div class="still-bar">
     <div class="still-actions">
       <a class="still-btn" data-still-back href="./">← Back</a>
-      <button type="button" class="still-btn secondary" data-still-back aria-label="Close still">Close</button>
     </div>
     <div class="still-meta">
       <h1 id="stillTitle">Beauty still</h1>
@@ -116,8 +112,8 @@
     <img id="stillImg" alt="" />
     <p id="stillError" hidden></p>
   </div>
-  <div class="still-hint">Esc · Back · Close · click frame — return to Look</div>
+  <div class="still-hint">Esc · Back · click frame — return to Look</div>
 
-  <script src="still.js?v=1" defer></script>
+  <script src="still.js?v=2" defer></script>
 </body>
 </html>
