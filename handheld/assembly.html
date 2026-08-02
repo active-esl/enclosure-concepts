@@ -1580,7 +1580,7 @@
           col = c.getHex();
         }
         if (splash) {
-          projectXyUvs(o.geometry, true, true);
+          projectXyUvs(o.geometry, false, true); // lcd: invert Look flip_u
         }
         o.material = new THREE.MeshStandardMaterial({
           color: splash ? 0xffffff : col,
