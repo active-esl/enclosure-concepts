@@ -7,9 +7,11 @@
   <link rel="stylesheet" href="../site-nav.css?v=3" />
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
   <script src="../look-viewer.js?v=1" defer></script>
+  <script src="../look.js?v=1" defer></script>
   <style>
     :root {
-      --bg: #0b1220; --panel: rgba(12, 18, 32, 0.78); --text: #f4f7fb; --muted: #a9b4c7; --accent: #3ec6ff; --warn: #ffcc66;
+      --bg: #0b1220; --panel: rgba(12, 18, 32, 0.88); --text: #f4f7fb;
+      --muted: #a9b4c7; --accent: #3ec6ff; --warn: #ffcc66;
     }
     * { box-sizing: border-box; }
     html, body {
@@ -22,76 +24,68 @@
       width: 100%; height: 100%; background: transparent;
       touch-action: pan-y;
     }
-    .hud {
-      position: fixed; z-index: 2; left: 16px; right: 16px;
-      top: calc(16px + var(--site-nav-h, 46px));
-      display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between;
-      pointer-events: none;
+    .look-bar {
+      position: fixed; z-index: 15;
+      left: 12px; right: 12px;
+      top: calc(10px + var(--site-nav-h, 46px));
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; pointer-events: none;
     }
-    .card {
-      pointer-events: auto; background: var(--panel); backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,.08); border-radius: 14px;
-      padding: 14px 16px; max-width: min(520px, 100%);
-      box-shadow: 0 10px 40px rgba(0,0,0,.35);
+    .look-bar > * { pointer-events: auto; }
+    .look-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .look-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 40px; padding: 8px 16px; border-radius: 999px;
+      font-size: 0.92rem; font-weight: 700; text-decoration: none;
+      border: 1px solid rgba(62,198,255,.55); background: rgba(62,198,255,.2);
+      color: #fff; cursor: pointer;
+      box-shadow: 0 8px 28px rgba(0,0,0,.4);
     }
-    .badge {
-      display: inline-block; margin-bottom: 8px; padding: 3px 8px; border-radius: 999px;
-      background: rgba(255,204,102,.15); color: var(--warn);
-      font-size: .75rem; font-weight: 650; letter-spacing: .04em; text-transform: uppercase;
+    .look-btn:hover { border-color: rgba(62,198,255,.85); background: rgba(62,198,255,.32); }
+    .look-meta {
+      background: var(--panel); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,.08); border-radius: 12px;
+      padding: 8px 12px; max-width: min(420px, 100%);
     }
-    h1 { margin: 0 0 6px; font-size: 1.15rem; font-weight: 650; }
-    p { margin: 0; color: var(--muted); font-size: .92rem; line-height: 1.45; }
-    a { color: var(--accent); }
-    .mode-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-    .mode-row a {
-      display: inline-flex; align-items: center; min-height: 34px; padding: 6px 12px;
-      border-radius: 999px; font-size: .85rem; font-weight: 650; text-decoration: none;
-      border: 1px solid rgba(62,198,255,.35); background: rgba(62,198,255,.12);
+    .look-meta h1 {
+      margin: 0; font-size: 0.95rem; font-weight: 650;
     }
-    .mode-row a.secondary {
-      background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.14); color: var(--muted);
+    .look-meta p {
+      margin: 2px 0 0; color: var(--muted); font-size: 0.8rem;
     }
-    .hint {
-      position: fixed; z-index: 2; left: 50%; bottom: 18px; transform: translateX(-50%);
+    .look-hint {
+      position: fixed; z-index: 15; left: 50%; bottom: 14px;
+      transform: translateX(-50%);
       background: var(--panel); border: 1px solid rgba(255,255,255,.08);
-      border-radius: 999px; padding: 8px 14px; color: var(--muted); font-size: .85rem;
-      pointer-events: none;
+      border-radius: 999px; padding: 7px 14px; color: var(--muted);
+      font-size: 0.8rem; pointer-events: none; white-space: nowrap;
     }
     @media (max-width: 640px) {
-      .hud { left: 10px; right: 10px; top: calc(10px + var(--site-nav-h, 84px)); }
-      .card { padding: 10px 12px; max-width: 100%; }
-      h1 { font-size: 1rem; }
-      p.blurb {
-        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-        overflow: hidden; font-size: .82rem;
+      .look-bar {
+        top: calc(8px + var(--site-nav-h, 84px));
+        flex-direction: column; align-items: stretch;
       }
-      p.blurb.expanded { display: block; -webkit-line-clamp: unset; overflow: visible; }
-      .blurb-more {
-        display: inline-block; margin-top: 4px; background: none; border: none;
-        color: var(--accent); font-size: .8rem; font-weight: 650; padding: 0; cursor: pointer;
+      .look-meta { max-width: 100%; }
+      .look-actions { width: 100%; }
+      .look-btn { flex: 1; min-height: 44px; }
+      .look-hint {
+        font-size: 0.72rem; max-width: calc(100% - 16px);
+        white-space: normal; text-align: center;
       }
-      .hint { font-size: .75rem; bottom: 12px; max-width: calc(100% - 20px); text-align: center; }
-    }
-    @media (min-width: 641px) {
-      .blurb-more { display: none; }
     }
   </style>
 </head>
-<body>
+<body data-look-gallery="../">
   <nav id="siteNav" class="site-nav" data-root="../" data-concept="eth" data-mode="look" aria-label="Concept site"></nav>
   <script src="../site-nav.js?v=3" defer></script>
-  <div class="hud">
-    <div class="card">
-      <div class="badge">Placeholder · eth · Look</div>
-      <h1>Handheld — eth (onboard RJ45)</h1>
-      <p class="blurb" id="lookBlurb">
-        Stepped rear · front / rear / hatch · irregular 2Db PCB.
-        Beauty look — use the top bar for Inspect, Slim, Still, or Gallery.
-      </p>
-      <button type="button" class="blurb-more" id="lookBlurbMore">More</button>
-      <div class="mode-row">
-        <a class="secondary" href="../still.html?c=eth">Still</a>
-      </div>
+
+  <div class="look-bar">
+    <div class="look-actions">
+      <a class="look-btn" data-look-back href="../">← Back</a>
+    </div>
+    <div class="look-meta">
+      <h1>Handheld eth — beauty look</h1>
+      <p>PLACEHOLDER · eth · onboard RJ45</p>
     </div>
   </div>
 
@@ -109,17 +103,6 @@
     interaction-prompt="auto"
   ></model-viewer>
 
-  <div class="hint">Look · drag to rotate · pinch or Ctrl+scroll zoom · Inspect for teardown</div>
-  <script>
-    (() => {
-      const blurb = document.getElementById('lookBlurb');
-      const btn = document.getElementById('lookBlurbMore');
-      if (!blurb || !btn) return;
-      btn.addEventListener('click', () => {
-        const open = blurb.classList.toggle('expanded');
-        btn.textContent = open ? 'Less' : 'More';
-      });
-    })();
-  </script>
+  <div class="look-hint">Esc · Back · drag to orbit · Ctrl+scroll zoom</div>
 </body>
 </html>
