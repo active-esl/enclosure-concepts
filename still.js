@@ -12,11 +12,11 @@
       caption: "Cycles baseline · PLACEHOLDER · slim",
     },
     eth: {
-      src: "handheld-eth/beauty_card.png",
+      src: "handheld-eth/beauty_raytrace.png",
       look: "handheld-eth/",
       inspect: "handheld-eth/assembly.html",
       title: "Handheld eth — beauty still",
-      caption: "EEVEE card · PLACEHOLDER · eth",
+      caption: "Cycles · PLACEHOLDER · eth",
     },
   };
 
