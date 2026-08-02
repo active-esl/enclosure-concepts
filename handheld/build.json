@@ -1,11 +1,11 @@
 {
-  "id": "20260802T145818Z-cdd48508b0",
-  "built_at": "2026-08-02T14:58:18Z",
+  "id": "20260802T212358Z-88756aaa10",
+  "built_at": "2026-08-02T21:23:58Z",
   "concept": "handheld",
   "assets": {
     "handheld.glb": "93c7dbaa60",
-    "assembly.glb": "3221263f03",
-    "lcd_splash_active_esl.png": "27f5e8cad0",
+    "assembly.glb": "5a532aa784",
+    "lcd_splash_active_esl.png": "8b5800ed92",
     "active-esl-uv-badge-28x10-brand-full-600dpi.png": "bd3627da5a",
     "site-nav.css": "6d880fe881",
     "site-nav.js": "b30e3047b9",

@@ -1,9 +1,9 @@
 {
   "id": "slim",
   "title": "Handheld slim \u2014 PLACEHOLDER",
-  "blurb": "Thin ~7.6 mm slab \u00b7 front housing + rear housing \u00b7 no onboard RJ45 (dock / USB-C / PoE-when-docked). Ghost internals (2Db PCB) through shell by default \u00b7 rear-service (VESA / \u00bc-20 / RF / wordmark). Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
+  "blurb": "Thin ~7.6 mm slab \u00b7 front housing + rear housing \u00b7 no onboard RJ45 (dock / USB-C / PoE-when-docked). Ghost internals (V3Room populated board) through shell by default \u00b7 rear-service (VESA / \u00bc-20 / RF / wordmark). Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "3221263f03",
+  "glb_version": "5a532aa784",
   "parts": [
     {
       "id": "front",
@@ -31,7 +31,7 @@
     },
     {
       "id": "glass",
-      "label": "LCD glass",
+      "label": "Display (ST1010 LENS+stack)",
       "visible": true,
       "color": [
         28,
@@ -41,7 +41,9 @@
       "transparent": true,
       "opacity": 0.92,
       "splash": "lcd_splash_active_esl.png",
-      "splash_style": "lcd"
+      "splash_style": "lcd",
+      "splash_flip_u": false,
+      "splash_flip_v": true
     },
     {
       "id": "uv_badge",
@@ -53,7 +55,9 @@
         255
       ],
       "splash": "active-esl-uv-badge-28x10-brand-full-600dpi.png",
-      "splash_style": "print"
+      "splash_style": "print",
+      "splash_flip_u": false,
+      "splash_flip_v": true
     },
     {
       "id": "accents",
@@ -67,7 +71,7 @@
     },
     {
       "id": "pcb",
-      "label": "PCB ghost (2Db outline)",
+      "label": "PCB (V3Room light)",
       "visible": true,
       "color": [
         28,
@@ -77,6 +81,18 @@
       "ghost": true,
       "transparent": true,
       "opacity": 0.7
+    },
+    {
+      "id": "poe",
+      "label": "PoE transformer",
+      "visible": true,
+      "color": [
+        200,
+        72,
+        56
+      ],
+      "highlight": true,
+      "opacity": 1.0
     }
   ],
   "dim_groups": [
@@ -86,30 +102,30 @@
       "default": false,
       "dims": [
         {
-          "label": "W 224.9 mm",
-          "mm": 224.9,
+          "label": "W 246.9 mm",
+          "mm": 246.9,
           "a": [
             -0.00045000000000000004,
-            0.159,
+            0.177,
             0.005200000000000001
           ],
           "b": [
-            0.22444999999999998,
-            0.159,
+            0.24645,
+            0.177,
             0.005200000000000001
           ]
         },
         {
-          "label": "H 151.0 mm",
-          "mm": 151.0,
+          "label": "H 169.0 mm",
+          "mm": 169.0,
           "a": [
-            0.23245,
+            0.25445,
             0.0,
             0.005200000000000001
           ],
           "b": [
-            0.23245,
-            0.151,
+            0.25445,
+            0.169,
             0.005200000000000001
           ]
         },
@@ -117,13 +133,13 @@
           "label": "D 5.2 mm",
           "mm": 5.2,
           "a": [
-            0.23245,
-            0.151,
+            0.25445,
+            0.169,
             0.0
           ],
           "b": [
-            0.23245,
-            0.151,
+            0.25445,
+            0.169,
             0.005200000000000001
           ]
         }
@@ -135,30 +151,30 @@
       "default": false,
       "dims": [
         {
-          "label": "front W 224.0 mm",
-          "mm": 224.0,
+          "label": "front W 246.0 mm",
+          "mm": 246.0,
           "a": [
             0.0,
-            0.159,
+            0.177,
             0.0076
           ],
           "b": [
-            0.224,
-            0.159,
+            0.246,
+            0.177,
             0.0076
           ]
         },
         {
-          "label": "front H 151.0 mm",
-          "mm": 151.0,
+          "label": "front H 169.0 mm",
+          "mm": 169.0,
           "a": [
-            0.232,
+            0.254,
             0.0,
             0.0076
           ],
           "b": [
-            0.232,
-            0.151,
+            0.254,
+            0.169,
             0.0076
           ]
         }
@@ -170,31 +186,31 @@
       "default": false,
       "dims": [
         {
-          "label": "glass W 216.0 mm",
-          "mm": 216.0,
+          "label": "glass W 243.6 mm",
+          "mm": 243.6,
           "a": [
-            0.004,
-            0.147,
-            0.00755
+            0.0012000000476837158,
+            0.1758000030517578,
+            0.007599999904632568
           ],
           "b": [
-            0.22,
-            0.147,
-            0.00755
+            0.2448000030517578,
+            0.1758000030517578,
+            0.007599999904632568
           ]
         },
         {
-          "label": "glass H 135.0 mm",
-          "mm": 135.0,
+          "label": "glass H 166.6 mm",
+          "mm": 166.6,
           "a": [
-            0.228,
-            0.004,
-            0.00755
+            0.2528000030517578,
+            0.0012000000476837158,
+            0.007599999904632568
           ],
           "b": [
-            0.228,
-            0.139,
-            0.00755
+            0.2528000030517578,
+            0.16780000305175782,
+            0.007599999904632568
           ]
         }
       ]
@@ -243,27 +259,27 @@
           "label": "accents W 28.0 mm",
           "mm": 28.0,
           "a": [
-            0.098,
-            0.15615,
+            0.109,
+            0.1724,
             0.00764
           ],
           "b": [
-            0.126,
-            0.15615,
+            0.137,
+            0.1724,
             0.00764
           ]
         },
         {
-          "label": "accents H 139.7 mm",
-          "mm": 139.65,
+          "label": "accents H 146.8 mm",
+          "mm": 146.85,
           "a": [
-            0.134,
-            0.0085,
+            0.145,
+            0.01755,
             0.00764
           ],
           "b": [
-            0.134,
-            0.14815,
+            0.145,
+            0.16440000000000002,
             0.00764
           ]
         }
@@ -278,28 +294,63 @@
           "label": "pcb W 146.0 mm",
           "mm": 145.99,
           "a": [
-            0.039005000000000005,
-            0.13265000000000002,
-            0.004900000000000001
+            0.050005001068115236,
+            0.1416499938964844,
+            0.00684999942779541
           ],
           "b": [
-            0.18499700000000002,
-            0.13265000000000002,
-            0.004900000000000001
+            0.19599690246582033,
+            0.1416499938964844,
+            0.00684999942779541
           ]
         },
         {
           "label": "pcb H 98.3 mm",
           "mm": 98.3,
           "a": [
-            0.19299700000000003,
-            0.026350000000000002,
-            0.004900000000000001
+            0.2039969024658203,
+            0.0353499984741211,
+            0.00684999942779541
           ],
           "b": [
-            0.19299700000000003,
-            0.12465000000000001,
-            0.004900000000000001
+            0.2039969024658203,
+            0.13364999389648438,
+            0.00684999942779541
+          ]
+        }
+      ]
+    },
+    {
+      "id": "poe",
+      "label": "Poe",
+      "default": false,
+      "dims": [
+        {
+          "label": "poe W 21.3 mm",
+          "mm": 21.35,
+          "a": [
+            0.1614017333984375,
+            0.07866876983642579,
+            0.0021590070724487307
+          ],
+          "b": [
+            0.18275172424316408,
+            0.07866876983642579,
+            0.0021590070724487307
+          ]
+        },
+        {
+          "label": "poe H 15.0 mm",
+          "mm": 15.0,
+          "a": [
+            0.19075172424316406,
+            0.05566876983642578,
+            0.0021590070724487307
+          ],
+          "b": [
+            0.19075172424316406,
+            0.07066876983642578,
+            0.0021590070724487307
           ]
         }
       ]
@@ -330,6 +381,7 @@
   "features": {
     "measure": true,
     "outline": true,
+    "outline_default": true,
     "outline_depth_sensitivity": 320.0,
     "outline_normal_sensitivity": 26.0,
     "explode": true,
@@ -344,6 +396,7 @@
       "accents": 35,
       "front": 22,
       "pcb": 14,
+      "poe": 16,
       "rear": -10
     },
     "section": true,
