@@ -105,6 +105,14 @@
     }
 
     // Inspect (embedded MANIFEST) needs a full document load; ?v= busts CDN HTML.
+    // Keep the outgoing paint dark — new HTML also has inline html/body bg.
+    try {
+      document.documentElement.style.backgroundColor = "#0b1220";
+      document.documentElement.style.colorScheme = "dark";
+      if (document.body) document.body.style.backgroundColor = "#0b1220";
+    } catch {
+      /* ignore */
+    }
     location.replace(withBuildParam(location.href, j.id));
     return true;
   };
