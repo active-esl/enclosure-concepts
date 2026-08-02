@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260802T184709Z-199adc947c" />
+  <meta name="aesl-build" content="20260802T190131Z-199adc947c" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -515,6 +515,7 @@
         30,
         30
       ],
+      "highlight": true,
       "opacity": 1.0
     }
   ],
@@ -902,6 +903,7 @@
   "features": {
     "measure": true,
     "outline": true,
+    "outline_default": false,
     "outline_depth_sensitivity": 320.0,
     "outline_normal_sensitivity": 26.0,
     "explode": true,
@@ -1082,8 +1084,11 @@
     }
     const featToggles = document.getElementById('featureToggles');
     if (FEATURES.outline) {
+      // outline: true = control available; checked only when outline_default.
+      // Default off — thick white edges clutter Inspect (Alex 2026-08-02).
       const lab = document.createElement('label');
-      lab.innerHTML = '<input type="checkbox" id="chkEdges" checked> Edge outline';
+      const checked = FEATURES.outline_default ? ' checked' : '';
+      lab.innerHTML = `<input type="checkbox" id="chkEdges"${checked}> Edge outline`;
       featToggles.appendChild(lab);
     } else {
       document.getElementById('displayBlock').hidden = true;
@@ -1925,9 +1930,17 @@
         o.castShadow = true;
         o.receiveShadow = true;
         const n = (o.name || o.parent?.name || '').toLowerCase();
+        // Exact id first, then longest-id includes — avoids short tokens
+        // stealing meshes (e.g. "poe" vs a longer stem).
         let partId = null;
         for (const id of PART_IDS) {
-          if (n === id || n.includes(id)) { partId = id; break; }
+          if (n === id) { partId = id; break; }
+        }
+        if (!partId) {
+          const byLen = [...PART_IDS].sort((a, b) => b.length - a.length);
+          for (const id of byLen) {
+            if (n.includes(id)) { partId = id; break; }
+          }
         }
         if (partId) {
           byName[partId] = byName[partId] || [];
@@ -1936,6 +1949,9 @@
         const meta = PART_META[partId] || {};
         let col = PART_COLOR[partId] || 0x8e9298;
         const isGhost = !!meta.ghost;
+        // PoE (and meta.highlight): stay vivid through translucent ghost PCB —
+        // opaque + emissive + renderOrder above ghost (Alex 2026-08-02).
+        const isHighlight = partId === 'poe' || !!meta.highlight;
         const splash = partId ? splashTex[partId] : null;
         // lcd = emissive glass art; print = matte UV/film decal (alpha corners).
         // Transparent shells / PCB ghost keep plastic shading — only the LCD
@@ -1944,16 +1960,19 @@
           || (partId === 'glass' ? 'lcd' : (splash ? 'print' : null));
         const isPrintSplash = !!splash && splashStyle === 'print';
         const isLcdSplash = !!splash && !isPrintSplash;
-        const isGlass = !isGhost && (partId === 'glass' || isLcdSplash);
-        const isAlpha = isGhost || isGlass || isPrintSplash || !!meta.transparent
-          || (typeof meta.opacity === 'number' && meta.opacity < 1);
+        const isGlass = !isGhost && !isHighlight && (partId === 'glass' || isLcdSplash);
+        const isAlpha = !isHighlight && (
+          isGhost || isGlass || isPrintSplash || !!meta.transparent
+          || (typeof meta.opacity === 'number' && meta.opacity < 1)
+        );
         {
           const c = new THREE.Color(col);
           const hsl = { h: 0, s: 0, l: 0 };
           c.getHSL(hsl);
           // Hatch / dark plastics sit near black; without a floor they read as holes.
           // Keep ghost PCB green unsaturated-lift off (ghost wants FR4 read).
-          if (!isGlass && !isGhost && !isPrintSplash && hsl.l < 0.30) {
+          // Highlight parts keep YAML colour (PoE red must not get lifted/greyed).
+          if (!isGlass && !isGhost && !isPrintSplash && !isHighlight && hsl.l < 0.30) {
             c.setHSL(hsl.h, Math.min(hsl.s, 0.22), 0.36);
           }
           if (isGlass && !splash) c.offsetHSL(0, 0, 0.06);
@@ -1968,28 +1987,32 @@
         o.material = new THREE.MeshStandardMaterial({
           color: splash ? 0xffffff : col,
           map: splash || null,
-          emissive: isLcdSplash ? 0xffffff : 0x000000,
+          emissive: isLcdSplash ? 0xffffff : (isHighlight ? col : 0x000000),
           emissiveMap: isLcdSplash ? splash : null,
-          emissiveIntensity: isLcdSplash ? 1.35 : 0,
+          emissiveIntensity: isLcdSplash ? 1.35 : (isHighlight ? 1.0 : 0),
           // Matte plastic: higher metalness + RoomEnvironment stamps a hard
           // horizon band onto flat faces as you orbit.
-          metalness: isGlass ? 0.04 : (isPrintSplash ? 0.06 : 0.12),
-          roughness: isLcdSplash ? 0.35 : (isPrintSplash ? 0.55 : (isGlass ? 0.2 : 0.62)),
-          envMapIntensity: isGlass ? (splash ? 0.55 : 1.4) : (isPrintSplash ? 0.35 : 0.45),
+          metalness: isHighlight ? 0.05 : (isGlass ? 0.04 : (isPrintSplash ? 0.06 : 0.12)),
+          roughness: isHighlight ? 0.45 : (isLcdSplash ? 0.35 : (isPrintSplash ? 0.55 : (isGlass ? 0.2 : 0.62))),
+          envMapIntensity: isHighlight ? 0.25 : (isGlass ? (splash ? 0.55 : 1.4) : (isPrintSplash ? 0.35 : 0.45)),
           transparent: isAlpha,
           // Splash needs enough opacity to read; ghost PCB / shells use YAML.
-          opacity: isLcdSplash
-            ? (meta.opacity ?? 0.92)
-            : (isGhost ? (meta.opacity ?? 0.55)
-              : (isAlpha ? (meta.opacity ?? 0.55) : 1.0)),
+          opacity: isHighlight
+            ? 1.0
+            : (isLcdSplash
+              ? (meta.opacity ?? 0.92)
+              : (isGhost ? (meta.opacity ?? 0.55)
+                : (isAlpha ? (meta.opacity ?? 0.55) : 1.0))),
           alphaTest: isPrintSplash ? 0.35 : 0,
           // Ghost / see-through shells: no depth write so PCB composites inside.
-          depthWrite: isLcdSplash || isPrintSplash ? true : !isAlpha,
+          // Highlight (PoE) always depth-writes so it wins over ghost blend.
+          depthWrite: isHighlight || isLcdSplash || isPrintSplash ? true : !isAlpha,
           side: (isPrintSplash || isGhost) ? THREE.DoubleSide : THREE.FrontSide,
           vertexColors: false,
           clippingPlanes: [],
         });
-        if (isGhost) o.renderOrder = 2;
+        if (isHighlight) o.renderOrder = 3;
+        else if (isGhost) o.renderOrder = 2;
         o.userData.baseColor = splash ? 0xffffff : col;
         o.userData.partId = partId;
       });

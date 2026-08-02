@@ -99,6 +99,7 @@
         30,
         30
       ],
+      "highlight": true,
       "opacity": 1.0
     }
   ],
@@ -486,6 +487,7 @@
   "features": {
     "measure": true,
     "outline": true,
+    "outline_default": false,
     "outline_depth_sensitivity": 320.0,
     "outline_normal_sensitivity": 26.0,
     "explode": true,
