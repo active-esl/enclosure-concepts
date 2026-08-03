@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260803T162739Z-b86085fb84" />
+  <meta name="aesl-build" content="20260803T163256Z-755f17f5d4" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -444,7 +444,7 @@
       INSPECT_LIGHTING,
       applyInspectEnvironment,
       createInspectLights,
-    } from '../inspect-lighting.js?v=eb88380dca';
+    } from '../inspect-lighting.js?v=07973df9fe';
 
     const MANIFEST = {
   "id": "eth",
@@ -2498,20 +2498,19 @@
           projectXyUvs(o.geometry, flipU, flipV);
           if (isLcdSplash) neutralizeLcdBackFaceUvs(o.geometry);
         }
-        // Face-colored / ghost PCB: dielectric (metalness 0) + higher roughness
-        // so RoomEnvironment's rectangular area lights don't stamp a milky
-        // specular wash — diffuse IBL still lights FR4/SMDs (Alex 2026-08-03).
-        const isPcbMat = useFaceColors || isGhost;
         o.material = new THREE.MeshStandardMaterial({
           color: splash ? 0xffffff : (useFaceColors ? 0xffffff : col),
           map: splash || null,
           emissive: isLcdSplash ? 0xffffff : 0x000000,
           emissiveMap: isLcdSplash ? splash : null,
           emissiveIntensity: isLcdSplash ? 1.35 : 0,
-          // LCD splash: no IBL (horizon/shelf bars — Alex 2026-08-03).
-          metalness: isOverlay ? 0.04 : (isGlass ? 0.04 : (isPrintSplash ? 0.03 : (isPcbMat ? 0.0 : 0.02))),
-          roughness: isOverlay ? 0.55 : (isLcdSplash ? 0.55 : (isPrintSplash ? 0.6 : (isGlass ? 0.28 : (isPcbMat ? 0.82 : 0.72)))),
-          envMapIntensity: isOverlay ? 0.35 : (isLcdSplash ? 0.0 : (isGlass ? 1.1 : (isPrintSplash ? 0.28 : (isPcbMat ? 0.42 : 0.38)))),
+          // Matte plastic: higher metalness + RoomEnvironment stamps a hard
+          // horizon band onto flat faces as you orbit.
+          // LCD splash: no IBL — env horizon + mid-stack shelves read as a gray
+          // bar through the concept-UI caption (Alex 2026-08-03).
+          metalness: isOverlay ? 0.08 : (isGlass ? 0.04 : (isPrintSplash ? 0.06 : 0.12)),
+          roughness: isOverlay ? 0.5 : (isLcdSplash ? 0.55 : (isPrintSplash ? 0.55 : (isGlass ? 0.2 : 0.62))),
+          envMapIntensity: isOverlay ? 0.4 : (isLcdSplash ? 0.0 : (isGlass ? 1.4 : (isPrintSplash ? 0.35 : 0.45))),
           transparent: isAlpha,
           // Splash needs enough opacity to read; ghost PCB / shells use YAML.
           // LCD: fully opaque so well-floor / shelves cannot composite a bar.

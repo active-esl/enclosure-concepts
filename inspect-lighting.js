@@ -1,9 +1,10 @@
 /**
- * Fallback only — Inspect pages use inline 32143d8 studio lighting again.
- * Values match last-known-good so stale imports stay visible.
+ * Shared Inspect studio lighting for Active-ESL concept pages.
  */
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
 export const INSPECT_LIGHTING = {
-  roomEnvBlur: 0.04,
+  envBlur: 0.04,
   toneMappingExposure: 1.2,
   ambient: { color: 0xc8d4e6, intensity: 2.1 },
   hemi: { sky: 0xe8eef8, ground: 0x243044, intensity: 0 },
@@ -16,17 +17,18 @@ export const INSPECT_LIGHTING = {
   fillOffset: [-0.7, 0.1, 0.5],
 };
 
-export function applyInspectEnvironment(THREE, scene, renderer, RoomEnvironment) {
+export function applyInspectEnvironment(THREE, scene, renderer) {
   const L = INSPECT_LIGHTING;
   renderer.toneMappingExposure = L.toneMappingExposure;
   const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), L.roomEnvBlur).texture;
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), L.envBlur).texture;
   return pmrem;
 }
 
 export function createInspectLights(THREE, scene) {
   const L = INSPECT_LIGHTING;
   scene.add(new THREE.AmbientLight(L.ambient.color, L.ambient.intensity));
+  // hemi intensity 0 = omitted (matches last-known-good)
   const key = new THREE.DirectionalLight(L.key.color, L.key.intensity);
   scene.add(key); scene.add(key.target);
   const fill = new THREE.DirectionalLight(L.fill.color, L.fill.intensity);
