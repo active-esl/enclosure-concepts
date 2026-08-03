@@ -3,7 +3,7 @@
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front housing + rear housing (service hatch removed from SCAD). Ghost internals (Active Screen populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "05e2693f73",
+  "glb_version": "76264721e4",
   "parts": [
     {
       "id": "front",
@@ -44,6 +44,30 @@
       "splash_style": "lcd",
       "splash_flip_u": false,
       "splash_flip_v": true
+    },
+    {
+      "id": "ctp_flex",
+      "label": "CTP flex (STEP gbd004 bottom)",
+      "visible": true,
+      "color": [
+        232,
+        140,
+        48
+      ],
+      "highlight": true,
+      "opacity": 1.0
+    },
+    {
+      "id": "lcd_ffc",
+      "label": "LCD FFC (STEP gbd001 side)",
+      "visible": true,
+      "color": [
+        64,
+        140,
+        220
+      ],
+      "highlight": true,
+      "opacity": 1.0
     },
     {
       "id": "uv_badge",
@@ -211,6 +235,76 @@
             0.2528000030517578,
             0.16780000305175782,
             0.012
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ctp_flex",
+      "label": "Ctp_flex",
+      "default": false,
+      "dims": [
+        {
+          "label": "ctp_flex W 61.5 mm",
+          "mm": 61.5,
+          "a": [
+            0.1571999969482422,
+            0.018530001640319826,
+            0.011699999809265137
+          ],
+          "b": [
+            0.2186999969482422,
+            0.018530001640319826,
+            0.011699999809265137
+          ]
+        },
+        {
+          "label": "ctp_flex H 66.9 mm",
+          "mm": 66.94,
+          "a": [
+            0.2266999969482422,
+            -0.05641335678100586,
+            0.011699999809265137
+          ],
+          "b": [
+            0.2266999969482422,
+            0.010530001640319824,
+            0.011699999809265137
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lcd_ffc",
+      "label": "Lcd_ffc",
+      "default": false,
+      "dims": [
+        {
+          "label": "lcd_ffc W 17.4 mm",
+          "mm": 17.41,
+          "a": [
+            0.006327784538269043,
+            0.14875003051757812,
+            0.007949999809265137
+          ],
+          "b": [
+            0.023737979888916017,
+            0.14875003051757812,
+            0.007949999809265137
+          ]
+        },
+        {
+          "label": "lcd_ffc H 121.1 mm",
+          "mm": 121.1,
+          "a": [
+            0.03173797988891602,
+            0.019650005340576173,
+            0.007949999809265137
+          ],
+          "b": [
+            0.03173797988891602,
+            0.14075003051757812,
+            0.007949999809265137
           ]
         }
       ]
@@ -460,6 +554,8 @@
     ],
     "explode_offsets_mm": {
       "glass": 55,
+      "ctp_flex": 55,
+      "lcd_ffc": 55,
       "uv_badge": 52,
       "accents": 48,
       "front": 28,
