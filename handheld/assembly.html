@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260803T003008Z-e2b7a1f29f" />
+  <meta name="aesl-build" content="20260803T004938Z-8761d66f2e" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -422,7 +422,7 @@
   "title": "Handheld slim \u2014 PLACEHOLDER",
   "blurb": "Thin ~7.6 mm slab \u00b7 front housing + rear housing \u00b7 no onboard RJ45 (dock / USB-C / PoE-when-docked). Ghost internals (V3Room populated board) through shell by default \u00b7 rear-service (VESA / \u00bc-20 / RF / wordmark). Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "5a532aa784",
+  "glb_version": "496e4d2ea2",
   "parts": [
     {
       "id": "front",
@@ -524,14 +524,14 @@
           "label": "W 246.9 mm",
           "mm": 246.9,
           "a": [
-            -0.00045000000000000004,
+            -0.0004500000000000001,
             0.177,
-            0.005200000000000001
+            0.0052
           ],
           "b": [
-            0.24645,
+            0.24645000000000003,
             0.177,
-            0.005200000000000001
+            0.0052
           ]
         },
         {
@@ -540,12 +540,12 @@
           "a": [
             0.25445,
             0.0,
-            0.005200000000000001
+            0.0052
           ],
           "b": [
             0.25445,
             0.169,
-            0.005200000000000001
+            0.0052
           ]
         },
         {
@@ -559,7 +559,7 @@
           "b": [
             0.25445,
             0.169,
-            0.005200000000000001
+            0.0052
           ]
         }
       ]
@@ -1051,7 +1051,7 @@
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     // Physical light units (three r155+) need ~π× the old "legacy" intensities.
-    // Restored inline from 32143d8 after shared diffuse lighting broke shell visibility.
+    // Inline studio rig (32143d8) — shared diffuse inspect-lighting broke shell visibility.
     renderer.toneMappingExposure = 1.2;
     renderer.localClippingEnabled = true;
 
@@ -1090,8 +1090,6 @@
     const top = new THREE.DirectionalLight(0xffffff, 1.41);
     top.position.set(0.1, 1.1, 0.15);
     scene.add(top);
-    // Fixed world key so default front/side presets still have form if the
-    // camera-follow lights are glancing.
     const worldKey = new THREE.DirectionalLight(0xfff6ee, 2.98);
     worldKey.position.set(0.5, 0.75, 0.85);
     scene.add(worldKey);
@@ -1788,6 +1786,23 @@
       geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
     }
 
+    // LCD stack is thick: rear faces share XY-projected splash UVs, so a deep
+    // I/O void can show mirrored "handheld · concept UI" on the under-jack
+    // plane. Pin back-half verts to a navy field texel (front LCD unchanged).
+    function neutralizeLcdBackFaceUvs(geometry) {
+      const box = geometry.boundingBox || (geometry.computeBoundingBox(), geometry.boundingBox);
+      const pos = geometry.attributes.position;
+      const uv = geometry.attributes.uv;
+      if (!box || !pos || !uv) return;
+      const zMid = (box.min.z + box.max.z) * 0.5;
+      for (let i = 0; i < pos.count; i++) {
+        if (pos.getZ(i) < zMid) {
+          uv.setXY(i, 0.02, 0.02);
+        }
+      }
+      uv.needsUpdate = true;
+    }
+
     const glbUrl = `${MANIFEST.glb}?v=${MANIFEST.glb_version || 1}`;
     const splashByPart = {};
     for (const p of PARTS) {
@@ -1886,6 +1901,7 @@
           const flipU = meta.splash_flip_u === true;
           const flipV = meta.splash_flip_v !== false; // default true (historical)
           projectXyUvs(o.geometry, flipU, flipV);
+          if (isLcdSplash) neutralizeLcdBackFaceUvs(o.geometry);
         }
         o.material = new THREE.MeshStandardMaterial({
           color: splash ? 0xffffff : col,
