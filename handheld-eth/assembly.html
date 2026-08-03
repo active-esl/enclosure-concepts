@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260803T003348Z-630c871e52" />
+  <meta name="aesl-build" content="20260803T004132Z-f6ac842fd6" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -1878,6 +1878,23 @@
       geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
     }
 
+    // LCD stack is thick: rear faces share XY-projected splash UVs, so a deep
+    // I/O void can show mirrored "handheld · concept UI" on the under-jack
+    // plane. Pin back-half verts to a navy field texel (front LCD unchanged).
+    function neutralizeLcdBackFaceUvs(geometry) {
+      const box = geometry.boundingBox || (geometry.computeBoundingBox(), geometry.boundingBox);
+      const pos = geometry.attributes.position;
+      const uv = geometry.attributes.uv;
+      if (!box || !pos || !uv) return;
+      const zMid = (box.min.z + box.max.z) * 0.5;
+      for (let i = 0; i < pos.count; i++) {
+        if (pos.getZ(i) < zMid) {
+          uv.setXY(i, 0.02, 0.02);
+        }
+      }
+      uv.needsUpdate = true;
+    }
+
     const glbUrl = `${MANIFEST.glb}?v=${MANIFEST.glb_version || 1}`;
     const splashByPart = {};
     for (const p of PARTS) {
@@ -1976,6 +1993,7 @@
           const flipU = meta.splash_flip_u === true;
           const flipV = meta.splash_flip_v !== false; // default true (historical)
           projectXyUvs(o.geometry, flipU, flipV);
+          if (isLcdSplash) neutralizeLcdBackFaceUvs(o.geometry);
         }
         o.material = new THREE.MeshStandardMaterial({
           color: splash ? 0xffffff : col,
