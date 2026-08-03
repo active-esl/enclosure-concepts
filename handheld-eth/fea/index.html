@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="aesl-build" content="eval-20260803T012127Z" />
+  <title>Printable eval board — handheld eth (FEA ranking ≠ CE)</title>
+  <link rel='stylesheet' href='../../site-nav.css' />
+  <style>
+    :root {
+      --bg:#0f1419; --panel:#1a222c; --line:#2a3542; --text:#e8eef5;
+      --muted:#9aa8b8; --warn:#f0b74a; --ok:#3ecf8e; --bad:#ff8a80; --accent:#3ec6ff;
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font:15px/1.45 system-ui,sans-serif; background:var(--bg); color:var(--text); }
+    header { padding:16px 20px; background:var(--panel); border-bottom:1px solid var(--line); }
+    header h1 { margin:0 0 6px; font-size:1.25rem; }
+    .meta { color:var(--muted); font-size:.9rem; }
+    .disclaimer, .blurb, .legend, .stl {
+      margin:12px 20px 0; padding:12px 14px; border-radius:10px;
+      background:var(--panel); border:1px solid var(--line);
+    }
+    .disclaimer { border-color:rgba(240,183,74,.45); background:rgba(240,183,74,.08); color:var(--warn); }
+    .disclaimer strong { color:#ffd27a; }
+    .part-nav { display:flex; flex-wrap:wrap; gap:10px; margin:12px 20px 0; }
+    .part-nav a {
+      display:inline-flex; align-items:center; min-height:36px; padding:6px 12px;
+      border-radius:999px; text-decoration:none; border:1px solid rgba(62,198,255,.55);
+      background:rgba(62,198,255,.12); color:#fff; font-weight:650;
+    }
+    .board-wrap { margin:16px 20px; overflow-x:auto; }
+    table.board {
+      width:100%; border-collapse:collapse; min-width:920px;
+      background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    }
+    table.board th, table.board td {
+      border-bottom:1px solid var(--line); padding:10px 12px; vertical-align:top;
+      text-align:left; font-size:.92rem;
+    }
+    table.board thead th {
+      background:#121820; color:var(--muted); font-size:.78rem; letter-spacing:.04em;
+      text-transform:uppercase;
+    }
+    table.board th code { color:var(--accent); font-size:.78rem; }
+    .cell { margin-top:6px; color:var(--muted); font-size:.86rem; }
+    .pill {
+      font-size:.72rem; padding:2px 8px; border-radius:999px; font-weight:650;
+      background:rgba(154,168,184,.18); color:var(--muted); white-space:nowrap;
+    }
+    .pill.state-ok, .pill.state-ran { background:rgba(62,207,142,.15); color:var(--ok); }
+    .pill.state-warn { background:rgba(240,183,74,.18); color:var(--warn); }
+    .pill.state-skip, .pill.state-na, .pill.state-deferred, .pill.state-unknown,
+    .pill.state-not_run, .pill.state-not_fea_target {
+      background:rgba(154,168,184,.18); color:var(--muted);
+    }
+    .part { margin:20px 0 8px; padding-top:8px; border-top:1px solid var(--line); }
+    .part h2 { margin:0 16px 6px; font-size:1.15rem; }
+    .eval-list { margin:8px 20px; color:var(--muted); }
+    .grid {
+      display:grid; gap:16px; padding:12px 20px 8px;
+      grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+    }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; }
+    .card h3 { margin:0 0 6px; font-size:1.02rem; }
+    .badge {
+      font-size:.72rem; padding:2px 7px; border-radius:999px;
+      background:rgba(62,207,142,.15); color:var(--ok);
+    }
+    .card.skip .badge { background:rgba(154,168,184,.18); color:var(--muted); }
+    .card.fail .badge { background:rgba(255,138,128,.18); color:var(--bad); }
+    .big { font-size:1.05rem; }
+    .warns { color:var(--warn); margin:8px 0 0; padding-left:1.1em; }
+    .stl code { color:var(--accent); word-break:break-all; font-size:.82rem; }
+    .links { margin:16px 20px 28px; display:flex; flex-wrap:wrap; gap:10px; }
+    .links a {
+      display:inline-flex; align-items:center; min-height:40px; padding:8px 14px;
+      border-radius:999px; text-decoration:none; border:1px solid rgba(62,198,255,.55);
+      background:rgba(62,198,255,.15); color:#fff; font-weight:650;
+    }
+    .links a.secondary {
+      border-color:rgba(255,255,255,.18); background:transparent; color:var(--muted);
+    }
+    .open a { color:var(--accent); }
+  </style>
+</head>
+<body>
+  <nav id='siteNav' class='site-nav' data-root='../../' data-concept='eth' data-mode='inspect' aria-label='Concept site'></nav>
+  <script src='../../site-nav.js' defer></script>
+  <script src='../../pages-update.js' defer></script>
+  <header>
+    <h1>Printable eval board — handheld eth</h1>
+    <p class="meta">
+      Rows = FDM printables · columns = fit · FEA · print · mass · DFM ·
+      <strong style="color:#ffd27a">FEA ranking ≠ CE</strong> ·
+      20260803T012127Z
+    </p>
+  </header>
+
+  <aside class="disclaimer" role="note">
+    <strong>Not one enclosure blob — and FEA is not CE.</strong>
+    Read each printable row. FEA PASS means the solver finished (often with huge
+    deflection warnings). It does not mean the product or that part is OK for
+    drop / office / certification.
+  </aside>
+
+  <section class="blurb">
+    <p>Open a row’s Inspect link to solo that shell. Run FEA per part
+    (<code>--rear</code> / <code>--front</code>). Hatch is listed while deferred;
+    coupons are printables but not shell FEA.</p>
+    <p class="meta">
+      HOWTO: <code>handheld/review/FEA-HOWTO.md</code> ·
+      CE brief: <code>cea-mechanical-drop-fea-brief.md</code>
+    </p>
+  </section>
+
+  <nav class="part-nav" aria-label="Printable parts"><a href='#rear'>Rear housing</a><a href='#front'>Front housing</a><a href='#hatch'>Service hatch</a><a href='#coupons'>Clearance coupons</a></nav>
+  <div class='board-wrap'><table class='board'><thead><tr><th scope='col'>Printable</th><th scope='col'>FIT</th><th scope='col'>FEA</th><th scope='col'>PRINT</th><th scope='col'>MASS</th><th scope='col'>DFM</th><th scope='col'>Open</th></tr></thead><tbody><tr id='row-rear'><th scope='row'><a href='#rear'>Rear housing</a><br><code>rear_housing</code><br><span class='meta'>print-bottom</span></th><td class='st-ok'><span class='pill state-ok'>ok</span><div class='cell'>io_aperture + pad contain + drop-on PASS (assemble-review)</div></td><td class='st-warn'><span class='pill state-warn'>warn</span><div class='cell'>press_centre: SKIP; long_edge_bend: PASS defl=21.5936 mm; corner_twist: PASS defl=75.2862 mm · ranking≠CE</div></td><td class='st-ok'><span class='pill state-ok'>ok</span><div class='cell'>Dry-fit print-bottom · Inspect rear.stl</div></td><td class='st-unknown'><span class='pill state-unknown'>unknown</span><div class='cell'>Not weighed — leave blank until dry-fit scale</div></td><td class='st-warn'><span class='pill state-warn'>warn</span><div class='cell'>I/O on −Y step; hatch folded into solid pad for now</div></td><td class='open'><a href='../assembly.html#v=rear&solo=rear'>Inspect</a> · <a href='#rear'>Detail</a> · <span class='meta'>./scripts/run_fea_ranking.sh --rear</span></td></tr><tr id='row-front'><th scope='row'><a href='#front'>Front housing</a><br><code>front_housing</code><br><span class='meta'>print-top</span></th><td class='st-warn'><span class='pill state-warn'>warn</span><div class='cell'>LCD adhesive + PCB M2 into front — dry-fit / flex dress open</div></td><td class='st-skip'><span class='pill state-skip'>skip</span><div class='cell'>press_centre: SKIP · ranking≠CE</div></td><td class='st-ok'><span class='pill state-ok'>ok</span><div class='cell'>Dry-fit print-top · Inspect front.stl</div></td><td class='st-unknown'><span class='pill state-unknown'>unknown</span><div class='cell'>Not weighed</div></td><td class='st-warn'><span class='pill state-warn'>warn</span><div class='cell'>Clamshell lip + heat-set bosses — coupon feel-test pending</div></td><td class='open'><a href='../assembly.html#v=front&solo=front'>Inspect</a> · <a href='#front'>Detail</a> · <span class='meta'>./scripts/run_fea_ranking.sh --front</span></td></tr><tr id='row-hatch'><th scope='row'><a href='#hatch'>Service hatch</a><br><code>service_hatch</code></th><td class='st-deferred'><span class='pill state-deferred'>deferred</span><div class='cell'>service_hatch_enable=false</div></td><td class='st-deferred'><span class='pill state-deferred'>deferred</span><div class='cell'>No FEA — hatch not printed</div></td><td class='st-deferred'><span class='pill state-deferred'>deferred</span><div class='cell'>Not a separate print right now</div></td><td class='st-na'><span class='pill state-na'>na</span><div class='cell'>—</div></td><td class='st-deferred'><span class='pill state-deferred'>deferred</span><div class='cell'>Restore with enable + eth.yaml hatch part</div></td><td class='open'><a href='../assembly.html#v=rear'>Inspect</a> · <a href='#hatch'>Detail</a></td></tr><tr id='row-coupons'><th scope='row'><a href='#coupons'>Clearance coupons</a><br><code>clearance_coupons</code></th><td class='st-na'><span class='pill state-na'>na</span><div class='cell'>Boss/insert feel — not shell fit</div></td><td class='st-na'><span class='pill state-na'>na</span><div class='cell'>Not a shell stiffness target</div></td><td class='st-ok'><span class='pill state-ok'>ok</span><div class='cell'>scad/clearance_coupons.scad → out/clearance_coupons.stl</div></td><td class='st-na'><span class='pill state-na'>na</span><div class='cell'>—</div></td><td class='st-warn'><span class='pill state-warn'>warn</span><div class='cell'>M2 insert ID feel-test still open</div></td><td class='open'><a href='#coupons'>Detail</a></td></tr></tbody></table></div>
+
+  <section class="legend">
+    <p><strong>Cell status</strong></p>
+    <p class="meta">
+      <span class="pill state-ok">ok</span> cited gate ·
+      <span class="pill state-warn">warn</span> open risk / ranking signal ·
+      <span class="pill state-skip">skip</span> not run ·
+      <span class="pill state-deferred">deferred</span> not in BOM ·
+      <span class="pill state-unknown">unknown</span> not measured ·
+      <span class="pill state-na">na</span> N/A
+    </p>
+  </section>
+
+  <h2 style="margin:24px 20px 0;font-size:1.1rem">Per-part FEA detail</h2>
+  <section class='part' id='rear'><h2>Rear housing <span class='pill'>rear_housing</span> <span class='pill state-ran'>FEA results</span></h2><ul class='eval-list'><li><strong>fit</strong>: <span class='pill state-ok'>ok</span> io_aperture + pad contain + drop-on PASS (assemble-review)</li><li><strong>fea</strong>: <span class='pill state-warn'>warn</span> press_centre: SKIP; long_edge_bend: PASS defl=21.5936 mm; corner_twist: PASS defl=75.2862 mm · ranking≠CE</li><li><strong>print</strong>: <span class='pill state-ok'>ok</span> Dry-fit print-bottom · Inspect rear.stl</li><li><strong>mass</strong>: <span class='pill state-unknown'>unknown</span> Not weighed — leave blank until dry-fit scale</li><li><strong>dfm</strong>: <span class='pill state-warn'>warn</span> I/O on −Y step; hatch folded into solid pad for now</li></ul><div class='stl'><p><strong>STL</strong> · FEA stamp <code>20260803T005440811800Z</code></p><p class='meta'>SHA-1 <code>d27b103eaf7dfc5893f019a8c5474209291be5d6</code></p><p><code>/data_drive/esl/active-esl-enclosures/handheld/out/review/assembly_explorer/20260803T012106665773Z/rear.stl</code></p><p class='meta'><a href='../assembly.html#v=rear&solo=rear'>Inspect →</a> · re-run <code>./scripts/run_fea_ranking.sh --rear</code></p></div><div class='grid'><article class='card skip'><h3>Press the face centre (thumb on screen) <span class='badge'>SKIP</span></h3><p class='meta'>no nodes in load/fix region</p><p class='meta'>154877 elems · fixed 24025 · loaded 0 · F=[0, 0, -30] N</p><p class='big'>max defl <b>—</b> mm · peak σ<sub>vm</sub> <b>—</b> MPa · SF —</p><ul class='warns'><li>no material in fixed=24025 / loaded=0 region — case likely belongs to the other half</li></ul></article><article class='card pass'><h3>Bend across the long axis (grip + push) <span class='badge'>PASS</span></h3><p class='meta'>solver finished — not design OK</p><p class='meta'>154877 elems · fixed 3000 · loaded 3098 · F=[0, 0, -20] N</p><p class='big'>max defl <b>21.5936</b> mm · peak σ<sub>vm</sub> <b>83.05</b> MPa · SF 0.6</p><ul class='warns'><li>max deflection 21.5936 mm > 2.0 mm</li><li>peak von Mises 83.05 MPa = 166% of yield (isotropic; FDM layer bond is weaker)</li></ul></article><article class='card pass'><h3>Diagonal twist (one corner up) <span class='badge'>PASS</span></h3><p class='meta'>solver finished — not design OK</p><p class='meta'>154877 elems · fixed 969 · loaded 995 · F=[0, 0, -15] N</p><p class='big'>max defl <b>75.2862</b> mm · peak σ<sub>vm</sub> <b>116.424</b> MPa · SF 0.43</p><ul class='warns'><li>max deflection 75.2862 mm > 2.0 mm</li><li>peak von Mises 116.424 MPa = 233% of yield (isotropic; FDM layer bond is weaker)</li></ul></article></div></section><section class='part' id='front'><h2>Front housing <span class='pill'>front_housing</span> <span class='pill state-ran'>FEA results</span></h2><ul class='eval-list'><li><strong>fit</strong>: <span class='pill state-warn'>warn</span> LCD adhesive + PCB M2 into front — dry-fit / flex dress open</li><li><strong>fea</strong>: <span class='pill state-skip'>skip</span> press_centre: SKIP · ranking≠CE</li><li><strong>print</strong>: <span class='pill state-ok'>ok</span> Dry-fit print-top · Inspect front.stl</li><li><strong>mass</strong>: <span class='pill state-unknown'>unknown</span> Not weighed</li><li><strong>dfm</strong>: <span class='pill state-warn'>warn</span> Clamshell lip + heat-set bosses — coupon feel-test pending</li></ul><div class='stl'><p><strong>STL</strong> · FEA stamp <code>20260803T005943250157Z</code></p><p class='meta'>SHA-1 <code>0b0b1c47040ed40a34ca7d7fa3a49c96594e026d</code></p><p><code>/data_drive/esl/active-esl-enclosures/handheld/out/review/assembly_explorer/20260803T012106665773Z/front.stl</code></p><p class='meta'><a href='../assembly.html#v=front&solo=front'>Inspect →</a> · re-run <code>./scripts/run_fea_ranking.sh --front</code></p></div><div class='grid'><article class='card skip'><h3>Press the face centre (thumb on screen) <span class='badge'>SKIP</span></h3><p class='meta'>no nodes in load/fix region</p><p class='meta'>485934 elems · fixed 6101 · loaded 0 · F=[0, 0, -30] N</p><p class='big'>max defl <b>—</b> mm · peak σ<sub>vm</sub> <b>—</b> MPa · SF —</p><ul class='warns'><li>no material in fixed=6101 / loaded=0 region — case likely belongs to the other half</li></ul></article></div></section><section class='part' id='hatch'><h2>Service hatch <span class='pill'>service_hatch</span> <span class='pill state-deferred'>deferred</span></h2><ul class='eval-list'><li><strong>fit</strong>: <span class='pill state-deferred'>deferred</span> service_hatch_enable=false</li><li><strong>fea</strong>: <span class='pill state-deferred'>deferred</span> No FEA — hatch not printed</li><li><strong>print</strong>: <span class='pill state-deferred'>deferred</span> Not a separate print right now</li><li><strong>mass</strong>: <span class='pill state-na'>na</span> —</li><li><strong>dfm</strong>: <span class='pill state-deferred'>deferred</span> Restore with enable + eth.yaml hatch part</li></ul><div class='stl'><p class='meta'><strong>deferred</strong></p><p class='meta'>SHA-1 <code>—</code></p><p><code>— (no STL on disk)</code></p><p class='meta'><a href='../assembly.html#v=rear'>Inspect →</a> · <em>no FEA runner</em></p></div></section><section class='part' id='coupons'><h2>Clearance coupons <span class='pill'>clearance_coupons</span> <span class='pill state-not_fea_target'>not FEA target</span></h2><ul class='eval-list'><li><strong>fit</strong>: <span class='pill state-na'>na</span> Boss/insert feel — not shell fit</li><li><strong>fea</strong>: <span class='pill state-na'>na</span> Not a shell stiffness target</li><li><strong>print</strong>: <span class='pill state-ok'>ok</span> scad/clearance_coupons.scad → out/clearance_coupons.stl</li><li><strong>mass</strong>: <span class='pill state-na'>na</span> —</li><li><strong>dfm</strong>: <span class='pill state-warn'>warn</span> M2 insert ID feel-test still open</li></ul><div class='stl'><p class='meta'><strong>not FEA target</strong></p><p class='meta'>SHA-1 <code>b937786018414c8cb213b7ed65d8ead0dd371bd7</code></p><p><code>/data_drive/esl/active-esl-enclosures/handheld/out/clearance_coupons.stl</code></p><p class='meta'><em>no FEA runner</em></p></div></section>
+  <div class='links'><a href='../assembly.html'>Inspect →</a><a class='secondary' href='../'>Look →</a><a class='secondary' href='../../'>Gallery →</a><a class='secondary' href='report.json'>report.json</a></div>
+</body>
+</html>
