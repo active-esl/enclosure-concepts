@@ -19,12 +19,14 @@
       label: "Eth",
       look: `${root}handheld-eth/`,
       inspect: `${root}handheld-eth/assembly.html`,
+      eval: `${root}handheld-eth/fea/`,
       still: `${root}still.html?c=eth`,
     },
   ];
 
   const conceptHref = (c) => {
     if (mode === "inspect") return c.inspect;
+    if (mode === "eval" && c.eval) return c.eval;
     if (mode === "still") return c.still;
     return c.look;
   };
@@ -32,6 +34,7 @@
     const cur = concepts.find((c) => c.id === concept);
     if (!cur) return `${root}`;
     if (m === "inspect") return cur.inspect;
+    if (m === "eval") return cur.eval || cur.look;
     if (m === "still") return cur.still;
     return cur.look;
   };
@@ -45,13 +48,19 @@
     ...concepts.map((c) => pill(conceptHref(c), c.label, c.id === concept)),
   ].join("");
 
+  const cur = concepts.find((c) => c.id === concept);
+  // Order (Alex 2026-08-03): Still · Look · Inspect · Evaluate
   const modeBlock = concept
     ? `<div class="site-nav__modes" role="navigation" aria-label="Mode">${
+        pill(modeHref("still"), "Still", mode === "still")
+      }${
         pill(modeHref("look"), "Look", mode === "look")
       }${
         pill(modeHref("inspect"), "Inspect", mode === "inspect")
       }${
-        pill(modeHref("still"), "Still", mode === "still")
+        cur?.eval
+          ? pill(modeHref("eval"), "Evaluate", mode === "eval")
+          : ""
       }</div>`
     : "";
 
