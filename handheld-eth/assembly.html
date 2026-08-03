@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260803T014606Z-117bff9692" />
+  <meta name="aesl-build" content="20260803T015331Z-5d7295bf91" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -1049,8 +1049,38 @@
       };
     }
 
+    function defaultHudDockPos() {
+      const cs = getComputedStyle(document.documentElement);
+      const n = (v) => {
+        const m = String(v || '0').match(/([\d.]+)/);
+        return m ? parseFloat(m[1]) : 0;
+      };
+      return {
+        left: 12 + n(cs.getPropertyValue('--safe-left')),
+        top: 12 + n(cs.getPropertyValue('--safe-top')),
+      };
+    }
+
+    function clearHudPlacement({ persist = true } = {}) {
+      hudEl.style.left = '';
+      hudEl.style.top = '';
+      hudEl.style.right = '';
+      hudEl.style.bottom = '';
+      hudEl.classList.remove('hud-placed');
+      hudPlaced = false;
+      if (persist) persistHudChrome();
+      if (!hudDragging) applyPanelViewOffset();
+    }
+
     function applyHudPosition(left, top, { persist = true } = {}) {
       const p = clampHudPosition(left, top);
+      // Near the CSS dock slot → stay in default docked mode so view-offset
+      // still centres the model in the clear view area (not under the HUD).
+      const dock = defaultHudDockPos();
+      if (Math.hypot(p.left - dock.left, p.top - dock.top) < 28) {
+        clearHudPlacement({ persist });
+        return { left: dock.left, top: dock.top };
+      }
       hudEl.style.left = `${p.left}px`;
       hudEl.style.top = `${p.top}px`;
       hudEl.style.right = 'auto';
@@ -1093,11 +1123,23 @@
         const raw = localStorage.getItem(HUD_STORE_KEY);
         if (!raw) return;
         const st = JSON.parse(raw);
-        if (st && typeof st.left === 'number' && typeof st.top === 'number') {
-          applyHudPosition(st.left, st.top, { persist: false });
+        if (!st || typeof st !== 'object') {
+          localStorage.removeItem(HUD_STORE_KEY);
+          return;
         }
-        if (st && st.collapsed) setHudCollapsed(true, { persist: false });
-      } catch (_) { /* ignore */ }
+        if (typeof st.left === 'number' && typeof st.top === 'number'
+            && Number.isFinite(st.left) && Number.isFinite(st.top)) {
+          // Reject absurd coords (pre-clamp) that used to zero the view.
+          if (Math.abs(st.left) > innerWidth * 3 || Math.abs(st.top) > innerHeight * 3) {
+            localStorage.removeItem(HUD_STORE_KEY);
+          } else {
+            applyHudPosition(st.left, st.top, { persist: false });
+          }
+        }
+        if (st.collapsed) setHudCollapsed(true, { persist: false });
+      } catch (_) {
+        try { localStorage.removeItem(HUD_STORE_KEY); } catch (__) { /* ignore */ }
+      }
     }
 
     hudHandle.addEventListener('pointerdown', (ev) => {
@@ -1154,6 +1196,12 @@
       if (ev.target.closest('#btnPanelClose')) return;
       if (suppressHudDblClick) return;
       ev.preventDefault();
+      // Alt+double-click restores the default left dock + view centering.
+      if (ev.altKey) {
+        setHudCollapsed(false, { persist: false });
+        clearHudPlacement({ persist: true });
+        return;
+      }
       setHudCollapsed(!hudCollapsed);
     });
 
@@ -2314,7 +2362,7 @@
       const dist = framingDistance(fit.radius, 1.15);
       camera.position.copy(fit.center).addScaledVector(dir, dist);
       controls.target.copy(fit.center);
-      camera.updateProjectionMatrix();
+      applyPanelViewOffset();
       controls.update();
       writeHash();
     }
@@ -2356,31 +2404,46 @@
       const dist = framingDistance(fit.radius, pad);
       camera.position.copy(fit.center).addScaledVector(dir, dist);
       controls.target.copy(fit.center);
-      camera.updateProjectionMatrix();
+      applyPanelViewOffset();
       controls.update();
       writeHash();
     }
 
-    // Shift the *projection* rather than the orbit target, so the model clears
-    // the desktop panel without moving the centre of rotation off the part.
-    // Only the default left-docked HUD drives this. A freely placed / dragging
-    // window must not pan the model (Hansei 2026-08-03: title-bar drag).
+    // Shift the *projection* so the model centres in the clear view area
+    // (between left-docked HUD and RHS cam stack), not in the full window.
+    // Freely placed / dragging HUD: clear offset — never freeze a stale value
+    // (Hansei 2026-08-03: freeze hid the model or parked it under the HUD).
     function applyPanelViewOffset() {
       if (!viewOffsetReady) return;
       if (hudDragging) return;
       const w = Math.max(1, innerWidth);
       const h = Math.max(1, innerHeight);
-      const hudNode = document.getElementById('hud');
-      // Freeze the docked offset once the user has placed the HUD — do not
-      // recompute from getBoundingClientRect().right while it floats.
-      if (hudPlaced && isPanelOpen()) return;
-      const panelW = (innerWidth > 900 && isPanelOpen() && hudNode && !hudPlaced)
-        ? hudNode.getBoundingClientRect().right
-        : 0;
-      if (panelW > 0) {
-        camera.setViewOffset(w, h, -panelW / 2, 0, w, h);
-      } else {
+      const docked = !hudPlaced && isPanelOpen() && w > 900;
+      if (!docked) {
         camera.clearViewOffset();
+        camera.updateProjectionMatrix();
+        return;
+      }
+      const hudNode = document.getElementById('hud');
+      const camNode = document.getElementById('camStack');
+      let left = hudNode ? hudNode.getBoundingClientRect().right : 0;
+      let right = w;
+      if (camNode) {
+        const cr = camNode.getBoundingClientRect();
+        if (cr.left > left + 40) right = cr.left;
+      }
+      // Keep a sane usable band; fall back to full-frame if layout is odd.
+      if (!(right - left > 120)) {
+        camera.clearViewOffset();
+        camera.updateProjectionMatrix();
+        return;
+      }
+      // offsetX < 0 shifts content right so frustum centre maps to usable centre.
+      const offsetX = w / 2 - (left + right) / 2;
+      if (Math.abs(offsetX) < 1) {
+        camera.clearViewOffset();
+      } else {
+        camera.setViewOffset(w, h, offsetX, 0, w, h);
       }
       camera.updateProjectionMatrix();
     }
