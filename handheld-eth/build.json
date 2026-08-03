@@ -1,6 +1,6 @@
 {
-  "id": "20260803T005927Z-c97f71eb8d",
-  "built_at": "2026-08-03T00:59:27Z",
+  "id": "20260803T010650Z-18db46f184",
+  "built_at": "2026-08-03T01:06:50Z",
   "concept": "handheld-eth",
   "assets": {
     "handheld.glb": "7c7cf656be",
@@ -15,6 +15,7 @@
     "still.js": "2e090d54cf",
     "inspect-lighting.js": "fcbeb5a3f5",
     "fea/corner_twist.json": "4c1bf1b6a8",
-    "fea/long_edge_bend.json": "b19df8ff76"
+    "fea/long_edge_bend.json": "b19df8ff76",
+    "fea/report.json": "03ac2c03c6"
   }
 }

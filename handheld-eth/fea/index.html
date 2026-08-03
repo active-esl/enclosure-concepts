@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="aesl-build" content="fea-20260803T005440Z" />
+  <title>FEA ranking — handheld eth (not CE)</title>
+  <link rel="stylesheet" href="../../site-nav.css?v=6d880fe881" />
+  <style>
+    :root {
+      --bg: #0f1419; --panel: #1a222c; --line: #2a3542;
+      --text: #e8eef5; --muted: #9aa8b8; --warn: #f0b74a;
+      --ok: #3ecf8e; --bad: #ff8a80; --accent: #3ec6ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font: 15px/1.45 "Segoe UI", system-ui, sans-serif;
+      background: var(--bg); color: var(--text);
+    }
+    header {
+      padding: 16px 20px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+    header h1 { margin: 0 0 6px; font-size: 1.25rem; }
+    .disclaimer {
+      margin: 12px 20px 0;
+      padding: 12px 14px;
+      border: 1px solid rgba(240,183,74,.45);
+      background: rgba(240,183,74,.08);
+      border-radius: 10px;
+      color: var(--warn);
+    }
+    .disclaimer strong { color: #ffd27a; }
+    .meta { color: var(--muted); font-size: .9rem; }
+    .grid {
+      display: grid; gap: 16px; padding: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+    .card {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: 12px; padding: 14px;
+    }
+    .badge {
+      font-size: .72rem; padding: 2px 7px; border-radius: 999px;
+      background: rgba(62,207,142,.15); color: var(--ok);
+    }
+    .card.skip .badge { background: rgba(154,168,184,.18); color: var(--muted); }
+    .big { font-size: 1.05rem; }
+    .warns { color: var(--warn); margin: 8px 0 0; padding-left: 1.1em; }
+    .stl {
+      margin: 12px 20px 0; padding: 12px 14px;
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+    .stl code { color: var(--accent); word-break: break-all; font-size: .82rem; }
+    .links { margin: 16px 20px 28px; display: flex; flex-wrap: wrap; gap: 10px; }
+    .links a {
+      display: inline-flex; align-items: center; min-height: 40px;
+      padding: 8px 14px; border-radius: 999px; text-decoration: none;
+      border: 1px solid rgba(62,198,255,.55); background: rgba(62,198,255,.15);
+      color: #fff; font-weight: 650;
+    }
+    .links a.secondary {
+      border-color: rgba(255,255,255,.18); background: transparent; color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <nav id="siteNav" class="site-nav" data-root="../../" data-concept="eth" data-mode="inspect" aria-label="Concept site"></nav>
+  <script src="../../site-nav.js?v=b30e3047b9" defer></script>
+
+  <header>
+    <h1>FEA ranking — handheld eth rear</h1>
+    <p class="meta">
+      20260803T005440Z · PLA E=3500&nbsp;MPa · gmsh + CalculiX ·
+      <strong style="color:#ffd27a">ranking only</strong>
+    </p>
+  </header>
+
+  <aside class="disclaimer" role="note">
+    <strong>Ranking only — isotropic PLA — NOT CE certification.</strong>
+    These numbers compare geometry stiffness (“does this rib help?”), not product
+    conformity. FDM layer bond is anisotropic and weaker than bulk yield.
+    Do <em>not</em> treat PASS as a CE / IEC pass. Future standards load cases
+    (drop, IEC&nbsp;62368 force steps, etc.) are scoped in the private CAD repo at
+    <code>handheld/review/cea-mechanical-drop-fea-brief.md</code>.
+  </aside>
+
+  <section class="stl">
+    <p><strong>STL used</strong> (io_aperture green; yes_skin / jack-wall era)</p>
+    <p class="meta">SHA-1 <code>3a686de5d856dea753e274b3a278763e2d6b88d0</code></p>
+    <p><code>…/assembly_explorer/20260803T004300944123Z/rear.stl</code></p>
+    <p class="meta">
+      Skin-connect WIP after this stamp (e.g. <code>20260803T005103…</code>) failed
+      flush — not waited on. Front <code>press_centre</code> also tried
+      (SHA <code>0b0b1c47040ed40a34ca7d7fa3a49c96594e026d</code>) — SKIP.
+      Inspect overlays: <code>long_edge_bend.json</code> /
+      <code>corner_twist.json</code> (subsampled field; peaks below full-mesh report).
+    </p>
+  </section>
+
+  <main class="grid">
+    <article class="card skip">
+      <h2>Press centre (rear) <span class="badge">SKIP</span></h2>
+      <p class="meta">30&nbsp;N · open tray — no nodes in load region</p>
+      <p class="big">max defl <b>—</b> · peak σ<sub>vm</sub> <b>—</b></p>
+    </article>
+    <article class="card skip">
+      <h2>Press centre (front) <span class="badge">SKIP</span></h2>
+      <p class="meta">30&nbsp;N · AABB load slab empty on front.stl</p>
+      <p class="big">max defl <b>—</b> · peak σ<sub>vm</sub> <b>—</b></p>
+    </article>
+    <article class="card">
+      <h2>Long-edge bend <span class="badge">PASS</span></h2>
+      <p class="meta">20&nbsp;N · 154 877 elems · fixed 3000 · loaded 3098</p>
+      <p class="big">
+        max defl <b>21.59</b> mm ·
+        peak σ<sub>vm</sub> <b>83.05</b> MPa ·
+        SF<sub>yield</sub> <b>0.60</b>
+      </p>
+      <ul class="warns">
+        <li>Deflection ≫ 2 mm advisory — ranking signal, not a fail gate</li>
+        <li>Peak σ<sub>vm</sub> above isotropic yield — expect FDM to be worse</li>
+      </ul>
+    </article>
+    <article class="card">
+      <h2>Corner twist <span class="badge">PASS</span></h2>
+      <p class="meta">15&nbsp;N · 154 877 elems · fixed 969 · loaded 995</p>
+      <p class="big">
+        max defl <b>75.29</b> mm ·
+        peak σ<sub>vm</sub> <b>116.42</b> MPa ·
+        SF<sub>yield</sub> <b>0.43</b>
+      </p>
+      <ul class="warns">
+        <li>Large twist deflection — shell is soft in this ranking load</li>
+        <li>Peak σ<sub>vm</sub> ≫ yield — geometry comparison only</li>
+      </ul>
+    </article>
+  </main>
+
+  <div class="links">
+    <a href="../assembly.html">Inspect (FEA overlays) →</a>
+    <a class="secondary" href="../">Look →</a>
+    <a class="secondary" href="../../">Gallery →</a>
+    <a class="secondary" href="report.json">report.json</a>
+  </div>
+  <script src="../../pages-update.js?v=e0b693ae57" defer></script>
+</body>
+</html>
