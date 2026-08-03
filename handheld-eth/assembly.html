@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260803T140423Z-b7e55cc4d0" />
+  <meta name="aesl-build" content="20260803T150511Z-cf852e76af" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -445,9 +445,9 @@
     const MANIFEST = {
   "id": "eth",
   "title": "Handheld eth \u2014 PLACEHOLDER",
-  "blurb": "Stepped rear eth \u00b7 front housing + rear housing (service hatch removed from SCAD). Ghost internals (V3Room populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
+  "blurb": "Stepped rear eth \u00b7 front housing + rear housing (service hatch removed from SCAD). Ghost internals (Active Screen populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "e62124ba98",
+  "glb_version": "6d44ef0779",
   "parts": [
     {
       "id": "front",
@@ -515,7 +515,7 @@
     },
     {
       "id": "pcb",
-      "label": "PCB (V3Room light)",
+      "label": "PCB (Active Screen board)",
       "visible": true,
       "color": [
         28,
@@ -551,12 +551,12 @@
           "a": [
             0.0,
             0.177,
-            0.0096
+            0.010400000000000001
           ],
           "b": [
             0.246,
             0.177,
-            0.0096
+            0.010400000000000001
           ]
         },
         {
@@ -565,17 +565,17 @@
           "a": [
             0.254,
             0.0,
-            0.0096
+            0.010400000000000001
           ],
           "b": [
             0.254,
             0.169,
-            0.0096
+            0.010400000000000001
           ]
         },
         {
-          "label": "D 18.4 mm",
-          "mm": 18.35,
+          "label": "D 19.1 mm",
+          "mm": 19.15,
           "a": [
             0.254,
             0.169,
@@ -584,7 +584,7 @@
           "b": [
             0.254,
             0.169,
-            0.0096
+            0.010400000000000001
           ]
         }
       ]
@@ -852,12 +852,12 @@
           "a": [
             0.254,
             0.01,
-            -0.0024000000000000002
+            -0.0015999999999999996
           ],
           "b": [
             0.254,
             0.01,
-            0.0096
+            0.010400000000000001
           ]
         }
       ]
@@ -946,18 +946,18 @@
     "fea_overlays": [
       {
         "id": "long_edge_bend",
-        "url": "fea/long_edge_bend.json?v=c063468023",
+        "url": "fea/long_edge_bend.json?v=eb18ddb05c",
         "label": "Bend across the long axis (grip + push)",
         "field": "von_mises_MPa",
-        "max": 26.249775,
+        "max": 31.705573,
         "min": 0.0
       },
       {
         "id": "corner_twist",
-        "url": "fea/corner_twist.json?v=e163ed6fe7",
+        "url": "fea/corner_twist.json?v=66ab34fd76",
         "label": "Diagonal twist (one corner up)",
         "field": "von_mises_MPa",
-        "max": 59.419398,
+        "max": 56.428394,
         "min": 0.0
       }
     ]
