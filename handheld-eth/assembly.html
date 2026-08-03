@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260803T010650Z-18db46f184" />
+  <meta name="aesl-build" content="20260803T012110Z-ac09a1fdb0" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -367,13 +367,17 @@
             </label>
           </summary>
           <div class="tool-body">
+            <p class="muted" style="margin:0 0 8px;font-size:.82rem">
+              Ranking only · not CE · by printable part
+            </p>
+            <div id="feaPrintables" class="toggles" aria-label="Printable parts"></div>
             <div class="row">
               <select id="feaCase" aria-label="FEA load case"></select>
             </div>
             <div id="feaOut" class="muted"></div>
             <p class="muted" style="margin:8px 0 0;font-size:.82rem">
-              Ranking only · isotropic PLA · not CE —
-              <a href="fea/" style="color:var(--accent,#3ec6ff)">full report</a>
+              Full by-part report:
+              <a href="fea/" style="color:var(--accent,#3ec6ff)">fea/</a>
             </p>
           </div>
         </details>
@@ -426,7 +430,7 @@
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front housing + rear housing (service hatch deferred). Ghost internals (V3Room populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "3325a41a2a",
+  "glb_version": "0028cd01aa",
   "parts": [
     {
       "id": "front",
@@ -900,6 +904,28 @@
       "long_edge_bend",
       "corner_twist"
     ],
+    "fea_printables": [
+      {
+        "id": "rear",
+        "label": "Rear",
+        "href": "fea/#rear"
+      },
+      {
+        "id": "front",
+        "label": "Front",
+        "href": "fea/#front"
+      },
+      {
+        "id": "hatch",
+        "label": "Hatch",
+        "href": "fea/#hatch"
+      },
+      {
+        "id": "coupons",
+        "label": "Coupons",
+        "href": "fea/#coupons"
+      }
+    ],
     "fea_overlays": [
       {
         "id": "long_edge_bend",
@@ -1081,6 +1107,26 @@
         opt.value = o.id;
         opt.textContent = o.label || o.id;
         sel.appendChild(opt);
+      }
+      // Printables entry: one link per FDM shell slot (report is part-scoped).
+      const printables = FEATURES.fea_printables || [
+        { id: 'rear', label: 'Rear', href: 'fea/#rear' },
+        { id: 'front', label: 'Front', href: 'fea/#front' },
+        { id: 'hatch', label: 'Hatch', href: 'fea/#hatch' },
+        { id: 'coupons', label: 'Coupons', href: 'fea/#coupons' },
+      ];
+      const box = document.getElementById('feaPrintables');
+      if (box) {
+        for (const p of printables) {
+          const a = document.createElement('a');
+          a.href = p.href || (`fea/#${p.id}`);
+          a.textContent = p.label || p.id;
+          a.style.cssText =
+            'display:inline-flex;align-items:center;min-height:28px;padding:2px 8px;' +
+            'margin:0 6px 6px 0;border-radius:999px;text-decoration:none;' +
+            'border:1px solid rgba(62,198,255,.45);color:var(--accent,#3ec6ff);font-size:.82rem';
+          box.appendChild(a);
+        }
       }
     }
     const dimToggles = document.getElementById('dimToggles');
