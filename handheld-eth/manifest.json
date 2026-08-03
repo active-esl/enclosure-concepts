@@ -3,7 +3,7 @@
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front housing + rear housing (service hatch deferred). Ghost internals (V3Room populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "d88c33a028",
+  "glb_version": "118e788921",
   "parts": [
     {
       "id": "front",
@@ -260,27 +260,27 @@
           "mm": 28.0,
           "a": [
             0.109,
-            0.17239999999999997,
-            0.01204
+            0.027049999999999994,
+            0.012039999999999999
           ],
           "b": [
             0.137,
-            0.17239999999999997,
-            0.01204
+            0.027049999999999994,
+            0.012039999999999999
           ]
         },
         {
-          "label": "accents H 146.8 mm",
-          "mm": 146.85,
+          "label": "accents H 1.5 mm",
+          "mm": 1.5,
           "a": [
             0.145,
             0.017549999999999993,
-            0.01204
+            0.012039999999999999
           ],
           "b": [
             0.145,
-            0.1644,
-            0.01204
+            0.019049999999999994,
+            0.012039999999999999
           ]
         }
       ]
