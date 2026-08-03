@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260803T013037Z-b1aa624624" />
+  <meta name="aesl-build" content="20260803T013941Z-29a77e0f02" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -990,6 +990,8 @@
     const btnPanelClose = document.getElementById('btnPanelClose');
     // Guards the camera-dependent view offset until the camera exists.
     let viewOffsetReady = false;
+    // OrbitControls is created later; HUD drag disables it via this ref.
+    let controls = null;
     const mqMobile = matchMedia('(max-width: 720px)');
     let panelOpen = true;
     let panelUserSet = false;
@@ -1057,6 +1059,7 @@
     const HUD_STORE_KEY = `aesl-inspect-hud:${MANIFEST.id || 'unknown'}`;
     let hudCollapsed = false;
     let hudPlaced = false;
+    let hudDragging = false;
     let suppressHudDblClick = false;
 
     function hudSafePad() {
@@ -1095,7 +1098,8 @@
       hudEl.classList.add('hud-placed');
       hudPlaced = true;
       if (persist) persistHudChrome();
-      applyPanelViewOffset();
+      // Never re-frame the 3D view while the window is being dragged.
+      if (!hudDragging) applyPanelViewOffset();
       return p;
     }
 
@@ -1139,16 +1143,24 @@
     hudHandle.addEventListener('pointerdown', (ev) => {
       if (ev.button != null && ev.button !== 0) return;
       if (ev.target.closest('#btnPanelClose')) return;
+      // Isolate from the canvas / OrbitControls under the HUD.
+      ev.preventDefault();
+      ev.stopPropagation();
       const startX = ev.clientX;
       const startY = ev.clientY;
       const rect = hudEl.getBoundingClientRect();
       const originL = rect.left;
       const originT = rect.top;
       let moved = false;
+      hudDragging = true;
       hudEl.classList.add('dragging');
+      hudHandle.style.cursor = 'grabbing';
+      if (controls) controls.enabled = false;
       try { hudHandle.setPointerCapture(ev.pointerId); } catch (_) { /* ok */ }
 
       const onMove = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         const dx = e.clientX - startX;
         const dy = e.clientY - startY;
         if (!moved && (dx * dx + dy * dy) < 16) return;
@@ -1156,11 +1168,15 @@
         applyHudPosition(originL + dx, originT + dy, { persist: false });
       };
       const onUp = (e) => {
-        hudHandle.removeEventListener('pointermove', onMove);
-        hudHandle.removeEventListener('pointerup', onUp);
-        hudHandle.removeEventListener('pointercancel', onUp);
+        window.removeEventListener('pointermove', onMove, true);
+        window.removeEventListener('pointerup', onUp, true);
+        window.removeEventListener('pointercancel', onUp, true);
+        hudDragging = false;
         hudEl.classList.remove('dragging');
+        hudHandle.style.cursor = '';
         try { hudHandle.releasePointerCapture(e.pointerId); } catch (_) { /* ok */ }
+        // Restore orbit unless Measure mode still owns the pointer.
+        if (controls) controls.enabled = !measureOn;
         if (moved) {
           suppressHudDblClick = true;
           setTimeout(() => { suppressHudDblClick = false; }, 400);
@@ -1168,9 +1184,10 @@
           applyHudPosition(r.left, r.top, { persist: true });
         }
       };
-      hudHandle.addEventListener('pointermove', onMove);
-      hudHandle.addEventListener('pointerup', onUp);
-      hudHandle.addEventListener('pointercancel', onUp);
+      // Capture-phase window listeners so release outside the HUD still cleans up.
+      window.addEventListener('pointermove', onMove, true);
+      window.addEventListener('pointerup', onUp, true);
+      window.addEventListener('pointercancel', onUp, true);
     });
 
     hudHandle.addEventListener('dblclick', (ev) => {
@@ -1367,7 +1384,7 @@
     const camera = new THREE.PerspectiveCamera(40, 2, 0.001, 20);
     camera.position.set(0.28, 0.22, 0.32);
 
-    const controls = new OrbitControls(camera, canvas);
+    controls = new OrbitControls(camera, canvas);
     controls.enableDamping = true;
     controls.target.set(0.11, 0.075, 0.0);
 
@@ -2086,17 +2103,20 @@
       geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
     }
 
-    // LCD stack is thick: rear faces share XY-projected splash UVs, so a deep
-    // I/O void can show mirrored "handheld · concept UI" on the under-jack
-    // plane. Pin back-half verts to a navy field texel (front LCD unchanged).
+    // LCD stack is thick: rear / shelf / step faces share XY-projected splash
+    // UVs. A mid-stack shelf near the caption Y reads as a solid gray bar
+    // through "handheld · concept UI" (Alex crop 2026-08-03). Keep splash only
+    // on the front skin; pin every other vert to a navy field texel.
     function neutralizeLcdBackFaceUvs(geometry) {
       const box = geometry.boundingBox || (geometry.computeBoundingBox(), geometry.boundingBox);
       const pos = geometry.attributes.position;
       const uv = geometry.attributes.uv;
       if (!box || !pos || !uv) return;
-      const zMid = (box.min.z + box.max.z) * 0.5;
+      const zSpan = Math.max(box.max.z - box.min.z, 1e-9);
+      // Front skin only (~top 12% of thickness). Mid-plane left shelves lit.
+      const zFrontMin = box.max.z - zSpan * 0.12;
       for (let i = 0; i < pos.count; i++) {
-        if (pos.getZ(i) < zMid) {
+        if (pos.getZ(i) < zFrontMin) {
           uv.setXY(i, 0.02, 0.02);
         }
       }
@@ -2211,15 +2231,18 @@
           emissiveIntensity: isLcdSplash ? 1.35 : 0,
           // Matte plastic: higher metalness + RoomEnvironment stamps a hard
           // horizon band onto flat faces as you orbit.
+          // LCD splash: no IBL — env horizon + mid-stack shelves read as a gray
+          // bar through the concept-UI caption (Alex 2026-08-03).
           metalness: isOverlay ? 0.08 : (isGlass ? 0.04 : (isPrintSplash ? 0.06 : 0.12)),
-          roughness: isOverlay ? 0.5 : (isLcdSplash ? 0.35 : (isPrintSplash ? 0.55 : (isGlass ? 0.2 : 0.62))),
-          envMapIntensity: isOverlay ? 0.4 : (isGlass ? (splash ? 0.55 : 1.4) : (isPrintSplash ? 0.35 : 0.45)),
+          roughness: isOverlay ? 0.5 : (isLcdSplash ? 0.55 : (isPrintSplash ? 0.55 : (isGlass ? 0.2 : 0.62))),
+          envMapIntensity: isOverlay ? 0.4 : (isLcdSplash ? 0.0 : (isGlass ? 1.4 : (isPrintSplash ? 0.35 : 0.45))),
           transparent: isAlpha,
           // Splash needs enough opacity to read; ghost PCB / shells use YAML.
+          // LCD: fully opaque so well-floor / shelves cannot composite a bar.
           opacity: isOverlay
             ? 1.0
             : (isLcdSplash
-              ? (meta.opacity ?? 0.92)
+              ? (meta.opacity ?? 1.0)
               : (isGhost ? (meta.opacity ?? 0.55)
                 : (isAlpha ? (meta.opacity ?? 0.55) : 1.0))),
           // LCD splash PNGs may use alpha (logo matte cleared 2026-08-02).
@@ -2380,13 +2403,19 @@
 
     // Shift the *projection* rather than the orbit target, so the model clears
     // the desktop panel without moving the centre of rotation off the part.
+    // Only the default left-docked HUD drives this. A freely placed / dragging
+    // window must not pan the model (Hansei 2026-08-03: title-bar drag).
     function applyPanelViewOffset() {
       if (!viewOffsetReady) return;
+      if (hudDragging) return;
       const w = Math.max(1, innerWidth);
       const h = Math.max(1, innerHeight);
-      const hudEl = document.getElementById('hud');
-      const panelW = (innerWidth > 900 && isPanelOpen() && hudEl)
-        ? hudEl.getBoundingClientRect().right
+      const hudNode = document.getElementById('hud');
+      // Freeze the docked offset once the user has placed the HUD — do not
+      // recompute from getBoundingClientRect().right while it floats.
+      if (hudPlaced && isPanelOpen()) return;
+      const panelW = (innerWidth > 900 && isPanelOpen() && hudNode && !hudPlaced)
+        ? hudNode.getBoundingClientRect().right
         : 0;
       if (panelW > 0) {
         camera.setViewOffset(w, h, -panelW / 2, 0, w, h);
