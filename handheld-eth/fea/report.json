@@ -1,8 +1,14 @@
 {
   "ranking_only": true,
   "not_ce_certification": true,
-  "disclaimer": "Ranking only — isotropic PLA via gmsh + CalculiX. NOT CE certification, NOT certified FDM strength. FDM layer bond is anisotropic and weaker than bulk yield. Confirm on the bench. Future standards load cases (drop / IEC 62368 force steps) are scoped in active-esl-enclosures handheld/review/cea-mechanical-drop-fea-brief.md (private CAD repo).",
+  "disclaimer": "Ranking only — isotropic PLA via gmsh + CalculiX. NOT CE certification, NOT certified FDM strength. PASS = solver finished (may warn on huge deflection), not product OK. FDM layer bond is anisotropic and weaker than bulk yield. Confirm on the bench. Daily HOWTO: active-esl-enclosures handheld/review/FEA-HOWTO.md (./scripts/run_fea_ranking.sh). CE/drop plan: handheld/review/cea-mechanical-drop-fea-brief.md.",
+  "howto_repo_path": "handheld/review/FEA-HOWTO.md",
   "cea_brief_repo_path": "handheld/review/cea-mechanical-drop-fea-brief.md",
+  "badge_note": {
+    "PASS": "solver finished — not design OK / not CE",
+    "SKIP": "no nodes in load/fix region",
+    "FAIL": "pipeline/solver error"
+  },
   "engine": "gmsh + CalculiX (ccx)",
   "material": {
     "name": "PLA",
