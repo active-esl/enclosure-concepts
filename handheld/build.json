@@ -1,6 +1,6 @@
 {
-  "id": "20260803T000945Z-00b2522be9",
-  "built_at": "2026-08-03T00:09:45Z",
+  "id": "20260803T002513Z-e2b7a1f29f",
+  "built_at": "2026-08-03T00:25:13Z",
   "concept": "handheld",
   "assets": {
     "handheld.glb": "93c7dbaa60",
@@ -13,6 +13,6 @@
     "look-viewer.js": "5db92e04f0",
     "pages-update.js": "e0b693ae57",
     "still.js": "2e090d54cf",
-    "inspect-lighting.js": "6be561f2f5"
+    "inspect-lighting.js": "fcbeb5a3f5"
   }
 }

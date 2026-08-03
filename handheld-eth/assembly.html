@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260803T000945Z-13bbc00648" />
+  <meta name="aesl-build" content="20260803T002513Z-6818bd9428" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -416,18 +416,13 @@
     import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
     import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
     import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-    import {
-      INSPECT_LIGHTING,
-      applyInspectEnvironment,
-      createInspectLights,
-    } from '../inspect-lighting.js?v=6be561f2f5';
 
     const MANIFEST = {
   "id": "eth",
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front housing + rear housing (service hatch deferred). Ghost internals (V3Room populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "f377aff514",
+  "glb_version": "1534eac98d",
   "parts": [
     {
       "id": "front",
@@ -529,12 +524,12 @@
           "label": "W 246.9 mm",
           "mm": 246.9,
           "a": [
-            -0.00045000000000000004,
+            -0.0004500000000000001,
             0.177,
             0.0096
           ],
           "b": [
-            0.24645,
+            0.24645000000000003,
             0.177,
             0.0096
           ]
@@ -788,7 +783,7 @@
           "label": "pad W 156.0 mm",
           "mm": 155.99,
           "a": [
-            0.045004999999999996,
+            0.04500500000000001,
             0.023350000000000003,
             0.0
           ],
@@ -802,12 +797,12 @@
           "label": "pad H 107.3 mm",
           "mm": 107.3,
           "a": [
-            0.037004999999999996,
+            0.03700500000000001,
             0.03135,
             0.0
           ],
           "b": [
-            0.037004999999999996,
+            0.03700500000000001,
             0.13865,
             0.0
           ]
@@ -816,12 +811,12 @@
           "label": "raise 8.8 mm",
           "mm": 8.75,
           "a": [
-            0.037004999999999996,
+            0.03700500000000001,
             0.13865,
             -0.00875
           ],
           "b": [
-            0.037004999999999996,
+            0.03700500000000001,
             0.13865,
             0.0
           ]
@@ -1147,7 +1142,10 @@
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    // Exposure set by shared applyInspectEnvironment (inspect-lighting.js).
+        // Physical light units (three r155+) need ~π× the old "legacy" intensities.
+    // Restored inline from 32143d8 after shared diffuse inspect-lighting.js
+    // made translucent shells read as a black silhouette (Alex 2026-08-03).
+    renderer.toneMappingExposure = 1.2;
     renderer.localClippingEnabled = true;
 
     const labelRenderer = new CSS2DRenderer();
@@ -1166,16 +1164,46 @@
     controls.enableDamping = true;
     controls.target.set(0.11, 0.075, 0.0);
 
-    // Shared diffuse studio (eth + slim): ../inspect-lighting.js
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     // environmentIntensity needs three >= r163; drive IBL via material.envMapIntensity.
-    applyInspectEnvironment(THREE, scene, renderer, RoomEnvironment);
-    const { updateCameraLights: _updateInspectLights } = createInspectLights(THREE, scene);
+
+    // Physical-unit studio rig. Camera-follow key/fill keep the viewed face
+    // lit while orbiting; fixed rim/top/worldKey keep silhouette and form.
+    scene.add(new THREE.AmbientLight(0xc8d4e6, 2.1));
+    const key = new THREE.DirectionalLight(0xfff1e0, 4.87);
+    scene.add(key);
+    scene.add(key.target);
+    const fill = new THREE.DirectionalLight(0xd4e4ff, 1.73);
+    scene.add(fill);
+    scene.add(fill.target);
+    const rim = new THREE.DirectionalLight(0xeef3ff, 3.77);
+    rim.position.set(-0.2, 0.4, -0.85);
+    scene.add(rim);
+    const top = new THREE.DirectionalLight(0xffffff, 1.41);
+    top.position.set(0.1, 1.1, 0.15);
+    scene.add(top);
+    // Fixed world key so default front/side presets still have form if the
+    // camera-follow lights are glancing.
+    const worldKey = new THREE.DirectionalLight(0xfff6ee, 2.98);
+    worldKey.position.set(0.5, 0.75, 0.85);
+    scene.add(worldKey);
+
+    const _lightKeyOff = new THREE.Vector3();
+    const _lightFillOff = new THREE.Vector3();
     function updateCameraLights() {
-      _updateInspectLights(camera, controls.target);
+      _lightKeyOff.set(0.35, 0.5, 1.0).normalize().multiplyScalar(1.0);
+      _lightKeyOff.applyQuaternion(camera.quaternion);
+      key.position.copy(camera.position).add(_lightKeyOff);
+      key.target.position.copy(controls.target);
+      key.target.updateMatrixWorld();
+      _lightFillOff.set(-0.7, 0.1, 0.5).normalize().multiplyScalar(0.95);
+      _lightFillOff.applyQuaternion(camera.quaternion);
+      fill.position.copy(camera.position).add(_lightFillOff);
+      fill.target.position.copy(controls.target);
+      fill.target.updateMatrixWorld();
     }
     updateCameraLights();
-    // Expose preset id for visual proof / debug (same module both concepts).
-    window.__AESL_INSPECT_LIGHTING__ = INSPECT_LIGHTING;
 
     const root = new THREE.Group();
     scene.add(root);
@@ -1960,10 +1988,9 @@
           emissiveIntensity: isLcdSplash ? 1.35 : 0,
           // Matte plastic: higher metalness + RoomEnvironment stamps a hard
           // horizon band onto flat faces as you orbit.
-          metalness: isOverlay ? 0.08 : (isGlass ? 0.04 : (isPrintSplash ? 0.06 : 0.10)),
-          // Diffuse Inspect: slightly higher roughness; keep enough IBL for translucent shells.
-          roughness: isOverlay ? 0.5 : (isLcdSplash ? 0.38 : (isPrintSplash ? 0.55 : (isGlass ? 0.35 : (isAlpha ? 0.68 : 0.62)))),
-          envMapIntensity: isOverlay ? 0.38 : (isGlass ? (splash ? 0.5 : 0.95) : (isPrintSplash ? 0.32 : (isAlpha ? 0.42 : 0.42))),
+          metalness: isOverlay ? 0.08 : (isGlass ? 0.04 : (isPrintSplash ? 0.06 : 0.12)),
+          roughness: isOverlay ? 0.5 : (isLcdSplash ? 0.35 : (isPrintSplash ? 0.55 : (isGlass ? 0.2 : 0.62))),
+          envMapIntensity: isOverlay ? 0.4 : (isGlass ? (splash ? 0.55 : 1.4) : (isPrintSplash ? 0.35 : 0.45)),
           transparent: isAlpha,
           // Splash needs enough opacity to read; ghost PCB / shells use YAML.
           opacity: isOverlay
@@ -2042,8 +2069,11 @@
         const sid = hashState.spot || '';
         spotPartId = sid && PART_IDS.includes(sid) ? sid : null;
       } else {
-        const seed = PARTS.find((p) => p.highlight)?.id;
-        spotPartId = seed && PART_IDS.includes(seed) ? seed : null;
+        // Do not auto-Spot from YAML highlight — that dims translucent shells
+} else {
+        // to a black silhouette under studio lighting (Alex 2026-08-03).
+} else {
+        spotPartId = null;
       }
       if (Object.keys(hashState).length) {
         applyHashState(hashState);
@@ -2307,8 +2337,8 @@
               mat.emissiveIntensity = 0;
             }
             // Keep ghosts/shells translucent; just pull them back.
-            mat.opacity = Math.max(0.12, base.opacity * (base.opacity < 1 ? 0.62 : 0.78));
-            mat.envMapIntensity = base.envMapIntensity * 0.3;
+            mat.opacity = Math.max(0.28, base.opacity * (base.opacity < 1 ? 0.85 : 0.9));
+            mat.envMapIntensity = Math.max(0.25, base.envMapIntensity * 0.7);
             mesh.renderOrder = base.renderOrder;
           }
           mat.needsUpdate = true;
