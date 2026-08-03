@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260803T163256Z-755f17f5d4" />
+  <meta name="aesl-build" content="20260803T164007Z-f8d88e41a4" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -444,14 +444,14 @@
       INSPECT_LIGHTING,
       applyInspectEnvironment,
       createInspectLights,
-    } from '../inspect-lighting.js?v=07973df9fe';
+    } from '../inspect-lighting.js?v=3f90d182e8';
 
     const MANIFEST = {
   "id": "eth",
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front housing + rear housing (service hatch removed from SCAD). Ghost internals (Active Screen populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "d8cd297a94",
+  "glb_version": "b53ba73c61",
   "parts": [
     {
       "id": "front",
@@ -541,7 +541,7 @@
     },
     {
       "id": "ctp_dress",
-      "label": "CTP dress path (PLACEHOLDER)",
+      "label": "CTP dress 69.46 mm (ST1010 A02 SENSOR OD)",
       "visible": true,
       "color": [
         232,
@@ -553,7 +553,7 @@
     },
     {
       "id": "lcd_dress",
-      "label": "LCD dress path (PLACEHOLDER)",
+      "label": "LCD dress LCM\u2192PCB span (A02 onboard conn)",
       "visible": true,
       "color": [
         40,
@@ -1132,8 +1132,8 @@
     "measure": true,
     "outline": true,
     "outline_default": true,
-    "outline_depth_sensitivity": 320.0,
-    "outline_normal_sensitivity": 26.0,
+    "outline_depth_sensitivity": 360.0,
+    "outline_normal_sensitivity": 30.0,
     "explode": true,
     "explode_axis": [
       0,
@@ -2508,9 +2508,13 @@
           // horizon band onto flat faces as you orbit.
           // LCD splash: no IBL — env horizon + mid-stack shelves read as a gray
           // bar through the concept-UI caption (Alex 2026-08-03).
-          metalness: isOverlay ? 0.08 : (isGlass ? 0.04 : (isPrintSplash ? 0.06 : 0.12)),
-          roughness: isOverlay ? 0.5 : (isLcdSplash ? 0.55 : (isPrintSplash ? 0.55 : (isGlass ? 0.2 : 0.62))),
-          envMapIntensity: isOverlay ? 0.4 : (isLcdSplash ? 0.0 : (isGlass ? 1.4 : (isPrintSplash ? 0.35 : 0.45))),
+          // Soften RoomEnvironment rect wash: shells (transparent plastic) get
+          // low envMapIntensity so ceiling boxes don't stamp a milky panel;
+          // ghost PCB keeps higher IBL so FR4/SMDs stay lit (Alex 2026-08-03).
+          // LCD splash: no IBL (horizon/shelf bars).
+          metalness: isOverlay ? 0.06 : (isGlass ? 0.04 : (isPrintSplash ? 0.05 : ((isGhost || useFaceColors) ? 0.09 : (isAlpha ? 0.04 : 0.08)))),
+          roughness: isOverlay ? 0.55 : (isLcdSplash ? 0.55 : (isPrintSplash ? 0.58 : (isGlass ? 0.22 : ((isGhost || useFaceColors) ? 0.70 : (isAlpha ? 0.78 : 0.66))))),
+          envMapIntensity: isOverlay ? 0.35 : (isLcdSplash ? 0.0 : (isGlass ? 1.2 : (isPrintSplash ? 0.28 : ((isGhost || useFaceColors) ? 0.42 : (isAlpha ? 0.16 : 0.35))))),
           transparent: isAlpha,
           // Splash needs enough opacity to read; ghost PCB / shells use YAML.
           // LCD: fully opaque so well-floor / shelves cannot composite a bar.

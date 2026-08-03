@@ -3,7 +3,7 @@
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front housing + rear housing (service hatch removed from SCAD). Ghost internals (Active Screen populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "d8cd297a94",
+  "glb_version": "b53ba73c61",
   "parts": [
     {
       "id": "front",
@@ -93,7 +93,7 @@
     },
     {
       "id": "ctp_dress",
-      "label": "CTP dress path (PLACEHOLDER)",
+      "label": "CTP dress 69.46 mm (ST1010 A02 SENSOR OD)",
       "visible": true,
       "color": [
         232,
@@ -105,7 +105,7 @@
     },
     {
       "id": "lcd_dress",
-      "label": "LCD dress path (PLACEHOLDER)",
+      "label": "LCD dress LCM\u2192PCB span (A02 onboard conn)",
       "visible": true,
       "color": [
         40,
@@ -684,8 +684,8 @@
     "measure": true,
     "outline": true,
     "outline_default": true,
-    "outline_depth_sensitivity": 320.0,
-    "outline_normal_sensitivity": 26.0,
+    "outline_depth_sensitivity": 360.0,
+    "outline_normal_sensitivity": 30.0,
     "explode": true,
     "explode_axis": [
       0,
