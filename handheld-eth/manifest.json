@@ -3,7 +3,7 @@
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front housing + rear housing (service hatch removed from SCAD). Ghost internals (Active Screen populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "76264721e4",
+  "glb_version": "b53ba73c61",
   "parts": [
     {
       "id": "front",
@@ -104,19 +104,8 @@
       ],
       "ghost": true,
       "transparent": true,
+      "face_colors": true,
       "opacity": 0.7
-    },
-    {
-      "id": "poe",
-      "label": "PoE transformer",
-      "visible": true,
-      "color": [
-        200,
-        72,
-        56
-      ],
-      "highlight": true,
-      "opacity": 1.0
     }
   ],
   "dim_groups": [
@@ -415,41 +404,6 @@
       ]
     },
     {
-      "id": "poe",
-      "label": "Poe",
-      "default": false,
-      "dims": [
-        {
-          "label": "poe W 21.3 mm",
-          "mm": 21.35,
-          "a": [
-            0.1614017333984375,
-            0.07866876983642579,
-            0.0021590070724487307
-          ],
-          "b": [
-            0.18275172424316408,
-            0.07866876983642579,
-            0.0021590070724487307
-          ]
-        },
-        {
-          "label": "poe H 15.0 mm",
-          "mm": 15.0,
-          "a": [
-            0.19075172424316406,
-            0.05566876983642578,
-            0.0021590070724487307
-          ],
-          "b": [
-            0.19075172424316406,
-            0.07066876983642578,
-            0.0021590070724487307
-          ]
-        }
-      ]
-    },
-    {
       "id": "pad",
       "label": "Rear pad (CAD)",
       "default": false,
@@ -560,7 +514,6 @@
       "accents": 48,
       "front": 28,
       "pcb": 18,
-      "poe": 18,
       "rear": -12
     },
     "section": true,

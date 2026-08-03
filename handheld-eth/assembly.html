@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260803T154241Z-f824bd21fd" />
+  <meta name="aesl-build" content="20260803T160153Z-bb390a04fe" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -447,7 +447,7 @@
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front housing + rear housing (service hatch removed from SCAD). Ghost internals (Active Screen populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "76264721e4",
+  "glb_version": "b53ba73c61",
   "parts": [
     {
       "id": "front",
@@ -548,19 +548,8 @@
       ],
       "ghost": true,
       "transparent": true,
+      "face_colors": true,
       "opacity": 0.7
-    },
-    {
-      "id": "poe",
-      "label": "PoE transformer",
-      "visible": true,
-      "color": [
-        200,
-        72,
-        56
-      ],
-      "highlight": true,
-      "opacity": 1.0
     }
   ],
   "dim_groups": [
@@ -859,41 +848,6 @@
       ]
     },
     {
-      "id": "poe",
-      "label": "Poe",
-      "default": false,
-      "dims": [
-        {
-          "label": "poe W 21.3 mm",
-          "mm": 21.35,
-          "a": [
-            0.1614017333984375,
-            0.07866876983642579,
-            0.0021590070724487307
-          ],
-          "b": [
-            0.18275172424316408,
-            0.07866876983642579,
-            0.0021590070724487307
-          ]
-        },
-        {
-          "label": "poe H 15.0 mm",
-          "mm": 15.0,
-          "a": [
-            0.19075172424316406,
-            0.05566876983642578,
-            0.0021590070724487307
-          ],
-          "b": [
-            0.19075172424316406,
-            0.07066876983642578,
-            0.0021590070724487307
-          ]
-        }
-      ]
-    },
-    {
       "id": "pad",
       "label": "Rear pad (CAD)",
       "default": false,
@@ -1004,7 +958,6 @@
       "accents": 48,
       "front": 28,
       "pcb": 18,
-      "poe": 18,
       "rear": -12
     },
     "section": true,
@@ -2343,9 +2296,11 @@
         const meta = PART_META[partId] || {};
         let col = PART_COLOR[partId] || 0x8e9298;
         const isGhost = !!meta.ghost;
-        // Opaque overlay parts (e.g. PoE body) sit above ghost PCB — not always-on
-        // emissive paint. Spot attention mode handles dim/accent separately.
-        const isOverlay = partId === 'poe' || (!!meta.highlight && !isGhost && !meta.transparent);
+        const useFaceColors = !!meta.face_colors;
+        // Opaque overlay parts sit above ghost PCB — not always-on emissive paint.
+        // Spot attention mode handles dim/accent separately.
+        // (PoE red highlight retired 2026-08-03 — magnetics in board face_colors.)
+        const isOverlay = !!meta.highlight && !isGhost && !meta.transparent;
         const splash = partId ? splashTex[partId] : null;
         // lcd = emissive glass art; print = matte UV/film decal (alpha corners).
         // Transparent shells / PCB ghost keep plastic shading — only the LCD
@@ -2382,7 +2337,7 @@
           if (isLcdSplash) neutralizeLcdBackFaceUvs(o.geometry);
         }
         o.material = new THREE.MeshStandardMaterial({
-          color: splash ? 0xffffff : col,
+          color: splash ? 0xffffff : (useFaceColors ? 0xffffff : col),
           map: splash || null,
           emissive: isLcdSplash ? 0xffffff : 0x000000,
           emissiveMap: isLcdSplash ? splash : null,
@@ -2408,20 +2363,21 @@
           // as a white square — discard low-alpha fragments like print decals.
           alphaTest: isPrintSplash ? 0.35 : (isLcdSplash ? 0.12 : 0),
           // Ghost / see-through shells: no depth write so PCB composites inside.
-          // Overlay (PoE) always depth-writes so it wins over ghost blend.
+          // Overlay always depth-writes so it wins over ghost blend.
           depthWrite: isOverlay || isLcdSplash || isPrintSplash ? true : !isAlpha,
           side: (isPrintSplash || isGhost) ? THREE.DoubleSide : THREE.FrontSide,
-          vertexColors: false,
+          vertexColors: useFaceColors,
           clippingPlanes: [],
         });
         if (isOverlay) o.renderOrder = 3;
         else if (isGhost) o.renderOrder = 2;
-        o.userData.baseColor = splash ? 0xffffff : col;
+        o.userData.baseColor = splash ? 0xffffff : (useFaceColors ? 0xffffff : col);
         o.userData.partId = partId;
         o.userData.isLcdSplash = isLcdSplash;
         o.userData.isOverlay = isOverlay;
+        o.userData.faceColors = useFaceColors;
         o.userData.matBase = {
-          color: splash ? 0xffffff : col,
+          color: splash ? 0xffffff : (useFaceColors ? 0xffffff : col),
           emissive: isLcdSplash ? 0xffffff : 0x000000,
           emissiveIntensity: isLcdSplash ? 1.35 : 0,
           opacity: o.material.opacity,
@@ -2679,11 +2635,9 @@
       for (const p of PARTS) {
         const input = document.querySelector(`input[data-part="${p.id}"]`);
         if (!input || !input.parentElement) continue;
-        const base = p._baseLabel || String(p.label || p.id).replace(/\s*\(RED\)\s*$/i, '').trim();
-        // Everyday PoE label omits (RED); show it only while that part is spotted.
-        const text = (p.id === 'poe' && spotPartId === 'poe') ? `${base} (RED)` : base;
+        const base = p._baseLabel || String(p.label || p.id).trim();
         while (input.nextSibling) input.nextSibling.remove();
-        input.parentElement.appendChild(document.createTextNode(` ${text}`));
+        input.parentElement.appendChild(document.createTextNode(` ${base}`));
       }
     }
     function syncSpotButtons() {
