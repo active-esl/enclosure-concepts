@@ -1,9 +1,9 @@
 {
   "id": "eth",
   "title": "Handheld eth \u2014 PLACEHOLDER",
-  "blurb": "Stepped rear eth \u00b7 front + rear housing \u00b7 LOCKED I/O tip-in (open apron + face-wall RJ45/USB-C mouths; no internal bay fill). Ghost internals through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER shell \u2014 I/O bay locked 2026-08-03.",
+  "blurb": "Stepped rear eth \u00b7 front + rear housing \u00b7 LOCKED I/O tip-in (open apron + face-wall RJ45/USB-C mouths with lead-in chamfers; no internal bay fill) \u00b7 small snap cover over mouths (cable notches). Ghost internals through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER shell \u2014 I/O bay locked 2026-08-03.",
   "glb": "assembly.glb",
-  "glb_version": "967ed5d3a9",
+  "glb_version": "0aa3107cfe",
   "parts": [
     {
       "id": "front",
@@ -28,6 +28,18 @@
       ],
       "transparent": true,
       "opacity": 0.62
+    },
+    {
+      "id": "bay_hatch",
+      "label": "I/O snap cover (mouths)",
+      "visible": true,
+      "color": [
+        120,
+        160,
+        175
+      ],
+      "transparent": true,
+      "opacity": 0.75
     },
     {
       "id": "glass",
@@ -259,6 +271,41 @@
             0.254,
             0.169,
             0.012
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bay_hatch",
+      "label": "Bay_hatch",
+      "default": false,
+      "dims": [
+        {
+          "label": "bay_hatch W 53.6 mm",
+          "mm": 53.6,
+          "a": [
+            0.09361500000000002,
+            0.05163000000000001,
+            0.009000000000000001
+          ],
+          "b": [
+            0.147215,
+            0.05163000000000001,
+            0.009000000000000001
+          ]
+        },
+        {
+          "label": "bay_hatch H 5.7 mm",
+          "mm": 5.7,
+          "a": [
+            0.15521500000000002,
+            0.037930000000000005,
+            0.009000000000000001
+          ],
+          "b": [
+            0.15521500000000002,
+            0.04363000000000001,
+            0.009000000000000001
           ]
         }
       ]
@@ -838,18 +885,18 @@
     "fea_overlays": [
       {
         "id": "long_edge_bend",
-        "url": "fea/long_edge_bend.json?v=d41127237a",
+        "url": "fea/long_edge_bend.json?v=2e8f651638",
         "label": "Bend across the long axis (grip + push)",
         "field": "von_mises_MPa",
-        "max": 26.885303,
+        "max": 27.147593,
         "min": 0.0
       },
       {
         "id": "corner_twist",
-        "url": "fea/corner_twist.json?v=0bca0e28ac",
+        "url": "fea/corner_twist.json?v=5f5b0f86b7",
         "label": "Diagonal twist (one corner up)",
         "field": "von_mises_MPa",
-        "max": 40.940414,
+        "max": 61.415755,
         "min": 0.0
       }
     ]
