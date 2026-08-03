@@ -3,7 +3,7 @@
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front + rear housing \u00b7 snap I/O bay cover (full aperture, RJ45+USB-C mouths). Ghost internals through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "cc7ac486c2",
+  "glb_version": "c7d144b62d",
   "parts": [
     {
       "id": "front",
@@ -127,8 +127,20 @@
       "opacity": 1.0
     },
     {
+      "id": "m2_wifi",
+      "label": "M.2 Wi-Fi \u2014 EA 2EL / IW612 (2230 key E @ J001)",
+      "visible": true,
+      "color": [
+        32,
+        168,
+        160
+      ],
+      "highlight": true,
+      "opacity": 1.0
+    },
+    {
       "id": "m2_modem",
-      "label": "M.2 volume study \u2014 Quectel EM05-G (Sentai LTE; J001 wants 2230 key E Wi-Fi)",
+      "label": "M.2 volume study \u2014 Quectel EM05-G (Sentai LTE; wrong part)",
       "visible": false,
       "color": [
         176,
@@ -268,31 +280,31 @@
       "default": false,
       "dims": [
         {
-          "label": "bay_hatch W 53.6 mm",
-          "mm": 53.64,
+          "label": "bay_hatch W 54.1 mm",
+          "mm": 54.14,
           "a": [
-            0.09359500000000001,
-            0.048850000000000005,
-            0.0117
+            0.09334500000000001,
+            0.05163,
+            0.008499999999999999
           ],
           "b": [
-            0.14723499999999998,
-            0.048850000000000005,
-            0.0117
+            0.14748499999999998,
+            0.05163,
+            0.008499999999999999
           ]
         },
         {
-          "label": "bay_hatch H 11.1 mm",
-          "mm": 11.1,
+          "label": "bay_hatch H 2.3 mm",
+          "mm": 2.3,
           "a": [
-            0.15523499999999998,
-            0.029750000000000002,
-            0.0117
+            0.15548499999999998,
+            0.041330000000000006,
+            0.008499999999999999
           ],
           "b": [
-            0.15523499999999998,
-            0.040850000000000004,
-            0.0117
+            0.15548499999999998,
+            0.04363,
+            0.008499999999999999
           ]
         }
       ]
@@ -538,6 +550,41 @@
             0.06721189498901367,
             0.08270001983642579,
             0.007149999618530274
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m2_wifi",
+      "label": "M2_wifi",
+      "default": false,
+      "dims": [
+        {
+          "label": "m2_wifi W 30.0 mm",
+          "mm": 30.0,
+          "a": [
+            0.07273979949951172,
+            0.12307499694824219,
+            0.0018351995944976807
+          ],
+          "b": [
+            0.10273979949951172,
+            0.12307499694824219,
+            0.0018351995944976807
+          ]
+        },
+        {
+          "label": "m2_wifi H 22.0 mm",
+          "mm": 22.0,
+          "a": [
+            0.11073979949951172,
+            0.09307499694824219,
+            0.0018351995944976807
+          ],
+          "b": [
+            0.11073979949951172,
+            0.11507499694824219,
+            0.0018351995944976807
           ]
         }
       ]
@@ -793,7 +840,8 @@
       "lcd_dress": 40,
       "ctp_conn": 18,
       "lcd_conn": 18,
-      "m2_modem": 24,
+      "m2_wifi": 24,
+      "m2_modem": 28,
       "uv_badge": 52,
       "accents": 48,
       "front": 28,
