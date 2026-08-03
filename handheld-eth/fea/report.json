@@ -1,0 +1,286 @@
+{
+  "board": "per_part_fdm_eval",
+  "ranking_only": true,
+  "not_ce_certification": true,
+  "disclaimer": "Per-printable FDM eval board. FEA column is ranking-only isotropic PLA (gmsh+CalculiX) \u2014 NOT CE. PASS = solver finished, not product OK. HOWTO: handheld/review/FEA-HOWTO.md",
+  "howto_repo_path": "handheld/review/FEA-HOWTO.md",
+  "cea_brief_repo_path": "handheld/review/cea-mechanical-drop-fea-brief.md",
+  "columns": [
+    "fit",
+    "fea",
+    "print",
+    "mass",
+    "dfm"
+  ],
+  "badge_note": {
+    "ok": "gate/evidence cited",
+    "warn": "open risk or ranking signal (incl. FEA PASS with huge defl)",
+    "skip": "not run / SKIP case",
+    "na": "not applicable to this printable",
+    "deferred": "part not in current print BOM",
+    "unknown": "not measured yet"
+  },
+  "engine": "gmsh + CalculiX (ccx)",
+  "material": {
+    "name": "PLA",
+    "E_MPa": 3500,
+    "yield_MPa": 50
+  },
+  "generated_utc": "20260803T212548Z",
+  "parts": [
+    {
+      "id": "rear",
+      "scad_part": "rear_housing",
+      "label": "Rear housing",
+      "print_alias": "print-bottom",
+      "status": "active",
+      "inspect_view": "rear",
+      "inspect_part": "rear",
+      "run_state": "ran",
+      "stl_path": "/data_drive/esl/active-esl-enclosures/handheld/out/review/assembly_explorer/20260803T204421178919Z/rear.stl",
+      "stl_sha1": "b60f146ccecffd6a472591a2728819186a5ff4fc",
+      "fea": {
+        "stamp": "20260803T204432968604Z",
+        "stl": "rear.stl",
+        "stl_path": "/data_drive/esl/active-esl-enclosures/handheld/out/review/assembly_explorer/20260803T204421178919Z/rear.stl",
+        "stl_sha1": "b60f146ccecffd6a472591a2728819186a5ff4fc",
+        "material": "PLA",
+        "E_MPa": 3500,
+        "cases": [
+          {
+            "case": "press_centre",
+            "label": "Press the face centre (thumb on screen)",
+            "n_nodes": 54499,
+            "n_elems": 169749,
+            "n_fixed": 23024,
+            "n_loaded": 0,
+            "total_force_N": [
+              0,
+              0,
+              -30
+            ],
+            "result": "SKIP",
+            "warns": [
+              "no material in fixed=23024 / loaded=0 region \u2014 case likely belongs to the other half"
+            ],
+            "part": "rear"
+          },
+          {
+            "case": "long_edge_bend",
+            "label": "Bend across the long axis (grip + push)",
+            "n_nodes": 54499,
+            "n_elems": 169749,
+            "n_fixed": 3941,
+            "n_loaded": 3879,
+            "total_force_N": [
+              0,
+              0,
+              -20
+            ],
+            "max_disp_mm": 13.7119,
+            "max_von_mises_MPa": 32.684,
+            "n_disp_nodes": 54499,
+            "n_stress_nodes": 54499,
+            "overlay": "overlay.json",
+            "safety_factor_yield": 1.53,
+            "warns": [
+              "max deflection 13.7119 mm > 2.0 mm",
+              "peak von Mises 32.684 MPa = 65% of yield (isotropic; FDM layer bond is weaker)"
+            ],
+            "result": "PASS",
+            "part": "rear"
+          },
+          {
+            "case": "corner_twist",
+            "label": "Diagonal twist (one corner up)",
+            "n_nodes": 54499,
+            "n_elems": 169749,
+            "n_fixed": 1719,
+            "n_loaded": 1663,
+            "total_force_N": [
+              0,
+              0,
+              -15
+            ],
+            "max_disp_mm": 48.1335,
+            "max_von_mises_MPa": 61.416,
+            "n_disp_nodes": 54499,
+            "n_stress_nodes": 54499,
+            "overlay": "overlay.json",
+            "safety_factor_yield": 0.81,
+            "warns": [
+              "max deflection 48.1335 mm > 2.0 mm",
+              "peak von Mises 61.416 MPa = 123% of yield (isotropic; FDM layer bond is weaker)"
+            ],
+            "result": "PASS",
+            "part": "rear"
+          }
+        ],
+        "local_index": "/data_drive/esl/active-esl-enclosures/handheld/out/review/fea/rear/20260803T204432968604Z/index.html"
+      },
+      "eval": {
+        "fit": {
+          "status": "ok",
+          "summary": "io_aperture + pad contain + drop-on PASS (assemble-review)"
+        },
+        "print": {
+          "status": "ok",
+          "summary": "Dry-fit print-bottom \u00b7 Inspect rear.stl"
+        },
+        "mass": {
+          "status": "unknown",
+          "summary": "Not weighed \u2014 leave blank until dry-fit scale"
+        },
+        "dfm": {
+          "status": "warn",
+          "summary": "I/O on \u2212Y step; solid pad (hatch removed from SCAD)"
+        },
+        "fea": {
+          "status": "warn",
+          "summary": "press_centre: SKIP; long_edge_bend: PASS defl=13.7119 mm; corner_twist: PASS defl=48.1335 mm \u00b7 ranking\u2260CE",
+          "n_pass": 2,
+          "n_skip": 1
+        }
+      },
+      "run_cmd": "./scripts/run_fea_ranking.sh --rear"
+    },
+    {
+      "id": "front",
+      "scad_part": "front_housing",
+      "label": "Front housing",
+      "print_alias": "print-top",
+      "status": "active",
+      "inspect_view": "front",
+      "inspect_part": "front",
+      "run_state": "ran",
+      "stl_path": "/data_drive/esl/active-esl-enclosures/handheld/out/review/assembly_explorer/20260803T204855930087Z/front.stl",
+      "stl_sha1": "fdb845c03ba55a97d78db4f502a008919775746f",
+      "fea": {
+        "stamp": "20260803T005943250157Z",
+        "stl": "front.stl",
+        "stl_path": null,
+        "stl_sha1": null,
+        "material": "PLA",
+        "E_MPa": 3500,
+        "cases": [
+          {
+            "case": "press_centre",
+            "label": "Press the face centre (thumb on screen)",
+            "n_nodes": 161801,
+            "n_elems": 485934,
+            "n_fixed": 6101,
+            "n_loaded": 0,
+            "total_force_N": [
+              0,
+              0,
+              -30
+            ],
+            "result": "SKIP",
+            "warns": [
+              "no material in fixed=6101 / loaded=0 region \u2014 case likely belongs to the other half"
+            ],
+            "part": "front"
+          }
+        ],
+        "local_index": "/data_drive/esl/active-esl-enclosures/handheld/out/review/fea/front/20260803T005943250157Z/index.html"
+      },
+      "eval": {
+        "fit": {
+          "status": "warn",
+          "summary": "LCD adhesive + PCB M2 into front \u2014 dry-fit / flex dress open"
+        },
+        "print": {
+          "status": "ok",
+          "summary": "Dry-fit print-top \u00b7 Inspect front.stl"
+        },
+        "mass": {
+          "status": "unknown",
+          "summary": "Not weighed"
+        },
+        "dfm": {
+          "status": "warn",
+          "summary": "Clamshell lip + heat-set bosses \u2014 coupon feel-test pending"
+        },
+        "fea": {
+          "status": "skip",
+          "summary": "press_centre: SKIP \u00b7 ranking\u2260CE",
+          "n_pass": 0,
+          "n_skip": 1
+        }
+      },
+      "run_cmd": "./scripts/run_fea_ranking.sh --front"
+    },
+    {
+      "id": "hatch",
+      "scad_part": null,
+      "label": "Service hatch",
+      "print_alias": null,
+      "status": "removed",
+      "inspect_view": "rear",
+      "inspect_part": null,
+      "run_state": "removed",
+      "stl_path": null,
+      "stl_sha1": null,
+      "fea": null,
+      "eval": {
+        "fit": {
+          "status": "na",
+          "summary": "Removed from SCAD (Alex 2026-08-03)"
+        },
+        "print": {
+          "status": "na",
+          "summary": "No hatch part"
+        },
+        "mass": {
+          "status": "na",
+          "summary": "\u2014"
+        },
+        "dfm": {
+          "status": "na",
+          "summary": "Excised; redesign only in enclosure Step 3"
+        },
+        "fea": {
+          "status": "na",
+          "summary": "Removed from SCAD"
+        }
+      },
+      "run_cmd": null
+    },
+    {
+      "id": "coupons",
+      "scad_part": "clearance_coupons",
+      "label": "Clearance coupons",
+      "print_alias": null,
+      "status": "pre_shell",
+      "inspect_view": null,
+      "inspect_part": null,
+      "run_state": "not_fea_target",
+      "stl_path": "/data_drive/esl/active-esl-enclosures/handheld/out/clearance_coupons.stl",
+      "stl_sha1": "b937786018414c8cb213b7ed65d8ead0dd371bd7",
+      "fea": null,
+      "eval": {
+        "fit": {
+          "status": "na",
+          "summary": "Boss/insert feel \u2014 not shell fit"
+        },
+        "print": {
+          "status": "ok",
+          "summary": "scad/clearance_coupons.scad \u2192 out/clearance_coupons.stl"
+        },
+        "mass": {
+          "status": "na",
+          "summary": "\u2014"
+        },
+        "dfm": {
+          "status": "warn",
+          "summary": "M2 insert ID feel-test still open"
+        },
+        "fea": {
+          "status": "na",
+          "summary": "Not a shell stiffness target"
+        }
+      },
+      "run_cmd": null
+    }
+  ]
+}
