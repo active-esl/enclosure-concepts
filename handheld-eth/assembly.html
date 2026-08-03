@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260803T164007Z-f8d88e41a4" />
+  <meta name="aesl-build" content="20260803T164123Z-63e59bff36" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -451,7 +451,7 @@
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front housing + rear housing (service hatch removed from SCAD). Ghost internals (Active Screen populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "b53ba73c61",
+  "glb_version": "858e588bee",
   "parts": [
     {
       "id": "front",
@@ -517,23 +517,23 @@
     },
     {
       "id": "ctp_conn",
-      "label": "CTP connector (STEP J8 Molex 53261-02)",
+      "label": "CTP connector J8 (Molex 53261-02)",
       "visible": true,
       "color": [
         255,
-        210,
-        90
+        170,
+        20
       ],
       "highlight": true,
       "opacity": 1.0
     },
     {
       "id": "lcd_conn",
-      "label": "LCD connector (STEP J001 JAE SM3Z)",
+      "label": "LCD connector J001 (JAE SM3Z)",
       "visible": true,
       "color": [
-        120,
-        190,
+        0,
+        230,
         255
       ],
       "highlight": true,
@@ -541,24 +541,24 @@
     },
     {
       "id": "ctp_dress",
-      "label": "CTP dress 69.46 mm (ST1010 A02 SENSOR OD)",
+      "label": "CTP dress \u2192 J8 (SoT cable 69.46 mm)",
       "visible": true,
       "color": [
-        232,
-        120,
-        40
+        255,
+        100,
+        20
       ],
       "highlight": true,
       "opacity": 1.0
     },
     {
       "id": "lcd_dress",
-      "label": "LCD dress LCM\u2192PCB span (A02 onboard conn)",
+      "label": "LCD dress \u2192 J001 (LCM\u2192PCB span)",
       "visible": true,
       "color": [
-        40,
-        120,
-        220
+        30,
+        100,
+        255
       ],
       "highlight": true,
       "opacity": 1.0
@@ -871,27 +871,27 @@
           "label": "ctp_dress W 9.3 mm",
           "mm": 9.31,
           "a": [
-            0.18394999694824218,
-            0.11127500152587891,
+            0.183950439453125,
+            0.11152500152587891,
             0.011149999618530273
           ],
           "b": [
-            0.19326190185546877,
-            0.11127500152587891,
+            0.19326145935058595,
+            0.11152500152587891,
             0.011149999618530273
           ]
         },
         {
-          "label": "ctp_dress H 159.7 mm",
-          "mm": 159.72,
+          "label": "ctp_dress H 97.0 mm",
+          "mm": 96.99,
           "a": [
-            0.20126190185546874,
-            -0.05644841384887696,
+            0.20126145935058595,
+            0.006530001640319825,
             0.011149999618530273
           ],
           "b": [
-            0.20126190185546874,
-            0.10327500152587892,
+            0.20126145935058595,
+            0.10352500152587892,
             0.011149999618530273
           ]
         }
@@ -903,31 +903,31 @@
       "default": false,
       "dims": [
         {
-          "label": "lcd_dress W 100.1 mm",
-          "mm": 100.15,
+          "label": "lcd_dress W 100.9 mm",
+          "mm": 100.87,
           "a": [
-            0.004190224170684815,
-            0.11407499694824219,
-            0.007299999713897705
+            0.005724490642547608,
+            0.1180749969482422,
+            0.007149999618530274
           ],
           "b": [
-            0.10433979034423828,
-            0.11407499694824219,
-            0.007299999713897705
+            0.10658979034423828,
+            0.1180749969482422,
+            0.007149999618530274
           ]
         },
         {
-          "label": "lcd_dress H 27.9 mm",
-          "mm": 27.87,
+          "label": "lcd_dress H 32.4 mm",
+          "mm": 32.37,
           "a": [
-            0.11233979034423829,
-            0.07820001983642579,
-            0.007299999713897705
+            0.11458979034423829,
+            0.07770001983642578,
+            0.007149999618530274
           ],
           "b": [
-            0.11233979034423829,
-            0.10607499694824218,
-            0.007299999713897705
+            0.11458979034423829,
+            0.11007499694824219,
+            0.007149999618530274
           ]
         }
       ]
@@ -1677,7 +1677,7 @@
     controls.enableDamping = true;
     controls.target.set(0.11, 0.075, 0.0);
 
-    // Soft orb IBL + hemi/key/fill/rim/top — shared SoT for eth + slim.
+    // Shared inspect-lighting.js (RoomEnvironment + studio lights).
     applyInspectEnvironment(THREE, scene, renderer);
     const { updateCameraLights: _updateInspectLights } = createInspectLights(THREE, scene);
     function updateCameraLights() {
