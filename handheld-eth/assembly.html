@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260803T012110Z-ac09a1fdb0" />
+  <meta name="aesl-build" content="20260803T012936Z-b1aa624624" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -53,6 +53,15 @@
       scrollbar-width: thin;
       scrollbar-color: rgba(169,180,199,.45) rgba(255,255,255,.06);
     }
+    .hud.dragging { transition: none; user-select: none; }
+    .hud.hud-placed { right: auto; bottom: auto; width: min(360px, calc(100vw - 16px)); }
+    .hud.collapsed {
+      overflow: hidden;
+      max-height: none;
+    }
+    .hud.collapsed .card-body { display: none; }
+    .hud.collapsed .card { padding-bottom: 10px; }
+    .hud.collapsed .card-head { margin-bottom: 0; }
     .hud::-webkit-scrollbar { width: 8px; }
     .hud::-webkit-scrollbar-track { background: rgba(255,255,255,.06); border-radius: 999px; }
     .hud::-webkit-scrollbar-thumb {
@@ -66,7 +75,10 @@
       border: 1px solid rgba(255,255,255,.08); border-radius: 14px;
       padding: 12px 14px 14px; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
     .card-head { display: flex; gap: 8px; align-items: flex-start;
-      justify-content: space-between; margin-bottom: 2px; }
+      justify-content: space-between; margin-bottom: 2px;
+      cursor: grab; touch-action: none; user-select: none;
+      border-radius: 10px; margin: -4px -6px 2px; padding: 4px 6px; }
+    .card-head:active { cursor: grabbing; }
     .card-head-main { min-width: 0; flex: 1; }
     #btnPanelClose {
       flex: 0 0 auto; width: 40px; height: 40px; min-width: 40px; min-height: 40px;
@@ -262,12 +274,15 @@
         top: calc(10px + var(--safe-top) + var(--site-nav-h, 0px));
         bottom: auto;
       }
-      .hud {
+      .hud:not(.hud-placed) {
         left: calc(8px + var(--safe-left));
         right: calc(8px + var(--safe-right));
         top: auto;
         bottom: calc(12px + var(--safe-bottom));
         width: auto;
+        max-height: min(58vh, calc(100% - 24px - var(--safe-top) - var(--safe-bottom)));
+      }
+      .hud.hud-placed {
         max-height: min(58vh, calc(100% - 24px - var(--safe-top) - var(--safe-bottom)));
       }
       body.panel-closed .hud { transform: translateY(12px); }
@@ -295,13 +310,14 @@
   </div>
   <div class="hud" id="hud" role="region" aria-label="Assembly controls">
     <div class="card">
-      <div class="card-head">
+      <div class="card-head" id="hudDragHandle" title="Drag to move · double-click to collapse">
         <div class="card-head-main">
           <div class="badge">Placeholder</div>
           <h1 id="title"></h1>
         </div>
         <button type="button" id="btnPanelClose" aria-label="Close panel" title="Close (Esc)">×</button>
       </div>
+      <div class="card-body">
       <p id="blurb"></p>
       <button type="button" id="btnBlurbMore">More</button>
       <div id="extraLinks" class="nav-links"></div>
@@ -402,6 +418,7 @@
       </div>
 
       <div id="loading" class="muted">Loading model…</div>
+      </div>
     </div>
   </div>
   <div class="hint" id="hint">Drag to orbit · scroll zoom · Measure: two clicks</div>
@@ -430,7 +447,7 @@
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front housing + rear housing (service hatch deferred). Ghost internals (V3Room populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "0028cd01aa",
+  "glb_version": "3325a41a2a",
   "parts": [
     {
       "id": "front",
@@ -904,28 +921,6 @@
       "long_edge_bend",
       "corner_twist"
     ],
-    "fea_printables": [
-      {
-        "id": "rear",
-        "label": "Rear",
-        "href": "fea/#rear"
-      },
-      {
-        "id": "front",
-        "label": "Front",
-        "href": "fea/#front"
-      },
-      {
-        "id": "hatch",
-        "label": "Hatch",
-        "href": "fea/#hatch"
-      },
-      {
-        "id": "coupons",
-        "label": "Coupons",
-        "href": "fea/#coupons"
-      }
-    ],
     "fea_overlays": [
       {
         "id": "long_edge_bend",
@@ -1033,6 +1028,147 @@
       btnPanel.classList.add('pulse-once');
       setTimeout(() => btnPanel.classList.remove('pulse-once'), 2800);
     }
+
+    // Drag title bar to reposition; double-click to collapse to chrome-only.
+    const hudEl = document.getElementById('hud');
+    const hudHandle = document.getElementById('hudDragHandle');
+    const HUD_STORE_KEY = `aesl-inspect-hud:${MANIFEST.id || 'unknown'}`;
+    let hudCollapsed = false;
+    let hudPlaced = false;
+    let suppressHudDblClick = false;
+
+    function hudSafePad() {
+      const cs = getComputedStyle(document.documentElement);
+      const n = (v) => {
+        const m = String(v || '0').match(/([\d.]+)/);
+        return m ? parseFloat(m[1]) : 0;
+      };
+      return {
+        top: n(cs.getPropertyValue('--safe-top')) + 8,
+        right: n(cs.getPropertyValue('--safe-right')) + 8,
+        bottom: n(cs.getPropertyValue('--safe-bottom')) + 8,
+        left: n(cs.getPropertyValue('--safe-left')) + 8,
+      };
+    }
+
+    function clampHudPosition(left, top) {
+      const pad = hudSafePad();
+      const rect = hudEl.getBoundingClientRect();
+      const w = rect.width || Math.min(360, innerWidth - 16);
+      const h = rect.height || 80;
+      const maxL = Math.max(pad.left, innerWidth - w - pad.right);
+      const maxT = Math.max(pad.top, innerHeight - h - pad.bottom);
+      return {
+        left: Math.min(Math.max(left, pad.left), maxL),
+        top: Math.min(Math.max(top, pad.top), maxT),
+      };
+    }
+
+    function applyHudPosition(left, top, { persist = true } = {}) {
+      const p = clampHudPosition(left, top);
+      hudEl.style.left = `${p.left}px`;
+      hudEl.style.top = `${p.top}px`;
+      hudEl.style.right = 'auto';
+      hudEl.style.bottom = 'auto';
+      hudEl.classList.add('hud-placed');
+      hudPlaced = true;
+      if (persist) persistHudChrome();
+      applyPanelViewOffset();
+      return p;
+    }
+
+    function setHudCollapsed(collapsed, { persist = true } = {}) {
+      hudCollapsed = !!collapsed;
+      hudEl.classList.toggle('collapsed', hudCollapsed);
+      hudHandle.title = hudCollapsed
+        ? 'Drag to move · double-click to expand'
+        : 'Drag to move · double-click to collapse';
+      if (hudPlaced) {
+        const r = hudEl.getBoundingClientRect();
+        applyHudPosition(r.left, r.top, { persist: false });
+      }
+      if (persist) persistHudChrome();
+      applyPanelViewOffset();
+    }
+
+    function persistHudChrome() {
+      try {
+        const payload = { collapsed: hudCollapsed };
+        if (hudPlaced) {
+          payload.left = parseFloat(hudEl.style.left) || 0;
+          payload.top = parseFloat(hudEl.style.top) || 0;
+        }
+        localStorage.setItem(HUD_STORE_KEY, JSON.stringify(payload));
+      } catch (_) { /* private mode */ }
+    }
+
+    function restoreHudChrome() {
+      try {
+        const raw = localStorage.getItem(HUD_STORE_KEY);
+        if (!raw) return;
+        const st = JSON.parse(raw);
+        if (st && typeof st.left === 'number' && typeof st.top === 'number') {
+          applyHudPosition(st.left, st.top, { persist: false });
+        }
+        if (st && st.collapsed) setHudCollapsed(true, { persist: false });
+      } catch (_) { /* ignore */ }
+    }
+
+    hudHandle.addEventListener('pointerdown', (ev) => {
+      if (ev.button != null && ev.button !== 0) return;
+      if (ev.target.closest('#btnPanelClose')) return;
+      const startX = ev.clientX;
+      const startY = ev.clientY;
+      const rect = hudEl.getBoundingClientRect();
+      const originL = rect.left;
+      const originT = rect.top;
+      let moved = false;
+      hudEl.classList.add('dragging');
+      try { hudHandle.setPointerCapture(ev.pointerId); } catch (_) { /* ok */ }
+
+      const onMove = (e) => {
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        if (!moved && (dx * dx + dy * dy) < 16) return;
+        moved = true;
+        applyHudPosition(originL + dx, originT + dy, { persist: false });
+      };
+      const onUp = (e) => {
+        hudHandle.removeEventListener('pointermove', onMove);
+        hudHandle.removeEventListener('pointerup', onUp);
+        hudHandle.removeEventListener('pointercancel', onUp);
+        hudEl.classList.remove('dragging');
+        try { hudHandle.releasePointerCapture(e.pointerId); } catch (_) { /* ok */ }
+        if (moved) {
+          suppressHudDblClick = true;
+          setTimeout(() => { suppressHudDblClick = false; }, 400);
+          const r = hudEl.getBoundingClientRect();
+          applyHudPosition(r.left, r.top, { persist: true });
+        }
+      };
+      hudHandle.addEventListener('pointermove', onMove);
+      hudHandle.addEventListener('pointerup', onUp);
+      hudHandle.addEventListener('pointercancel', onUp);
+    });
+
+    hudHandle.addEventListener('dblclick', (ev) => {
+      if (ev.target.closest('#btnPanelClose')) return;
+      if (suppressHudDblClick) return;
+      ev.preventDefault();
+      setHudCollapsed(!hudCollapsed);
+    });
+
+    addEventListener('resize', () => {
+      if (!hudPlaced) {
+        applyPanelViewOffset();
+        return;
+      }
+      const r = hudEl.getBoundingClientRect();
+      applyHudPosition(r.left, r.top, { persist: true });
+    });
+
+    restoreHudChrome();
+
     document.getElementById('title').textContent = MANIFEST.title || 'Assembly';
     const blurbEl = document.getElementById('blurb');
     blurbEl.innerHTML = MANIFEST.blurb || '';
