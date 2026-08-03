@@ -1,9 +1,9 @@
 {
-  "id": "20260803T021133Z-8f6ee9c0dd",
-  "built_at": "2026-08-03T02:11:33Z",
+  "id": "20260803T021506Z-5dc0217861",
+  "built_at": "2026-08-03T02:15:06Z",
   "concept": "handheld-eth",
   "assets": {
-    "handheld.glb": "7c7cf656be",
+    "handheld.glb": "ec936dce67",
     "assembly.glb": "d88c33a028",
     "lcd_splash_active_esl.png": "c3b2d277a9",
     "active-esl-uv-badge-28x10-brand-full-600dpi.png": "bd3627da5a",
