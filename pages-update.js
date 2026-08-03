@@ -16,7 +16,10 @@
 
   const isLookOrInspectPath = (pathname) => {
     const p = String(pathname || "");
-    return /\/(?:handheld-eth|handheld)\/(?:|assembly\.html)$/.test(p);
+    // Look / Inspect / Evaluate board (fea/) share concept build.json busting.
+    return /\/(?:handheld-eth|handheld)\/(?:|assembly\.html|fea\/?|fea\/index\.html)$/.test(
+      p
+    );
   };
 
   const fetchBuild = async (dirUrl) => {
