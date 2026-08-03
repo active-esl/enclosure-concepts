@@ -1,9 +1,9 @@
 {
   "id": "eth",
   "title": "Handheld eth \u2014 PLACEHOLDER",
-  "blurb": "Stepped rear eth \u00b7 front housing + rear housing + hatch. Ghost internals (V3Room populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
-  "glb": "eth-assembly.glb",
-  "glb_version": "2aa23ee21b",
+  "blurb": "Stepped rear eth \u00b7 front housing + rear housing (service hatch deferred). Ghost internals (V3Room populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
+  "glb": "assembly.glb",
+  "glb_version": "f377aff514",
   "parts": [
     {
       "id": "front",
@@ -28,18 +28,6 @@
       ],
       "transparent": true,
       "opacity": 0.62
-    },
-    {
-      "id": "hatch",
-      "label": "Service hatch (blank \u2014 I/O TBD)",
-      "visible": true,
-      "color": [
-        72,
-        78,
-        88
-      ],
-      "transparent": true,
-      "opacity": 0.55
     },
     {
       "id": "glass",
@@ -142,12 +130,12 @@
           ]
         },
         {
-          "label": "D 24.8 mm",
-          "mm": 24.84,
+          "label": "D 18.4 mm",
+          "mm": 18.35,
           "a": [
             0.25445,
             0.169,
-            -0.015235
+            -0.00875
           ],
           "b": [
             0.25445,
@@ -188,41 +176,6 @@
             0.254,
             0.169,
             0.012
-          ]
-        }
-      ]
-    },
-    {
-      "id": "hatch",
-      "label": "Hatch",
-      "default": false,
-      "dims": [
-        {
-          "label": "hatch W 60.2 mm",
-          "mm": 60.25,
-          "a": [
-            0.092875,
-            0.08983000000000001,
-            -0.013734999999999999
-          ],
-          "b": [
-            0.153125,
-            0.08983000000000001,
-            -0.013734999999999999
-          ]
-        },
-        {
-          "label": "hatch H 26.0 mm",
-          "mm": 26.0,
-          "a": [
-            0.161125,
-            0.05583,
-            -0.013734999999999999
-          ],
-          "b": [
-            0.161125,
-            0.08183,
-            -0.013734999999999999
           ]
         }
       ]
@@ -412,21 +365,21 @@
           "mm": 155.99,
           "a": [
             0.045004999999999996,
-            0.022350000000000002,
+            0.023350000000000003,
             0.0
           ],
           "b": [
             0.200995,
-            0.022350000000000002,
+            0.023350000000000003,
             0.0
           ]
         },
         {
-          "label": "pad H 108.3 mm",
-          "mm": 108.3,
+          "label": "pad H 107.3 mm",
+          "mm": 107.3,
           "a": [
             0.037004999999999996,
-            0.030350000000000002,
+            0.03135,
             0.0
           ],
           "b": [
@@ -436,12 +389,12 @@
           ]
         },
         {
-          "label": "raise 15.2 mm",
-          "mm": 15.23,
+          "label": "raise 8.8 mm",
+          "mm": 8.75,
           "a": [
             0.037004999999999996,
             0.13865,
-            -0.015235
+            -0.00875
           ],
           "b": [
             0.037004999999999996,
