@@ -3,7 +3,7 @@
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front housing + rear housing (service hatch removed from SCAD). Ghost internals (Active Screen populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "dadadc6349",
+  "glb_version": "05e2693f73",
   "parts": [
     {
       "id": "front",
@@ -48,7 +48,7 @@
     {
       "id": "uv_badge",
       "label": "UV badge (brand-full swatch)",
-      "visible": true,
+      "visible": false,
       "color": [
         255,
         255,
@@ -61,8 +61,8 @@
     },
     {
       "id": "accents",
-      "label": "Accents (gated \u2014 home/cam off)",
-      "visible": false,
+      "label": "Accents (cam ring when cam_front_enable)",
+      "visible": true,
       "color": [
         190,
         192,
@@ -256,31 +256,31 @@
       "default": false,
       "dims": [
         {
-          "label": "accents W 0.0 mm",
-          "mm": 0.01,
+          "label": "accents W 3.8 mm",
+          "mm": 3.8,
           "a": [
-            -0.001,
-            0.00701,
-            -0.00099
+            0.1211,
+            0.17239999999999997,
+            0.01204
           ],
           "b": [
-            -0.00099,
-            0.00701,
-            -0.00099
+            0.12490000000000001,
+            0.17239999999999997,
+            0.01204
           ]
         },
         {
-          "label": "accents H 0.0 mm",
-          "mm": 0.01,
+          "label": "accents H 3.8 mm",
+          "mm": 3.8,
           "a": [
-            0.00701,
-            -0.001,
-            -0.00099
+            0.13290000000000002,
+            0.16059999999999997,
+            0.01204
           ],
           "b": [
-            0.00701,
-            -0.00099,
-            -0.00099
+            0.13290000000000002,
+            0.1644,
+            0.01204
           ]
         }
       ]
