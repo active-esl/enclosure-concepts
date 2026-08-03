@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260803T003008Z-6818bd9428" />
+  <meta name="aesl-build" content="20260803T003348Z-630c871e52" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -422,7 +422,7 @@
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front housing + rear housing (service hatch deferred). Ghost internals (V3Room populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "1534eac98d",
+  "glb_version": "fd1cbe7d2e",
   "parts": [
     {
       "id": "front",
@@ -1142,9 +1142,8 @@
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        // Physical light units (three r155+) need ~π× the old "legacy" intensities.
-    // Restored inline from 32143d8 after shared diffuse inspect-lighting.js
-    // made translucent shells read as a black silhouette (Alex 2026-08-03).
+    // Physical light units (three r155+) need ~π× the old "legacy" intensities.
+    // Inline studio rig (32143d8) — shared diffuse inspect-lighting broke shell visibility.
     renderer.toneMappingExposure = 1.2;
     renderer.localClippingEnabled = true;
 
@@ -1183,8 +1182,6 @@
     const top = new THREE.DirectionalLight(0xffffff, 1.41);
     top.position.set(0.1, 1.1, 0.15);
     scene.add(top);
-    // Fixed world key so default front/side presets still have form if the
-    // camera-follow lights are glancing.
     const worldKey = new THREE.DirectionalLight(0xfff6ee, 2.98);
     worldKey.position.set(0.5, 0.75, 0.85);
     scene.add(worldKey);
@@ -2069,8 +2066,7 @@
         const sid = hashState.spot || '';
         spotPartId = sid && PART_IDS.includes(sid) ? sid : null;
       } else {
-        // Do not auto-Spot from YAML highlight — that dims translucent shells
-        // to a black silhouette under studio lighting (Alex 2026-08-03).
+        // Do not auto-Spot from YAML highlight — dims translucent shells black.
         spotPartId = null;
       }
       if (Object.keys(hashState).length) {
