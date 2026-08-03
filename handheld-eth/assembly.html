@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260803T160153Z-bb390a04fe" />
+  <meta name="aesl-build" content="20260803T162739Z-b86085fb84" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -435,19 +435,23 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
     import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
     import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
     import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
     import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
     import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+    import {
+      INSPECT_LIGHTING,
+      applyInspectEnvironment,
+      createInspectLights,
+    } from '../inspect-lighting.js?v=eb88380dca';
 
     const MANIFEST = {
   "id": "eth",
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front housing + rear housing (service hatch removed from SCAD). Ghost internals (Active Screen populated board) through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "b53ba73c61",
+  "glb_version": "d8cd297a94",
   "parts": [
     {
       "id": "front",
@@ -491,23 +495,69 @@
     },
     {
       "id": "ctp_flex",
-      "label": "CTP flex (STEP gbd004 bottom)",
-      "visible": true,
+      "label": "CTP flex STEP-as-modeled (gbd004)",
+      "visible": false,
       "color": [
         232,
         140,
         48
       ],
-      "highlight": true,
       "opacity": 1.0
     },
     {
       "id": "lcd_ffc",
-      "label": "LCD FFC (STEP gbd001 side)",
-      "visible": true,
+      "label": "LCD FFC STEP-as-modeled (gbd001)",
+      "visible": false,
       "color": [
         64,
         140,
+        220
+      ],
+      "opacity": 1.0
+    },
+    {
+      "id": "ctp_conn",
+      "label": "CTP connector (STEP J8 Molex 53261-02)",
+      "visible": true,
+      "color": [
+        255,
+        210,
+        90
+      ],
+      "highlight": true,
+      "opacity": 1.0
+    },
+    {
+      "id": "lcd_conn",
+      "label": "LCD connector (STEP J001 JAE SM3Z)",
+      "visible": true,
+      "color": [
+        120,
+        190,
+        255
+      ],
+      "highlight": true,
+      "opacity": 1.0
+    },
+    {
+      "id": "ctp_dress",
+      "label": "CTP dress path (PLACEHOLDER)",
+      "visible": true,
+      "color": [
+        232,
+        120,
+        40
+      ],
+      "highlight": true,
+      "opacity": 1.0
+    },
+    {
+      "id": "lcd_dress",
+      "label": "LCD dress path (PLACEHOLDER)",
+      "visible": true,
+      "color": [
+        40,
+        120,
         220
       ],
       "highlight": true,
@@ -743,6 +793,146 @@
       ]
     },
     {
+      "id": "ctp_conn",
+      "label": "Ctp_conn",
+      "default": false,
+      "dims": [
+        {
+          "label": "ctp_conn W 5.2 mm",
+          "mm": 5.2,
+          "a": [
+            0.18666189575195313,
+            0.1110999984741211,
+            0.0032999997138977053
+          ],
+          "b": [
+            0.19186189270019532,
+            0.1110999984741211,
+            0.0032999997138977053
+          ]
+        },
+        {
+          "label": "ctp_conn H 7.7 mm",
+          "mm": 7.65,
+          "a": [
+            0.1998618927001953,
+            0.09544999694824219,
+            0.0032999997138977053
+          ],
+          "b": [
+            0.1998618927001953,
+            0.1030999984741211,
+            0.0032999997138977053
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lcd_conn",
+      "label": "Lcd_conn",
+      "default": false,
+      "dims": [
+        {
+          "label": "lcd_conn W 7.6 mm",
+          "mm": 7.6,
+          "a": [
+            0.09853978729248047,
+            0.1230250015258789,
+            0.0039052226543426515
+          ],
+          "b": [
+            0.10613978576660156,
+            0.1230250015258789,
+            0.0039052226543426515
+          ]
+        },
+        {
+          "label": "lcd_conn H 21.9 mm",
+          "mm": 21.9,
+          "a": [
+            0.11413978576660157,
+            0.093125,
+            0.0039052226543426515
+          ],
+          "b": [
+            0.11413978576660157,
+            0.11502500152587891,
+            0.0039052226543426515
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ctp_dress",
+      "label": "Ctp_dress",
+      "default": false,
+      "dims": [
+        {
+          "label": "ctp_dress W 9.3 mm",
+          "mm": 9.31,
+          "a": [
+            0.18394999694824218,
+            0.11127500152587891,
+            0.011149999618530273
+          ],
+          "b": [
+            0.19326190185546877,
+            0.11127500152587891,
+            0.011149999618530273
+          ]
+        },
+        {
+          "label": "ctp_dress H 159.7 mm",
+          "mm": 159.72,
+          "a": [
+            0.20126190185546874,
+            -0.05644841384887696,
+            0.011149999618530273
+          ],
+          "b": [
+            0.20126190185546874,
+            0.10327500152587892,
+            0.011149999618530273
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lcd_dress",
+      "label": "Lcd_dress",
+      "default": false,
+      "dims": [
+        {
+          "label": "lcd_dress W 100.1 mm",
+          "mm": 100.15,
+          "a": [
+            0.004190224170684815,
+            0.11407499694824219,
+            0.007299999713897705
+          ],
+          "b": [
+            0.10433979034423828,
+            0.11407499694824219,
+            0.007299999713897705
+          ]
+        },
+        {
+          "label": "lcd_dress H 27.9 mm",
+          "mm": 27.87,
+          "a": [
+            0.11233979034423829,
+            0.07820001983642579,
+            0.007299999713897705
+          ],
+          "b": [
+            0.11233979034423829,
+            0.10607499694824218,
+            0.007299999713897705
+          ]
+        }
+      ]
+    },
+    {
       "id": "uv_badge",
       "label": "Uv_badge",
       "default": false,
@@ -954,6 +1144,10 @@
       "glass": 55,
       "ctp_flex": 55,
       "lcd_ffc": 55,
+      "ctp_dress": 40,
+      "lcd_dress": 40,
+      "ctp_conn": 18,
+      "lcd_conn": 18,
       "uv_badge": 52,
       "accents": 48,
       "front": 28,
@@ -1464,9 +1658,7 @@
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    // Physical light units (three r155+) need ~π× the old "legacy" intensities.
-    // Inline studio rig (32143d8) — shared diffuse inspect-lighting broke shell visibility.
-    renderer.toneMappingExposure = 1.2;
+    // Exposure + IBL + studio lights from shared inspect-lighting.js.
     renderer.localClippingEnabled = true;
 
     const labelRenderer = new CSS2DRenderer();
@@ -1485,44 +1677,14 @@
     controls.enableDamping = true;
     controls.target.set(0.11, 0.075, 0.0);
 
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-    // environmentIntensity needs three >= r163; drive IBL via material.envMapIntensity.
-
-    // Physical-unit studio rig. Camera-follow key/fill keep the viewed face
-    // lit while orbiting; fixed rim/top/worldKey keep silhouette and form.
-    scene.add(new THREE.AmbientLight(0xc8d4e6, 2.1));
-    const key = new THREE.DirectionalLight(0xfff1e0, 4.87);
-    scene.add(key);
-    scene.add(key.target);
-    const fill = new THREE.DirectionalLight(0xd4e4ff, 1.73);
-    scene.add(fill);
-    scene.add(fill.target);
-    const rim = new THREE.DirectionalLight(0xeef3ff, 3.77);
-    rim.position.set(-0.2, 0.4, -0.85);
-    scene.add(rim);
-    const top = new THREE.DirectionalLight(0xffffff, 1.41);
-    top.position.set(0.1, 1.1, 0.15);
-    scene.add(top);
-    const worldKey = new THREE.DirectionalLight(0xfff6ee, 2.98);
-    worldKey.position.set(0.5, 0.75, 0.85);
-    scene.add(worldKey);
-
-    const _lightKeyOff = new THREE.Vector3();
-    const _lightFillOff = new THREE.Vector3();
+    // Soft orb IBL + hemi/key/fill/rim/top — shared SoT for eth + slim.
+    applyInspectEnvironment(THREE, scene, renderer);
+    const { updateCameraLights: _updateInspectLights } = createInspectLights(THREE, scene);
     function updateCameraLights() {
-      _lightKeyOff.set(0.35, 0.5, 1.0).normalize().multiplyScalar(1.0);
-      _lightKeyOff.applyQuaternion(camera.quaternion);
-      key.position.copy(camera.position).add(_lightKeyOff);
-      key.target.position.copy(controls.target);
-      key.target.updateMatrixWorld();
-      _lightFillOff.set(-0.7, 0.1, 0.5).normalize().multiplyScalar(0.95);
-      _lightFillOff.applyQuaternion(camera.quaternion);
-      fill.position.copy(camera.position).add(_lightFillOff);
-      fill.target.position.copy(controls.target);
-      fill.target.updateMatrixWorld();
+      _updateInspectLights(camera, controls.target);
     }
     updateCameraLights();
+    window.__AESL_INSPECT_LIGHTING__ = INSPECT_LIGHTING;
 
     const root = new THREE.Group();
     scene.add(root);
@@ -2336,19 +2498,20 @@
           projectXyUvs(o.geometry, flipU, flipV);
           if (isLcdSplash) neutralizeLcdBackFaceUvs(o.geometry);
         }
+        // Face-colored / ghost PCB: dielectric (metalness 0) + higher roughness
+        // so RoomEnvironment's rectangular area lights don't stamp a milky
+        // specular wash — diffuse IBL still lights FR4/SMDs (Alex 2026-08-03).
+        const isPcbMat = useFaceColors || isGhost;
         o.material = new THREE.MeshStandardMaterial({
           color: splash ? 0xffffff : (useFaceColors ? 0xffffff : col),
           map: splash || null,
           emissive: isLcdSplash ? 0xffffff : 0x000000,
           emissiveMap: isLcdSplash ? splash : null,
           emissiveIntensity: isLcdSplash ? 1.35 : 0,
-          // Matte plastic: higher metalness + RoomEnvironment stamps a hard
-          // horizon band onto flat faces as you orbit.
-          // LCD splash: no IBL — env horizon + mid-stack shelves read as a gray
-          // bar through the concept-UI caption (Alex 2026-08-03).
-          metalness: isOverlay ? 0.08 : (isGlass ? 0.04 : (isPrintSplash ? 0.06 : 0.12)),
-          roughness: isOverlay ? 0.5 : (isLcdSplash ? 0.55 : (isPrintSplash ? 0.55 : (isGlass ? 0.2 : 0.62))),
-          envMapIntensity: isOverlay ? 0.4 : (isLcdSplash ? 0.0 : (isGlass ? 1.4 : (isPrintSplash ? 0.35 : 0.45))),
+          // LCD splash: no IBL (horizon/shelf bars — Alex 2026-08-03).
+          metalness: isOverlay ? 0.04 : (isGlass ? 0.04 : (isPrintSplash ? 0.03 : (isPcbMat ? 0.0 : 0.02))),
+          roughness: isOverlay ? 0.55 : (isLcdSplash ? 0.55 : (isPrintSplash ? 0.6 : (isGlass ? 0.28 : (isPcbMat ? 0.82 : 0.72)))),
+          envMapIntensity: isOverlay ? 0.35 : (isLcdSplash ? 0.0 : (isGlass ? 1.1 : (isPrintSplash ? 0.28 : (isPcbMat ? 0.42 : 0.38)))),
           transparent: isAlpha,
           // Splash needs enough opacity to read; ghost PCB / shells use YAML.
           // LCD: fully opaque so well-floor / shelves cannot composite a bar.
