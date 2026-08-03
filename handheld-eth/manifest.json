@@ -1,9 +1,9 @@
 {
   "id": "eth",
   "title": "Handheld eth \u2014 PLACEHOLDER",
-  "blurb": "Stepped rear eth \u00b7 front + rear housing \u00b7 snap I/O bay cover (full aperture, RJ45+USB-C mouths). Ghost internals through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
+  "blurb": "Stepped rear eth \u00b7 front + rear housing \u00b7 LOCKED I/O tip-in (open apron + face-wall RJ45/USB-C mouths; no internal bay fill). Ghost internals through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER shell \u2014 I/O bay locked 2026-08-03.",
   "glb": "assembly.glb",
-  "glb_version": "e04803a67f",
+  "glb_version": "967ed5d3a9",
   "parts": [
     {
       "id": "front",
@@ -28,17 +28,6 @@
       ],
       "transparent": true,
       "opacity": 0.62
-    },
-    {
-      "id": "bay_hatch",
-      "label": "I/O bay snap cover",
-      "visible": true,
-      "color": [
-        168,
-        172,
-        180
-      ],
-      "opacity": 1.0
     },
     {
       "id": "glass",
@@ -270,41 +259,6 @@
             0.254,
             0.169,
             0.012
-          ]
-        }
-      ]
-    },
-    {
-      "id": "bay_hatch",
-      "label": "Bay_hatch",
-      "default": false,
-      "dims": [
-        {
-          "label": "bay_hatch W 54.1 mm",
-          "mm": 54.14,
-          "a": [
-            0.09334500000000001,
-            0.05163,
-            0.008499999999999999
-          ],
-          "b": [
-            0.14748499999999998,
-            0.05163,
-            0.008499999999999999
-          ]
-        },
-        {
-          "label": "bay_hatch H 12.3 mm",
-          "mm": 12.28,
-          "a": [
-            0.15548499999999998,
-            0.03135,
-            0.008499999999999999
-          ],
-          "b": [
-            0.15548499999999998,
-            0.04363,
-            0.008499999999999999
           ]
         }
       ]
@@ -884,18 +838,18 @@
     "fea_overlays": [
       {
         "id": "long_edge_bend",
-        "url": "fea/long_edge_bend.json?v=eb18ddb05c",
+        "url": "fea/long_edge_bend.json?v=d41127237a",
         "label": "Bend across the long axis (grip + push)",
         "field": "von_mises_MPa",
-        "max": 31.705573,
+        "max": 26.885303,
         "min": 0.0
       },
       {
         "id": "corner_twist",
-        "url": "fea/corner_twist.json?v=66ab34fd76",
+        "url": "fea/corner_twist.json?v=0bca0e28ac",
         "label": "Diagonal twist (one corner up)",
         "field": "von_mises_MPa",
-        "max": 56.428394,
+        "max": 40.940414,
         "min": 0.0
       }
     ]
