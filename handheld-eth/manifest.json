@@ -60,7 +60,7 @@
     {
       "id": "ctp_flex",
       "label": "CTP flex STEP-as-modeled (gbd004)",
-      "visible": false,
+      "visible": true,
       "color": [
         232,
         140,
@@ -71,7 +71,7 @@
     {
       "id": "lcd_ffc",
       "label": "LCD FFC STEP-as-modeled (gbd001)",
-      "visible": false,
+      "visible": true,
       "color": [
         64,
         140,
