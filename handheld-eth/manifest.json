@@ -3,7 +3,7 @@
   "title": "Handheld eth \u2014 PLACEHOLDER",
   "blurb": "Stepped rear eth \u00b7 front + rear housing \u00b7 LOCKED I/O tip-in (open apron + face-wall RJ45/USB-C mouths with lead-in chamfers; no internal bay fill) \u00b7 small snap cover over mouths (cable notches). Ghost internals through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER shell \u2014 I/O bay locked 2026-08-03.",
   "glb": "assembly.glb",
-  "glb_version": "f188555769",
+  "glb_version": "108f0e09d2",
   "parts": [
     {
       "id": "front",
