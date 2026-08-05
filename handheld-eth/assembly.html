@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260804T152345Z-d2ac7bc71a" />
+  <meta name="aesl-build" content="20260805T131033Z-04c72d40cc" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -2826,40 +2826,70 @@
     }
 
     // Shift the *projection* so the model centres in the clear view area
-    // (between left-docked HUD and RHS cam stack), not in the full window.
-    // Freely placed / dragging HUD: clear offset — never freeze a stale value
+    // (site-nav, left-docked HUD, RHS cam stack, bottom hint/Controls) — not
+    // the full window. Always apply chrome insets; HUD only when docked.
+    // Freely placed / dragging HUD: skip left inset — never freeze a stale value
     // (Hansei 2026-08-03: freeze hid the model or parked it under the HUD).
+    // Alex 2026-08-05: mobile/narrow previously cleared offset entirely, so the
+    // model sat low-left under site-nav rather than in the visible stage.
     function applyPanelViewOffset() {
       if (!viewOffsetReady) return;
       if (hudDragging) return;
       const w = Math.max(1, innerWidth);
       const h = Math.max(1, innerHeight);
-      const docked = !hudPlaced && isPanelOpen() && w > 900;
-      if (!docked) {
-        camera.clearViewOffset();
-        camera.updateProjectionMatrix();
-        return;
-      }
-      const hudNode = document.getElementById('hud');
-      const camNode = document.getElementById('camStack');
-      let left = hudNode ? hudNode.getBoundingClientRect().right : 0;
+      let left = 0;
       let right = w;
+      let top = 0;
+      let bottom = h;
+
+      const nav = document.getElementById('siteNav');
+      if (nav) {
+        const nr = nav.getBoundingClientRect();
+        if (nr.bottom > top + 8) top = nr.bottom;
+      }
+
+      const hint = document.getElementById('hint');
+      if (hint && !hint.classList.contains('faded')) {
+        const hr = hint.getBoundingClientRect();
+        if (hr.top > top + 80) bottom = Math.min(bottom, hr.top);
+      }
+
+      const btn = document.getElementById('btnPanel');
+      if (btn && !isPanelOpen()) {
+        const br = btn.getBoundingClientRect();
+        if (br.top > top + 80) bottom = Math.min(bottom, br.top - 6);
+      }
+
+      const docked = !hudPlaced && isPanelOpen() && w > 900;
+      if (docked) {
+        const hudNode = document.getElementById('hud');
+        if (hudNode) {
+          const hr = hudNode.getBoundingClientRect();
+          if (hr.right > left + 40) left = hr.right;
+        }
+      }
+
+      const camNode = document.getElementById('camStack');
       if (camNode) {
         const cr = camNode.getBoundingClientRect();
-        if (cr.left > left + 40) right = cr.left;
+        if (cr.left > left + 40) right = Math.min(right, cr.left);
       }
+
       // Keep a sane usable band; fall back to full-frame if layout is odd.
-      if (!(right - left > 120)) {
+      if (!(right - left > 120) || !(bottom - top > 120)) {
         camera.clearViewOffset();
         camera.updateProjectionMatrix();
         return;
       }
-      // offsetX < 0 shifts content right so frustum centre maps to usable centre.
+      // offsetX < 0 shifts content right (Three.js: left += offsetX * …).
+      // offsetY > 0 shifts content down (Three.js: top -= offsetY * …) — Y sign
+      // is opposite X. Map frustum centre onto the clear-area centre.
       const offsetX = w / 2 - (left + right) / 2;
-      if (Math.abs(offsetX) < 1) {
+      const offsetY = (top + bottom) / 2 - h / 2;
+      if (Math.abs(offsetX) < 1 && Math.abs(offsetY) < 1) {
         camera.clearViewOffset();
       } else {
-        camera.setViewOffset(w, h, offsetX, 0, w, h);
+        camera.setViewOffset(w, h, offsetX, offsetY, w, h);
       }
       camera.updateProjectionMatrix();
     }

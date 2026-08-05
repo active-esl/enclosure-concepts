@@ -1,6 +1,6 @@
 {
-  "id": "20260804T152345Z-d2ac7bc71a",
-  "built_at": "2026-08-04T15:23:45Z",
+  "id": "20260805T131033Z-04c72d40cc",
+  "built_at": "2026-08-05T13:10:33Z",
   "concept": "handheld-eth",
   "assets": {
     "handheld.glb": "fcd8e15fb7",
@@ -10,11 +10,12 @@
     "site-nav.css": "d180230ef5",
     "site-nav.js": "4371c21459",
     "look.js": "b61e24e6db",
-    "look-viewer.js": "5db92e04f0",
+    "look-viewer.js": "95fcba9977",
     "pages-update.js": "8ff9ecbdf6",
     "still.js": "2e090d54cf",
     "inspect-lighting.js": "3f90d182e8",
     "fea/corner_twist.json": "ca7cd4031d",
-    "fea/long_edge_bend.json": "14e16476bf"
+    "fea/long_edge_bend.json": "14e16476bf",
+    "fea/report.json": "bb170438d9"
   }
 }
