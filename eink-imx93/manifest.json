@@ -1,0 +1,180 @@
+{
+  "id": "eink-imx93",
+  "title": "Active \u2014 i.MX93 e-ink PLACEHOLDER",
+  "blurb": "Active product \u00b7 greenfield intake \u00b7 DD/AESL imx93 PCB (202500.stp) \u00b7 assumed EL133UF1 display \u00b7 **PCB-only Inspect** \u2014 identity pose PLACEHOLDER (not signed off). Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). Shell not started. Display / M.2 toggles are named PLACEHOLDERs until Michael STEP. Lab BSP alias: imx93-jaguar-eink.",
+  "glb": "assembly.glb",
+  "glb_version": "abe5d753b5",
+  "parts": [
+    {
+      "id": "display",
+      "label": "Display (EL133UF1 \u2014 PLACEHOLDER \u00b7 no STEP)",
+      "visible": false,
+      "color": [
+        40,
+        72,
+        110
+      ],
+      "ghost": true,
+      "manifest_only": true,
+      "transparent": true,
+      "opacity": 0.35
+    },
+    {
+      "id": "m2",
+      "label": "M.2 EM05-G (PLACEHOLDER \u00b7 ~30\u00d742 mm blob in 202500.stp)",
+      "visible": false,
+      "color": [
+        120,
+        90,
+        40
+      ],
+      "ghost": true,
+      "manifest_only": true,
+      "transparent": true,
+      "opacity": 0.45
+    },
+    {
+      "id": "usb",
+      "label": "USB-C USB4105-GF-A (PLACEHOLDER box \u00b7 202500.stp AABB)",
+      "visible": true,
+      "color": [
+        190,
+        150,
+        50
+      ],
+      "ghost": true,
+      "transparent": true,
+      "opacity": 0.55
+    },
+    {
+      "id": "pcb",
+      "label": "PCB (Active imx93 e-ink \u2014 202500.stp \u00b7 pose PLACEHOLDER)",
+      "visible": true,
+      "color": [
+        28,
+        110,
+        55
+      ],
+      "transparent": true,
+      "opacity": 0.85
+    }
+  ],
+  "dim_groups": [
+    {
+      "id": "overall",
+      "label": "Overall pcb (W\u00d7H\u00d7D)",
+      "default": false,
+      "dims": [
+        {
+          "label": "W 180.0 mm",
+          "mm": 180.0,
+          "a": [
+            0.0,
+            0.1286999969482422,
+            0.01323002815246582
+          ],
+          "b": [
+            0.18,
+            0.1286999969482422,
+            0.01323002815246582
+          ]
+        },
+        {
+          "label": "H 120.7 mm",
+          "mm": 120.7,
+          "a": [
+            0.188,
+            0.0,
+            0.01323002815246582
+          ],
+          "b": [
+            0.188,
+            0.1206999969482422,
+            0.01323002815246582
+          ]
+        },
+        {
+          "label": "D 13.2 mm",
+          "mm": 13.23,
+          "a": [
+            0.188,
+            0.1206999969482422,
+            0.0
+          ],
+          "b": [
+            0.188,
+            0.1206999969482422,
+            0.01323002815246582
+          ]
+        }
+      ]
+    },
+    {
+      "id": "usb",
+      "label": "Usb",
+      "default": false,
+      "dims": [
+        {
+          "label": "usb W 8.9 mm",
+          "mm": 8.94,
+          "a": [
+            0.02953000068664551,
+            0.08995999908447266,
+            0.007699999809265137
+          ],
+          "b": [
+            0.038470001220703126,
+            0.08995999908447266,
+            0.007699999809265137
+          ]
+        },
+        {
+          "label": "usb H 4.2 mm",
+          "mm": 4.21,
+          "a": [
+            0.046470001220703126,
+            0.07775,
+            0.007699999809265137
+          ],
+          "b": [
+            0.046470001220703126,
+            0.08195999908447266,
+            0.007699999809265137
+          ]
+        }
+      ]
+    }
+  ],
+  "views": {
+    "front": [
+      0.75,
+      0.5,
+      1.15
+    ],
+    "rear": [
+      -0.75,
+      0.5,
+      -1.15
+    ],
+    "side": [
+      1.4,
+      0.25,
+      0.15
+    ],
+    "top": [
+      0.15,
+      1.4,
+      0.6
+    ]
+  },
+  "features": {
+    "measure": true,
+    "outline": true,
+    "outline_depth_sensitivity": 320.0,
+    "outline_normal_sensitivity": 26.0,
+    "deeplink": true,
+    "fea": false,
+    "fea_overlays": []
+  },
+  "pages_links": []
+}

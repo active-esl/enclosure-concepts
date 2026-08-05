@@ -22,6 +22,13 @@
       eval: `${root}handheld-eth/fea/`,
       still: `${root}still.html?c=eth`,
     },
+    {
+      id: "eink-imx93",
+      label: "Active",
+      look: `${root}eink-imx93/`,
+      inspect: `${root}eink-imx93/assembly.html`,
+      still: `${root}still.html?c=eink-imx93`,
+    },
   ];
 
   const conceptHref = (c) => {

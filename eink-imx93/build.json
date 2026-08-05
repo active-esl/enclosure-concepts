@@ -1,0 +1,15 @@
+{
+  "id": "20260805T164241Z-5544a0f28a",
+  "built_at": "2026-08-05T16:42:41Z",
+  "concept": "eink-imx93",
+  "assets": {
+    "assembly.glb": "abe5d753b5",
+    "site-nav.css": "d180230ef5",
+    "site-nav.js": "8eed16de24",
+    "look.js": "b61e24e6db",
+    "look-viewer.js": "95fcba9977",
+    "pages-update.js": "8ff9ecbdf6",
+    "still.js": "2e090d54cf",
+    "inspect-lighting.js": "3f90d182e8"
+  }
+}
