@@ -8,14 +8,14 @@
       src: "handheld/beauty_raytrace_baseline.png",
       look: "handheld/",
       inspect: "handheld/assembly.html",
-      title: "Handheld slim — beauty still",
+      title: "Active slim — beauty still",
       caption: "Cycles baseline · PLACEHOLDER · slim",
     },
     eth: {
       src: "handheld-eth/beauty_raytrace.png",
       look: "handheld-eth/",
       inspect: "handheld-eth/assembly.html",
-      title: "Handheld eth — beauty still",
+      title: "Active eth — beauty still",
       caption: "Cycles · PLACEHOLDER · eth",
     },
   };
