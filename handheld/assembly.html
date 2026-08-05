@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260805T153051Z-fdeb1514e9" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
   <title>Active slim — PLACEHOLDER</title>
   <!-- Critical: paint dark before site-nav.css / body CSS — kills FOUC white flash -->
   <style>html,body{background-color:#0b1220;color-scheme:dark}</style>
-  <link rel="stylesheet" href="../site-nav.css?v=d180230ef5" />
+  <link rel="stylesheet" href="../site-nav.css?v=3" />
   <style>
     :root {
       color-scheme: dark;
@@ -296,7 +295,7 @@
 </head>
 <body class="panel-open" style="background-color:#0b1220;margin:0">
   <nav id="siteNav" class="site-nav" data-root="../" data-concept="slim" data-mode="inspect" aria-label="Concept site"></nav>
-  <script src="../site-nav.js?v=4371c21459" defer></script>
+  <script src="../site-nav.js?v=3" defer></script>
   <canvas id="c"></canvas>
   <button type="button" id="btnPanel" aria-controls="hud" aria-expanded="true">Controls</button>
   <div id="camStack" role="toolbar" aria-label="Camera controls">
@@ -328,6 +327,7 @@
       <h2>Parts</h2>
       <div class="row parts-tools">
         <button type="button" id="btnPartsAll">Show all</button>
+        <button type="button" id="btnPartsClear" title="Hide all parts">Clear all</button>
         <button type="button" id="btnShare" title="Copy URL with current view and toggles">Copy link</button>
       </div>
       <div class="toggles" id="toggles"></div>
@@ -435,12 +435,16 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
     import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
     import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
     import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
     import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
     import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+    import {
+      INSPECT_LIGHTING,
+      applyInspectEnvironment,
+      createInspectLights,
+    } from '../inspect-lighting.js';
 
     const MANIFEST = {
   "id": "slim",
@@ -1301,9 +1305,7 @@
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    // Physical light units (three r155+) need ~π× the old "legacy" intensities.
-    // Inline studio rig (32143d8) — shared diffuse inspect-lighting broke shell visibility.
-    renderer.toneMappingExposure = 1.2;
+    // Exposure + IBL + studio lights from shared inspect-lighting.js.
     renderer.localClippingEnabled = true;
 
     const labelRenderer = new CSS2DRenderer();
@@ -1322,44 +1324,14 @@
     controls.enableDamping = true;
     controls.target.set(0.11, 0.075, 0.0);
 
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-    // environmentIntensity needs three >= r163; drive IBL via material.envMapIntensity.
-
-    // Physical-unit studio rig. Camera-follow key/fill keep the viewed face
-    // lit while orbiting; fixed rim/top/worldKey keep silhouette and form.
-    scene.add(new THREE.AmbientLight(0xc8d4e6, 2.1));
-    const key = new THREE.DirectionalLight(0xfff1e0, 4.87);
-    scene.add(key);
-    scene.add(key.target);
-    const fill = new THREE.DirectionalLight(0xd4e4ff, 1.73);
-    scene.add(fill);
-    scene.add(fill.target);
-    const rim = new THREE.DirectionalLight(0xeef3ff, 3.77);
-    rim.position.set(-0.2, 0.4, -0.85);
-    scene.add(rim);
-    const top = new THREE.DirectionalLight(0xffffff, 1.41);
-    top.position.set(0.1, 1.1, 0.15);
-    scene.add(top);
-    const worldKey = new THREE.DirectionalLight(0xfff6ee, 2.98);
-    worldKey.position.set(0.5, 0.75, 0.85);
-    scene.add(worldKey);
-
-    const _lightKeyOff = new THREE.Vector3();
-    const _lightFillOff = new THREE.Vector3();
+    // Shared inspect-lighting.js (RoomEnvironment + studio lights).
+    applyInspectEnvironment(THREE, scene, renderer);
+    const { updateCameraLights: _updateInspectLights } = createInspectLights(THREE, scene);
     function updateCameraLights() {
-      _lightKeyOff.set(0.35, 0.5, 1.0).normalize().multiplyScalar(1.0);
-      _lightKeyOff.applyQuaternion(camera.quaternion);
-      key.position.copy(camera.position).add(_lightKeyOff);
-      key.target.position.copy(controls.target);
-      key.target.updateMatrixWorld();
-      _lightFillOff.set(-0.7, 0.1, 0.5).normalize().multiplyScalar(0.95);
-      _lightFillOff.applyQuaternion(camera.quaternion);
-      fill.position.copy(camera.position).add(_lightFillOff);
-      fill.target.position.copy(controls.target);
-      fill.target.updateMatrixWorld();
+      _updateInspectLights(camera, controls.target);
     }
     updateCameraLights();
+    window.__AESL_INSPECT_LIGHTING__ = INSPECT_LIGHTING;
 
     const root = new THREE.Group();
     scene.add(root);
@@ -1816,6 +1788,20 @@
       writeHash();
     }
 
+    function explodeOffsetMm(partId) {
+      // Explicit YAML offset wins. Highlight overlays (e.g. PoE red body) sit on
+      // geometry already in the PCB ghost — omitting their offset peels a second
+      // copy off on explode. Fall back to pcb so they stay registered.
+      if (Object.prototype.hasOwnProperty.call(EXPLODE_OFFSETS, partId)) {
+        return Number(EXPLODE_OFFSETS[partId]) || 0;
+      }
+      const meta = PART_META[partId] || {};
+      if (meta.highlight && !meta.ghost && Object.prototype.hasOwnProperty.call(EXPLODE_OFFSETS, 'pcb')) {
+        return Number(EXPLODE_OFFSETS.pcb) || 0;
+      }
+      return 0;
+    }
+
     function applyExplode() {
       if (!FEATURES.explode || !modelReady) return;
       const t = (Number(document.getElementById('explodeRange')?.value) || 0) / 100;
@@ -1825,7 +1811,7 @@
         const g = partRoots[id];
         if (!g) continue;
         const base = partBasePos[id] || new THREE.Vector3();
-        const mm = Number(EXPLODE_OFFSETS[id] ?? 0);
+        const mm = explodeOffsetMm(id);
         g.position.copy(base).addScaledVector(EXPLODE_AXIS, mm * 0.001 * t);
       }
       recenterPivot();
@@ -2119,9 +2105,11 @@
         const meta = PART_META[partId] || {};
         let col = PART_COLOR[partId] || 0x8e9298;
         const isGhost = !!meta.ghost;
-        // Opaque overlay parts (e.g. PoE body) sit above ghost PCB — not always-on
-        // emissive paint. Spot attention mode handles dim/accent separately.
-        const isOverlay = partId === 'poe' || (!!meta.highlight && !isGhost && !meta.transparent);
+        const useFaceColors = !!meta.face_colors;
+        // Opaque overlay parts sit above ghost PCB — not always-on emissive paint.
+        // Spot attention mode handles dim/accent separately.
+        // (PoE red highlight retired 2026-08-03 — magnetics in board face_colors.)
+        const isOverlay = !!meta.highlight && !isGhost && !meta.transparent;
         const splash = partId ? splashTex[partId] : null;
         // lcd = emissive glass art; print = matte UV/film decal (alpha corners).
         // Transparent shells / PCB ghost keep plastic shading — only the LCD
@@ -2158,7 +2146,7 @@
           if (isLcdSplash) neutralizeLcdBackFaceUvs(o.geometry);
         }
         o.material = new THREE.MeshStandardMaterial({
-          color: splash ? 0xffffff : col,
+          color: splash ? 0xffffff : (useFaceColors ? 0xffffff : col),
           map: splash || null,
           emissive: isLcdSplash ? 0xffffff : 0x000000,
           emissiveMap: isLcdSplash ? splash : null,
@@ -2167,9 +2155,13 @@
           // horizon band onto flat faces as you orbit.
           // LCD splash: no IBL — env horizon + mid-stack shelves read as a gray
           // bar through the concept-UI caption (Alex 2026-08-03).
-          metalness: isOverlay ? 0.08 : (isGlass ? 0.04 : (isPrintSplash ? 0.06 : 0.12)),
-          roughness: isOverlay ? 0.5 : (isLcdSplash ? 0.55 : (isPrintSplash ? 0.55 : (isGlass ? 0.2 : 0.62))),
-          envMapIntensity: isOverlay ? 0.4 : (isLcdSplash ? 0.0 : (isGlass ? 1.4 : (isPrintSplash ? 0.35 : 0.45))),
+          // Soften RoomEnvironment rect wash: shells (transparent plastic) get
+          // low envMapIntensity so ceiling boxes don't stamp a milky panel;
+          // ghost PCB keeps higher IBL so FR4/SMDs stay lit (Alex 2026-08-03).
+          // LCD splash: no IBL (horizon/shelf bars).
+          metalness: isOverlay ? 0.06 : (isGlass ? 0.04 : (isPrintSplash ? 0.05 : ((isGhost || useFaceColors) ? 0.09 : (isAlpha ? 0.04 : 0.08)))),
+          roughness: isOverlay ? 0.55 : (isLcdSplash ? 0.55 : (isPrintSplash ? 0.58 : (isGlass ? 0.22 : ((isGhost || useFaceColors) ? 0.70 : (isAlpha ? 0.78 : 0.66))))),
+          envMapIntensity: isOverlay ? 0.35 : (isLcdSplash ? 0.0 : (isGlass ? 1.2 : (isPrintSplash ? 0.28 : ((isGhost || useFaceColors) ? 0.42 : (isAlpha ? 0.16 : 0.35))))),
           transparent: isAlpha,
           // Splash needs enough opacity to read; ghost PCB / shells use YAML.
           // LCD: fully opaque so well-floor / shelves cannot composite a bar.
@@ -2184,20 +2176,21 @@
           // as a white square — discard low-alpha fragments like print decals.
           alphaTest: isPrintSplash ? 0.35 : (isLcdSplash ? 0.12 : 0),
           // Ghost / see-through shells: no depth write so PCB composites inside.
-          // Overlay (PoE) always depth-writes so it wins over ghost blend.
+          // Overlay always depth-writes so it wins over ghost blend.
           depthWrite: isOverlay || isLcdSplash || isPrintSplash ? true : !isAlpha,
           side: (isPrintSplash || isGhost) ? THREE.DoubleSide : THREE.FrontSide,
-          vertexColors: false,
+          vertexColors: useFaceColors,
           clippingPlanes: [],
         });
         if (isOverlay) o.renderOrder = 3;
         else if (isGhost) o.renderOrder = 2;
-        o.userData.baseColor = splash ? 0xffffff : col;
+        o.userData.baseColor = splash ? 0xffffff : (useFaceColors ? 0xffffff : col);
         o.userData.partId = partId;
         o.userData.isLcdSplash = isLcdSplash;
         o.userData.isOverlay = isOverlay;
+        o.userData.faceColors = useFaceColors;
         o.userData.matBase = {
-          color: splash ? 0xffffff : col,
+          color: splash ? 0xffffff : (useFaceColors ? 0xffffff : col),
           emissive: isLcdSplash ? 0xffffff : 0x000000,
           emissiveIntensity: isLcdSplash ? 1.35 : 0,
           opacity: o.material.opacity,
@@ -2273,9 +2266,60 @@
     const fit = { center: new THREE.Vector3(), dim: 0.25, radius: 0.14 };
     let lastView = 'front';
     viewOffsetReady = true;
+    // Clear viewport band excluding overlay chrome (site-nav, docked HUD, hints).
+    // Cam stack is a floating overlay — never shrink the stage for centering/FIT.
+    function visibleStageRect() {
+      const w = Math.max(1, innerWidth);
+      const h = Math.max(1, innerHeight);
+      let left = 0;
+      let right = w;
+      let top = 0;
+      let bottom = h;
+
+      const nav = document.getElementById('siteNav');
+      if (nav) {
+        const nr = nav.getBoundingClientRect();
+        if (nr.bottom > top + 8) top = nr.bottom;
+      }
+
+      const hint = document.getElementById('hint');
+      if (hint && !hint.classList.contains('faded')) {
+        const hr = hint.getBoundingClientRect();
+        if (hr.top > top + 80) bottom = Math.min(bottom, hr.top);
+      }
+
+      const btn = document.getElementById('btnPanel');
+      if (btn && !isPanelOpen()) {
+        const br = btn.getBoundingClientRect();
+        if (br.top > top + 80) bottom = Math.min(bottom, br.top - 6);
+      }
+
+      const leftDocked = !hudPlaced && isPanelOpen() && !mqMobile.matches;
+      if (leftDocked) {
+        const hudNode = document.getElementById('hud');
+        if (hudNode) {
+          const hr = hudNode.getBoundingClientRect();
+          if (hr.right > left + 40) left = hr.right;
+        }
+      }
+
+      if (mqMobile.matches && isPanelOpen() && !hudPlaced) {
+        const hudNode = document.getElementById('hud');
+        if (hudNode) {
+          const hr = hudNode.getBoundingClientRect();
+          if (hr.top < bottom - 40) bottom = Math.min(bottom, hr.top - 6);
+        }
+      }
+
+      return { w, h, left, right, top, bottom };
+    }
+    function visibleAspect() {
+      const { left, right, top, bottom } = visibleStageRect();
+      return Math.max(0.25, (right - left) / Math.max(1, bottom - top));
+    }
     function framingDistance(radius, pad) {
       const fovV = THREE.MathUtils.degToRad(camera.fov);
-      const fovH = 2 * Math.atan(Math.tan(fovV / 2) * camera.aspect);
+      const fovH = 2 * Math.atan(Math.tan(fovV / 2) * visibleAspect());
       return Math.max(radius / Math.tan(fovV / 2),
                       radius / Math.tan(fovH / 2)) * pad;
     }
@@ -2336,54 +2380,13 @@
     }
 
     // Shift the *projection* so the model centres in the clear view area
-    // (site-nav, left-docked HUD, RHS cam stack, bottom hint/Controls) — not
-    // the full window. Always apply chrome insets; HUD only when docked.
-    // Freely placed / dragging HUD: skip left inset — never freeze a stale value
+    // (site-nav, left-docked HUD, bottom hint/Controls) — not the full window.
+    // Freely placed / dragging HUD: skip dock inset — never freeze a stale value
     // (Hansei 2026-08-03: freeze hid the model or parked it under the HUD).
-    // Alex 2026-08-05: mobile/narrow previously cleared offset entirely, so the
-    // model sat low-left under site-nav rather than in the visible stage.
     function applyPanelViewOffset() {
       if (!viewOffsetReady) return;
       if (hudDragging) return;
-      const w = Math.max(1, innerWidth);
-      const h = Math.max(1, innerHeight);
-      let left = 0;
-      let right = w;
-      let top = 0;
-      let bottom = h;
-
-      const nav = document.getElementById('siteNav');
-      if (nav) {
-        const nr = nav.getBoundingClientRect();
-        if (nr.bottom > top + 8) top = nr.bottom;
-      }
-
-      const hint = document.getElementById('hint');
-      if (hint && !hint.classList.contains('faded')) {
-        const hr = hint.getBoundingClientRect();
-        if (hr.top > top + 80) bottom = Math.min(bottom, hr.top);
-      }
-
-      const btn = document.getElementById('btnPanel');
-      if (btn && !isPanelOpen()) {
-        const br = btn.getBoundingClientRect();
-        if (br.top > top + 80) bottom = Math.min(bottom, br.top - 6);
-      }
-
-      const docked = !hudPlaced && isPanelOpen() && w > 900;
-      if (docked) {
-        const hudNode = document.getElementById('hud');
-        if (hudNode) {
-          const hr = hudNode.getBoundingClientRect();
-          if (hr.right > left + 40) left = hr.right;
-        }
-      }
-
-      const camNode = document.getElementById('camStack');
-      if (camNode) {
-        const cr = camNode.getBoundingClientRect();
-        if (cr.left > left + 40) right = Math.min(right, cr.left);
-      }
+      const { w, h, left, right, top, bottom } = visibleStageRect();
 
       // Keep a sane usable band; fall back to full-frame if layout is odd.
       if (!(right - left > 120) || !(bottom - top > 120)) {
@@ -2485,11 +2488,9 @@
       for (const p of PARTS) {
         const input = document.querySelector(`input[data-part="${p.id}"]`);
         if (!input || !input.parentElement) continue;
-        const base = p._baseLabel || String(p.label || p.id).replace(/\s*\(RED\)\s*$/i, '').trim();
-        // Everyday PoE label omits (RED); show it only while that part is spotted.
-        const text = (p.id === 'poe' && spotPartId === 'poe') ? `${base} (RED)` : base;
+        const base = p._baseLabel || String(p.label || p.id).trim();
         while (input.nextSibling) input.nextSibling.remove();
-        input.parentElement.appendChild(document.createTextNode(` ${text}`));
+        input.parentElement.appendChild(document.createTextNode(` ${base}`));
       }
     }
     function syncSpotButtons() {
@@ -2631,6 +2632,13 @@
       syncSoloButtons();
       applyVisibility();
     }
+    function clearAllParts() {
+      for (const el of document.querySelectorAll('input[data-part]')) el.checked = false;
+      soloPartId = null;
+      partSnapshot = null;
+      syncSoloButtons();
+      applyVisibility();
+    }
     document.getElementById('toggles').addEventListener('click', (ev) => {
       const spotBtn = ev.target.closest('button[data-spot]');
       if (spotBtn) {
@@ -2644,6 +2652,7 @@
       soloPart(soloBtn.dataset.solo);
     });
     document.getElementById('btnPartsAll')?.addEventListener('click', showAllParts);
+    document.getElementById('btnPartsClear')?.addEventListener('click', clearAllParts);
 
     let shareTimer = null;
     document.getElementById('btnShare')?.addEventListener('click', async () => {
@@ -2838,6 +2847,5 @@
       labelRenderer.render(scene, camera);
     })();
   </script>
-<script src="../pages-update.js?v=8ff9ecbdf6" defer></script>
 </body>
 </html>
