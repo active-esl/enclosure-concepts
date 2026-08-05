@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
+  <meta name="aesl-build" content="20260805T175107Z-bb7ed7e9ef" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
-  <title>Active slim — PLACEHOLDER</title>
+  <title>Active Slim — PLACEHOLDER</title>
   <!-- Critical: paint dark before site-nav.css / body CSS — kills FOUC white flash -->
   <style>html,body{background-color:#0b1220;color-scheme:dark}</style>
-  <link rel="stylesheet" href="../site-nav.css?v=3" />
+  <link rel="stylesheet" href="../site-nav.css?v=d180230ef5" />
   <style>
     :root {
       color-scheme: dark;
@@ -295,7 +296,7 @@
 </head>
 <body class="panel-open" style="background-color:#0b1220;margin:0">
   <nav id="siteNav" class="site-nav" data-root="../" data-concept="slim" data-mode="inspect" aria-label="Concept site"></nav>
-  <script src="../site-nav.js?v=3" defer></script>
+  <script src="../site-nav.js?v=f745b073ef" defer></script>
   <canvas id="c"></canvas>
   <button type="button" id="btnPanel" aria-controls="hud" aria-expanded="true">Controls</button>
   <div id="camStack" role="toolbar" aria-label="Camera controls">
@@ -444,14 +445,14 @@
       INSPECT_LIGHTING,
       applyInspectEnvironment,
       createInspectLights,
-    } from '../inspect-lighting.js';
+    } from '../inspect-lighting.js?v=3f90d182e8';
 
     const MANIFEST = {
   "id": "slim",
-  "title": "Active slim \u2014 PLACEHOLDER",
-  "blurb": "Thin ~7.6 mm slab \u00b7 front housing + rear housing \u00b7 no onboard RJ45 (dock / USB-C / PoE-when-docked). Ghost internals (Active Screen board) through shell by default \u00b7 rear-service (VESA / \u00bc-20 / RF / wordmark). Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
+  "title": "Active Slim \u2014 PLACEHOLDER",
+  "blurb": "Thin ~7.6 mm slab \u00b7 front housing + rear housing \u00b7 no onboard RJ45 (dock / USB-C / PoE-when-docked). Ghost internals (Active Screen board, RJ45 not fitted) through shell by default \u00b7 rear-service (VESA / \u00bc-20 / RF / wordmark). Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). PLACEHOLDER \u2014 not measured CAD.",
   "glb": "assembly.glb",
-  "glb_version": "50282adb91",
+  "glb_version": "cc0bb773bd",
   "parts": [
     {
       "id": "front",
@@ -509,8 +510,8 @@
     },
     {
       "id": "accents",
-      "label": "Accents (cam ring / home)",
-      "visible": true,
+      "label": "Accents (gated \u2014 home/cam off)",
+      "visible": false,
       "color": [
         190,
         192,
@@ -519,7 +520,7 @@
     },
     {
       "id": "pcb",
-      "label": "PCB (Active Screen board)",
+      "label": "PCB (Active Screen \u2014 no RJ45 fitted)",
       "visible": true,
       "color": [
         28,
@@ -528,19 +529,8 @@
       ],
       "ghost": true,
       "transparent": true,
+      "face_colors": true,
       "opacity": 0.7
-    },
-    {
-      "id": "poe",
-      "label": "PoE transformer",
-      "visible": true,
-      "color": [
-        200,
-        72,
-        56
-      ],
-      "highlight": true,
-      "opacity": 1.0
     }
   ],
   "dim_groups": [
@@ -704,31 +694,31 @@
       "default": false,
       "dims": [
         {
-          "label": "accents W 28.0 mm",
-          "mm": 28.0,
+          "label": "accents W 0.0 mm",
+          "mm": 0.01,
           "a": [
-            0.109,
-            0.17239999999999997,
-            0.00764
+            -0.001,
+            0.00701,
+            -0.00099
           ],
           "b": [
-            0.137,
-            0.17239999999999997,
-            0.00764
+            -0.00099,
+            0.00701,
+            -0.00099
           ]
         },
         {
-          "label": "accents H 146.8 mm",
-          "mm": 146.85,
+          "label": "accents H 0.0 mm",
+          "mm": 0.01,
           "a": [
-            0.145,
-            0.017549999999999993,
-            0.00764
+            0.00701,
+            -0.001,
+            -0.00099
           ],
           "b": [
-            0.145,
-            0.1644,
-            0.00764
+            0.00701,
+            -0.00099,
+            -0.00099
           ]
         }
       ]
@@ -744,12 +734,12 @@
           "a": [
             0.050005001068115236,
             0.1416499938964844,
-            0.00684999942779541
+            0.005990992546081543
           ],
           "b": [
             0.19599690246582033,
             0.1416499938964844,
-            0.00684999942779541
+            0.005990992546081543
           ]
         },
         {
@@ -758,47 +748,12 @@
           "a": [
             0.2039969024658203,
             0.0353499984741211,
-            0.00684999942779541
+            0.005990992546081543
           ],
           "b": [
             0.2039969024658203,
             0.13364999389648438,
-            0.00684999942779541
-          ]
-        }
-      ]
-    },
-    {
-      "id": "poe",
-      "label": "Poe",
-      "default": false,
-      "dims": [
-        {
-          "label": "poe W 21.3 mm",
-          "mm": 21.35,
-          "a": [
-            0.1614017333984375,
-            0.07866876983642579,
-            0.0021590070724487307
-          ],
-          "b": [
-            0.18275172424316408,
-            0.07866876983642579,
-            0.0021590070724487307
-          ]
-        },
-        {
-          "label": "poe H 15.0 mm",
-          "mm": 15.0,
-          "a": [
-            0.19075172424316406,
-            0.05566876983642578,
-            0.0021590070724487307
-          ],
-          "b": [
-            0.19075172424316406,
-            0.07066876983642578,
-            0.0021590070724487307
+            0.005990992546081543
           ]
         }
       ]
@@ -844,7 +799,6 @@
       "accents": 35,
       "front": 22,
       "pcb": 14,
-      "poe": 16,
       "rear": -10
     },
     "section": true,
@@ -2847,5 +2801,6 @@
       labelRenderer.render(scene, camera);
     })();
   </script>
+<script src="../pages-update.js?v=8ff9ecbdf6" defer></script>
 </body>
 </html>

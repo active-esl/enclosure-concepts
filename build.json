@@ -1,0 +1,14 @@
+{
+  "id": "20260805T163526Z-d66f3d32d2",
+  "built_at": "2026-08-05T16:35:26Z",
+  "concept": "enclosure-concepts",
+  "assets": {
+    "site-nav.css": "d180230ef5",
+    "site-nav.js": "59f7428247",
+    "look.js": "b61e24e6db",
+    "look-viewer.js": "95fcba9977",
+    "pages-update.js": "8ff9ecbdf6",
+    "still.js": "2e090d54cf",
+    "inspect-lighting.js": "3f90d182e8"
+  }
+}

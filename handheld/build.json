@@ -1,18 +1,18 @@
 {
-  "id": "20260805T153051Z-fdeb1514e9",
-  "built_at": "2026-08-05T15:30:51Z",
+  "id": "20260805T175107Z-bb7ed7e9ef",
+  "built_at": "2026-08-05T17:51:07Z",
   "concept": "handheld",
   "assets": {
     "handheld.glb": "640d90a7f6",
-    "assembly.glb": "50282adb91",
+    "assembly.glb": "cc0bb773bd",
     "lcd_splash_active_esl.png": "c3b2d277a9",
     "active-esl-uv-badge-28x10-brand-full-600dpi.png": "bd3627da5a",
     "site-nav.css": "d180230ef5",
-    "site-nav.js": "4371c21459",
+    "site-nav.js": "f745b073ef",
     "look.js": "b61e24e6db",
     "look-viewer.js": "95fcba9977",
     "pages-update.js": "8ff9ecbdf6",
-    "still.js": "2e090d54cf",
+    "still.js": "8b8f9b7e0c",
     "inspect-lighting.js": "3f90d182e8"
   }
 }

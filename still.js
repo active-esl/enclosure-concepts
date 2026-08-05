@@ -8,8 +8,8 @@
       src: "handheld/beauty_raytrace_baseline.png",
       look: "handheld/",
       inspect: "handheld/assembly.html",
-      title: "Active slim — beauty still",
-      caption: "Cycles baseline · PLACEHOLDER · slim",
+      title: "Active Slim — beauty still",
+      caption: "Cycles baseline · PLACEHOLDER · Active Slim",
     },
     eth: {
       src: "handheld-eth/beauty_raytrace.png",
