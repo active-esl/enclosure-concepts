@@ -1,6 +1,6 @@
 {
   "id": "eink-imx93",
-  "title": "Active \u2014 i.MX93 e-ink PLACEHOLDER",
+  "title": "Active eink \u2014 PLACEHOLDER",
   "blurb": "Active product \u00b7 greenfield intake \u00b7 DD/AESL imx93 PCB (202500.stp) \u00b7 assumed EL133UF1 display \u00b7 **PCB-only Inspect** \u2014 identity pose PLACEHOLDER (not signed off). Toggle parts \u00b7 outline \u00b7 dims \u00b7 Measure (mm). Shell not started. Display / M.2 toggles are named PLACEHOLDERs until Michael STEP. Lab BSP alias: imx93-jaguar-eink.",
   "glb": "assembly.glb",
   "glb_version": "abe5d753b5",

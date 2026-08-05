@@ -24,7 +24,7 @@
     },
     {
       id: "eink-imx93",
-      label: "Active",
+      label: "Eink",
       look: `${root}eink-imx93/`,
       inspect: `${root}eink-imx93/assembly.html`,
       still: `${root}still.html?c=eink-imx93`,
