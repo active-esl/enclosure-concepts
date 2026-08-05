@@ -16,7 +16,7 @@
     },
     {
       id: "eth",
-      label: "Eth",
+      label: "POE",
       look: `${root}handheld-eth/`,
       inspect: `${root}handheld-eth/assembly.html`,
       eval: `${root}handheld-eth/fea/`,

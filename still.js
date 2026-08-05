@@ -15,8 +15,8 @@
       src: "handheld-eth/beauty_raytrace.png",
       look: "handheld-eth/",
       inspect: "handheld-eth/assembly.html",
-      title: "Active eth — beauty still",
-      caption: "Cycles · PLACEHOLDER · eth",
+      title: "Active POE — beauty still",
+      caption: "Cycles · PLACEHOLDER · POE",
     },
   };
 

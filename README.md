@@ -7,7 +7,7 @@ Public gallery for interactive PLACEHOLDER / concept enclosure designs.
 | Concept | 3D viewer |
 |---------|-----------|
 | Active slim | https://active-esl.github.io/enclosure-concepts/handheld/ |
-| Active eth | https://active-esl.github.io/enclosure-concepts/handheld-eth/ |
+| Active POE | https://active-esl.github.io/enclosure-concepts/handheld-eth/ |
 | Active eink | https://active-esl.github.io/enclosure-concepts/eink-imx93/assembly.html |
 
 Status on each page is labelled. Not measured production CAD unless stated.
