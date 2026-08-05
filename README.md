@@ -12,3 +12,6 @@ Public gallery for interactive PLACEHOLDER / concept enclosure designs.
 
 Status on each page is labelled. Not measured production CAD unless stated.
 Audience: Michael / Ollie (and Gary / Adam as needed).
+
+**Publish:** after pushing a new model GLB, rebake and copy the beauty still PNG
+— Still does not auto-update from GLB (see `design-share-3d` skill).
