@@ -3,7 +3,7 @@
   "title": "Active POE",
   "blurb": "Stepped rear eth/POE \u00b7 front + rear housing \u00b7 LOCKED I/O tip-in (open apron + face-wall RJ45/USB-C mouths with lead-in chamfers; no internal bay fill) \u00b7 small snap cover over mouths (cable notches). Ghost internals through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). Concept shell \u2014 I/O bay locked 2026-08-03.",
   "glb": "assembly.glb",
-  "glb_version": "c322407a0d",
+  "glb_version": "cd33c1414e",
   "parts": [
     {
       "id": "front",
@@ -73,7 +73,7 @@
     {
       "id": "ctp_flex_fold",
       "label": "CTP flex fold pose (PCB-move check)",
-      "visible": true,
+      "visible": false,
       "color": [
         255,
         120,
@@ -382,12 +382,12 @@
           "a": [
             0.156,
             0.08427336120605469,
-            0.011699999809265137
+            0.011225000381469726
           ],
           "b": [
             0.2175,
             0.08427336120605469,
-            0.011699999809265137
+            0.011225000381469726
           ]
         },
         {
@@ -396,12 +396,12 @@
           "a": [
             0.2255,
             0.009330001831054688,
-            0.011699999809265137
+            0.011225000381469726
           ],
           "b": [
             0.2255,
             0.07627336120605469,
-            0.011699999809265137
+            0.011225000381469726
           ]
         }
       ]
