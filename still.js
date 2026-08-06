@@ -9,14 +9,14 @@
       look: "handheld/",
       inspect: "handheld/assembly.html",
       title: "Active Slim — beauty still",
-      caption: "Cycles baseline · PLACEHOLDER · Active Slim",
+      caption: "Cycles baseline · Active Slim",
     },
     eth: {
       src: "handheld-eth/beauty_raytrace.png",
       look: "handheld-eth/",
       inspect: "handheld-eth/assembly.html",
       title: "Active POE — beauty still",
-      caption: "Cycles · PLACEHOLDER · POE",
+      caption: "Cycles · Active POE",
     },
   };
 

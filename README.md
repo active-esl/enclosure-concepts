@@ -1,6 +1,6 @@
 # Active-ESL — enclosure concepts
 
-Public gallery for interactive PLACEHOLDER / concept enclosure designs.
+Public gallery for interactive concept enclosure designs.
 
 **Browse:** https://active-esl.github.io/enclosure-concepts/
 
