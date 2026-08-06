@@ -1,18 +1,33 @@
-# Active-ESL — enclosure concepts (archive)
+# Active-ESL — enclosure concepts (archived)
 
-**This repo is a read-only archive.** Share the public gallery from:
+**Status: GitHub Archive — read-only.** Do not push new gallery tips here.
 
-**Live (Cloudflare Worker — current tip):** https://enclosure-concepts-site.ajlennon.workers.dev/  
-**Active POE Inspect:** https://enclosure-concepts-site.ajlennon.workers.dev/handheld-eth/assembly.html  
+## Canonical (use these)
 
-| Concept | Inspect |
-|---------|---------|
+| | URL |
+|--|-----|
+| **Canonical site repo** | https://github.com/active-esl/enclosure-concepts-site |
+| **Live share (Cloudflare Worker)** | https://enclosure-concepts-site.ajlennon.workers.dev/ |
+| **Active POE Inspect** | https://enclosure-concepts-site.ajlennon.workers.dev/handheld-eth/assembly.html |
+| **Pages (may lag tip)** | https://active-esl.github.io/enclosure-concepts-site/ |
+| **Baseline tags note** | [NOTE-archive-baseline-tags.md](https://github.com/active-esl/enclosure-concepts-site/blob/main/NOTE-archive-baseline-tags.md) on the site repo |
+
+| Concept | Inspect (Worker) |
+|---------|------------------|
 | Active Slim | https://enclosure-concepts-site.ajlennon.workers.dev/handheld/assembly.html |
 | Active POE | https://enclosure-concepts-site.ajlennon.workers.dev/handheld-eth/assembly.html |
 | Active Eink | https://enclosure-concepts-site.ajlennon.workers.dev/eink-imx93/assembly.html |
 
-**Canonical site repo:** https://github.com/active-esl/enclosure-concepts-site  
+## Why this repo still exists
 
-Do **not** use jsDelivr for this gallery (HTML served as `text/plain` + `nosniff` → blank/escaped page). GitHub Pages on this archive repo stays disabled; org Pages for the site repo remains wedged — CF is the share path until tip matches on Pages.
+Keeps **git history**, **PR/Actions history**, and the four `test/eth-*` baseline
+tags (`test/eth-poe-baseline-20260802`, `test/eth-assemble-baseline-20260802`,
+`test/eth-assemble-baseline-20260803`, `test/eth-jack-wall-good-20260803`).
+Site history is a separate snapshot (no shared SHAs) — tags stay here.
 
-Local dry-fit (`:8770`) may use either tree; eth review tip SoT is the pack last published by tip-owner `io-hatch`.
+Do **not** use jsDelivr for this gallery (HTML as `text/plain` + `nosniff`).
+GitHub Pages on this archive is disabled. Org Pages for the site repo may lag —
+CF Worker is the share path.
+
+**Local dry-fit (`:8770`):** may still use `/data_drive/esl/enclosure-concepts`
+as the tip publish tree; git push/share goes to `enclosure-concepts-site`.
