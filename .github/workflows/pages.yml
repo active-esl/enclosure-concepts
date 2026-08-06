@@ -20,7 +20,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -33,6 +33,7 @@ jobs:
     # Match active-esl/lab-infra runner-smoke + etablone-cloud verify.
     # Explicit aesl pin; runner hostname is esl-proxmox-runner.
     runs-on: [self-hosted, Linux, X64, aesl, esl-proxmox]
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v7
