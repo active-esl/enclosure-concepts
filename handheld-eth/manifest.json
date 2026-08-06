@@ -3,7 +3,7 @@
   "title": "Active POE",
   "blurb": "Stepped rear eth/POE \u00b7 front + rear housing \u00b7 LOCKED I/O tip-in (open apron + face-wall RJ45/USB-C mouths with lead-in chamfers; no internal bay fill) \u00b7 small snap cover over mouths (cable notches). Ghost internals through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). Concept shell \u2014 I/O bay locked 2026-08-03.",
   "glb": "assembly.glb",
-  "glb_version": "7830daf189",
+  "glb_version": "b6e252ff57",
   "parts": [
     {
       "id": "front",
@@ -83,9 +83,21 @@
       "opacity": 1.0
     },
     {
-      "id": "lcd_ffc",
-      "label": "LCD FFC (ST1010)",
+      "id": "lcd_ffc_fly",
+      "label": "PLACEHOLDER LCD FFC fly \u2014 LCM\u2192J006 (photo SoT)",
       "visible": true,
+      "color": [
+        236,
+        240,
+        245
+      ],
+      "highlight": true,
+      "opacity": 1.0
+    },
+    {
+      "id": "lcd_ffc",
+      "label": "LCD FFC (ST1010 gbd001 \u2014 long Y-strip; wrong mate path)",
+      "visible": false,
       "color": [
         64,
         140,
@@ -93,7 +105,7 @@
       ],
       "ghost": true,
       "transparent": true,
-      "opacity": 0.55
+      "opacity": 0.35
     },
     {
       "id": "lcd_ffc_fold",
@@ -439,6 +451,41 @@
             0.2255,
             0.07627336120605469,
             0.011225000381469726
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lcd_ffc_fly",
+      "label": "Lcd_ffc_fly",
+      "default": false,
+      "dims": [
+        {
+          "label": "lcd_ffc_fly W 11.3 mm",
+          "mm": 11.25,
+          "a": [
+            0.022504220962524416,
+            0.0780999984741211,
+            0.007347130298614502
+          ],
+          "b": [
+            0.0337562370300293,
+            0.0780999984741211,
+            0.007347130298614502
+          ]
+        },
+        {
+          "label": "lcd_ffc_fly H 20.4 mm",
+          "mm": 20.4,
+          "a": [
+            0.0417562370300293,
+            0.049700000762939456,
+            0.007347130298614502
+          ],
+          "b": [
+            0.0417562370300293,
+            0.0700999984741211,
+            0.007347130298614502
           ]
         }
       ]
@@ -935,6 +982,7 @@
       "glass": 55,
       "ctp_flex": 55,
       "ctp_flex_fold": 55,
+      "lcd_ffc_fly": 55,
       "lcd_ffc": 55,
       "lcd_ffc_fold": 55,
       "ctp_conn": 18,
@@ -1016,10 +1064,11 @@
       "id": "lcd_ffc_pose",
       "label": "LCD FFC pose",
       "parts": [
+        "lcd_ffc_fly",
         "lcd_ffc",
         "lcd_ffc_fold"
       ],
-      "default": "lcd_ffc"
+      "default": "lcd_ffc_fly"
     }
   ]
 }
