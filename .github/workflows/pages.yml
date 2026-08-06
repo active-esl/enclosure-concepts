@@ -1,5 +1,5 @@
 # Deploy static gallery to GitHub Pages on AESL Proxmox CT101 runner.
-# Runner: esl-proxmox-runner — labels [self-hosted, Linux, X64, esl-proxmox]
+# Runner name: esl-proxmox-runner — labels [self-hosted, Linux, X64, aesl, esl-proxmox]
 # Do NOT use org gitrunner (ai-tools) or GitHub-hosted ubuntu-latest for this.
 #
 # Pages Settings (required once):
@@ -28,7 +28,8 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     # Match active-esl/lab-infra runner-smoke + etablone-cloud verify.
-    runs-on: [self-hosted, Linux, X64, esl-proxmox]
+    # Explicit aesl pin; runner hostname is esl-proxmox-runner.
+    runs-on: [self-hosted, Linux, X64, aesl, esl-proxmox]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,20 +40,29 @@ jobs:
           rm -rf _site
           mkdir -p _site
           # Publish repo root as the site; keep Actions metadata / VCS out of the artifact.
-          # Prefer rsync; fall back to tar (no rsync on some runners).
-          if command -v rsync >/dev/null 2>&1; then
-            rsync -a \
-              --exclude='.git/' \
-              --exclude='.github/' \
-              --exclude='_site/' \
-              ./ _site/
-          else
-            tar -cf - \
-              --exclude='.git' \
-              --exclude='.github' \
-              --exclude='_site' \
-              . | tar -xf - -C _site
-          fi
+          # python3 shutil — rsync is not installed on esl-proxmox-runner.
+          python3 - <<'PY'
+          import shutil
+          from pathlib import Path
+
+          src = Path(".")
+          dst = Path("_site")
+          ignore = {".git", ".github", "_site"}
+
+          for child in src.iterdir():
+              if child.name in ignore:
+                  continue
+              target = dst / child.name
+              if child.is_dir():
+                  shutil.copytree(
+                      child,
+                      target,
+                      ignore=lambda d, names: [n for n in names if n in ignore],
+                      dirs_exist_ok=True,
+                  )
+              else:
+                  shutil.copy2(child, target)
+          PY
           # Ensure GitHub never runs Jekyll on the artifact if settings regress.
           touch _site/.nojekyll
           echo "publish_bytes=$(du -sb _site | awk '{print $1}')"
