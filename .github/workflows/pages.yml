@@ -1,0 +1,64 @@
+# Deploy static gallery to GitHub Pages on AESL Proxmox CT101 runner.
+# Runner: esl-proxmox-runner — labels [self-hosted, Linux, X64, esl-proxmox]
+# Do NOT use org gitrunner (ai-tools) or GitHub-hosted ubuntu-latest for this.
+#
+# Pages Settings (required once):
+#   Settings → Pages → Build and deployment → Source = GitHub Actions
+#   (API: build_type=workflow). That disables legacy branch /pages-build-deployment.
+#   Do not set Source back to "Deploy from a branch" (main/) — that path queues/fails.
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    # Match active-esl/lab-infra runner-smoke + etablone-cloud verify.
+    runs-on: [self-hosted, Linux, X64, esl-proxmox]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare static publish tree
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site
+          # Publish repo root as the site; keep Actions metadata / VCS out of the artifact.
+          rsync -a \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='_site/' \
+            ./ _site/
+          # Ensure GitHub never runs Jekyll on the artifact if settings regress.
+          touch _site/.nojekyll
+          echo "publish_bytes=$(du -sb _site | awk '{print $1}')"
+          test -f _site/index.html
+          test -f _site/handheld-eth/build.json
+          python3 -c 'import json; print("handheld-eth build id:", json.load(open("_site/handheld-eth/build.json"))["id"])'
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
