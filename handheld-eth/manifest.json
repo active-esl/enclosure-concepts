@@ -3,7 +3,7 @@
   "title": "Active POE",
   "blurb": "Stepped rear eth/POE \u00b7 front + rear housing \u00b7 LOCKED I/O tip-in (open apron + face-wall RJ45/USB-C mouths with lead-in chamfers; no internal bay fill) \u00b7 small snap cover over mouths (cable notches). Ghost internals through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). Concept shell \u2014 I/O bay locked 2026-08-03.",
   "glb": "assembly.glb",
-  "glb_version": "5dff3dcb54",
+  "glb_version": "04f5fc8a00",
   "parts": [
     {
       "id": "front",
@@ -59,12 +59,25 @@
     },
     {
       "id": "ctp_flex",
-      "label": "CTP flex + connector (ST1010 gbd004)",
+      "label": "CTP flex (as-modeled STEP)",
       "visible": true,
       "color": [
         232,
         140,
         48
+      ],
+      "ghost": true,
+      "transparent": true,
+      "opacity": 0.35
+    },
+    {
+      "id": "ctp_flex_fold",
+      "label": "CTP flex folded \u2192 J004 check",
+      "visible": true,
+      "color": [
+        255,
+        120,
+        24
       ],
       "highlight": true,
       "opacity": 1.0
@@ -354,6 +367,41 @@
             0.2255,
             0.009330001831054688,
             0.011699999809265137
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ctp_flex_fold",
+      "label": "Ctp_flex_fold",
+      "default": false,
+      "dims": [
+        {
+          "label": "ctp_flex_fold W 61.5 mm",
+          "mm": 61.5,
+          "a": [
+            0.156,
+            0.028905351638793948,
+            0.07713711547851562
+          ],
+          "b": [
+            0.2175,
+            0.028905351638793948,
+            0.07713711547851562
+          ]
+        },
+        {
+          "label": "ctp_flex_fold H 11.6 mm",
+          "mm": 11.6,
+          "a": [
+            0.2255,
+            0.009306685447692871,
+            0.07713711547851562
+          ],
+          "b": [
+            0.2255,
+            0.020905351638793947,
+            0.07713711547851562
           ]
         }
       ]
@@ -744,6 +792,7 @@
     "explode_offsets_mm": {
       "glass": 55,
       "ctp_flex": 55,
+      "ctp_flex_fold": 55,
       "lcd_ffc": 55,
       "ctp_conn": 18,
       "lcd_conn": 18,
