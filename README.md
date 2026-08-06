@@ -1,17 +1,18 @@
-# Active-ESL — enclosure concepts
+# Active-ESL — enclosure concepts (archive)
 
-Public gallery for interactive concept enclosure designs.
+**This repo is a read-only archive.** Share the public gallery from:
 
-**Browse:** https://active-esl.github.io/enclosure-concepts/
+**Live (Cloudflare Worker — current tip):** https://enclosure-concepts-site.ajlennon.workers.dev/  
+**Active POE Inspect:** https://enclosure-concepts-site.ajlennon.workers.dev/handheld-eth/assembly.html  
 
-| Concept | 3D viewer |
-|---------|-----------|
-| Active Slim | https://active-esl.github.io/enclosure-concepts/handheld/ |
-| Active POE | https://active-esl.github.io/enclosure-concepts/handheld-eth/ |
-| Active Eink | https://active-esl.github.io/enclosure-concepts/eink-imx93/assembly.html |
+| Concept | Inspect |
+|---------|---------|
+| Active Slim | https://enclosure-concepts-site.ajlennon.workers.dev/handheld/assembly.html |
+| Active POE | https://enclosure-concepts-site.ajlennon.workers.dev/handheld-eth/assembly.html |
+| Active Eink | https://enclosure-concepts-site.ajlennon.workers.dev/eink-imx93/assembly.html |
 
-Status on each page is labelled. Not measured production CAD unless stated.
-Audience: Michael / Ollie (and Gary / Adam as needed).
+**Canonical site repo:** https://github.com/active-esl/enclosure-concepts-site  
 
-**Publish:** after pushing a new model GLB, rebake and copy the beauty still PNG
-— Still does not auto-update from GLB (see `design-share-3d` skill).
+Do **not** use jsDelivr for this gallery (HTML served as `text/plain` + `nosniff` → blank/escaped page). GitHub Pages on this archive repo stays disabled; org Pages for the site repo remains wedged — CF is the share path until tip matches on Pages.
+
+Local dry-fit (`:8770`) may use either tree; eth review tip SoT is the pack last published by tip-owner `io-hatch`.
