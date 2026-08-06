@@ -39,11 +39,20 @@ jobs:
           rm -rf _site
           mkdir -p _site
           # Publish repo root as the site; keep Actions metadata / VCS out of the artifact.
-          rsync -a \
-            --exclude='.git/' \
-            --exclude='.github/' \
-            --exclude='_site/' \
-            ./ _site/
+          # Prefer rsync; fall back to tar (no rsync on some runners).
+          if command -v rsync >/dev/null 2>&1; then
+            rsync -a \
+              --exclude='.git/' \
+              --exclude='.github/' \
+              --exclude='_site/' \
+              ./ _site/
+          else
+            tar -cf - \
+              --exclude='.git' \
+              --exclude='.github' \
+              --exclude='_site' \
+              . | tar -xf - -C _site
+          fi
           # Ensure GitHub never runs Jekyll on the artifact if settings regress.
           touch _site/.nojekyll
           echo "publish_bytes=$(du -sb _site | awk '{print $1}')"
