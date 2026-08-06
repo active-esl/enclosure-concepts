@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260806T115242Z-fafe7303ba" />
+  <meta name="aesl-build" content="20260806T121634Z-6324679fea" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -452,7 +452,7 @@
   "title": "Active POE",
   "blurb": "Stepped rear eth/POE \u00b7 front + rear housing \u00b7 LOCKED I/O tip-in (open apron + face-wall RJ45/USB-C mouths with lead-in chamfers; no internal bay fill) \u00b7 small snap cover over mouths (cable notches). Ghost internals through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). Concept shell \u2014 I/O bay locked 2026-08-03.",
   "glb": "assembly.glb",
-  "glb_version": "a09c61e98d",
+  "glb_version": "7830daf189",
   "parts": [
     {
       "id": "front",
@@ -576,6 +576,30 @@
         0,
         230,
         255
+      ],
+      "highlight": true,
+      "opacity": 1.0
+    },
+    {
+      "id": "cam_conn",
+      "label": "Camera connector J012 (DF37 20-way)",
+      "visible": true,
+      "color": [
+        255,
+        64,
+        160
+      ],
+      "highlight": true,
+      "opacity": 1.0
+    },
+    {
+      "id": "cam_module",
+      "label": "PLACEHOLDER cam module \u2014 WPD662 8.5\u00d78.5\u00d75.3 (datasheet; not STEP)",
+      "visible": true,
+      "color": [
+        28,
+        28,
+        32
       ],
       "highlight": true,
       "opacity": 1.0
@@ -1009,6 +1033,76 @@
       ]
     },
     {
+      "id": "cam_conn",
+      "label": "Cam_conn",
+      "default": false,
+      "dims": [
+        {
+          "label": "cam_conn W 6.2 mm",
+          "mm": 6.22,
+          "a": [
+            0.11868989562988282,
+            0.1510400085449219,
+            0.0032999997138977053
+          ],
+          "b": [
+            0.12490989685058594,
+            0.1510400085449219,
+            0.0032999997138977053
+          ]
+        },
+        {
+          "label": "cam_conn H 3.0 mm",
+          "mm": 2.98,
+          "a": [
+            0.13290989685058593,
+            0.14005999755859375,
+            0.0032999997138977053
+          ],
+          "b": [
+            0.13290989685058593,
+            0.14304000854492188,
+            0.0032999997138977053
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cam_module",
+      "label": "Cam_module",
+      "default": false,
+      "dims": [
+        {
+          "label": "cam_module W 8.5 mm",
+          "mm": 8.5,
+          "a": [
+            0.11755000305175782,
+            0.17355000305175783,
+            0.007940000057220458
+          ],
+          "b": [
+            0.12605000305175781,
+            0.17355000305175783,
+            0.007940000057220458
+          ]
+        },
+        {
+          "label": "cam_module H 8.5 mm",
+          "mm": 8.5,
+          "a": [
+            0.13405000305175782,
+            0.1570500030517578,
+            0.007940000057220458
+          ],
+          "b": [
+            0.13405000305175782,
+            0.16555000305175782,
+            0.007940000057220458
+          ]
+        }
+      ]
+    },
+    {
       "id": "m2_wifi",
       "label": "M2_wifi",
       "default": false,
@@ -1294,6 +1388,8 @@
       "lcd_ffc_fold": 55,
       "ctp_conn": 18,
       "lcd_conn": 18,
+      "cam_conn": 18,
+      "cam_module": 42,
       "m2_wifi": 24,
       "m2_modem": 28,
       "uv_badge": 52,
