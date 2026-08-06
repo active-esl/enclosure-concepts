@@ -107,8 +107,8 @@
     },
     {
       "id": "ctp_dress",
-      "label": "CTP thin tail \u2192 J004 (in-cavity dress)",
-      "visible": true,
+      "label": "CTP thin tail \u2192 J004 (synthetic dress \u2014 off)",
+      "visible": false,
       "color": [
         255,
         100,
@@ -119,8 +119,8 @@
     },
     {
       "id": "lcd_dress",
-      "label": "LCD FFC dress \u2192 J006 (stub tip\u2192mate)",
-      "visible": true,
+      "label": "LCD FFC dress \u2192 J006 (synthetic dress \u2014 off)",
+      "visible": false,
       "color": [
         30,
         100,
