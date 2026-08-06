@@ -3,7 +3,7 @@
   "title": "Active POE",
   "blurb": "Stepped rear eth/POE \u00b7 front + rear housing \u00b7 LOCKED I/O tip-in (open apron + face-wall RJ45/USB-C mouths with lead-in chamfers; no internal bay fill) \u00b7 small snap cover over mouths (cable notches). Ghost internals through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). Concept shell \u2014 I/O bay locked 2026-08-03.",
   "glb": "assembly.glb",
-  "glb_version": "cd33c1414e",
+  "glb_version": "d582371b51",
   "parts": [
     {
       "id": "front",
@@ -90,6 +90,19 @@
         64,
         140,
         220
+      ],
+      "ghost": true,
+      "transparent": true,
+      "opacity": 0.35
+    },
+    {
+      "id": "lcd_ffc_fold",
+      "label": "LCD FFC fold pose (PCB-move check)",
+      "visible": false,
+      "color": [
+        48,
+        160,
+        255
       ],
       "highlight": true,
       "opacity": 1.0
@@ -437,6 +450,41 @@
             0.030537979125976562,
             0.13955003356933593,
             0.007949999809265137
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lcd_ffc_fold",
+      "label": "Lcd_ffc_fold",
+      "default": false,
+      "dims": [
+        {
+          "label": "lcd_ffc_fold W 17.4 mm",
+          "mm": 17.41,
+          "a": [
+            0.022542020797729493,
+            0.14755003356933594,
+            0.00815999984741211
+          ],
+          "b": [
+            0.03995221710205078,
+            0.14755003356933594,
+            0.00815999984741211
+          ]
+        },
+        {
+          "label": "lcd_ffc_fold H 121.1 mm",
+          "mm": 121.1,
+          "a": [
+            0.04795221710205078,
+            0.01845000457763672,
+            0.00815999984741211
+          ],
+          "b": [
+            0.04795221710205078,
+            0.13955003356933593,
+            0.00815999984741211
           ]
         }
       ]
@@ -794,6 +842,7 @@
       "ctp_flex": 55,
       "ctp_flex_fold": 55,
       "lcd_ffc": 55,
+      "lcd_ffc_fold": 55,
       "ctp_conn": 18,
       "lcd_conn": 18,
       "m2_wifi": 24,
