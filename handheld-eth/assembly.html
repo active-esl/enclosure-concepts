@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" style="background-color:#0b1220;color-scheme:dark">
 <head>
-  <meta name="aesl-build" content="20260806T102605Z-70749b1d12" />
+  <meta name="aesl-build" content="20260806T103646Z-96ae443031" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
@@ -452,7 +452,7 @@
   "title": "Active POE",
   "blurb": "Stepped rear eth/POE \u00b7 front + rear housing \u00b7 LOCKED I/O tip-in (open apron + face-wall RJ45/USB-C mouths with lead-in chamfers; no internal bay fill) \u00b7 small snap cover over mouths (cable notches). Ghost internals through shell by default. Toggle parts \u00b7 Spot \u00b7 Solo \u00b7 outline \u00b7 dims \u00b7 Measure (mm). Concept shell \u2014 I/O bay locked 2026-08-03.",
   "glb": "assembly.glb",
-  "glb_version": "d582371b51",
+  "glb_version": "1c1775f66d",
   "parts": [
     {
       "id": "front",
@@ -509,7 +509,7 @@
     {
       "id": "ctp_flex",
       "label": "CTP flex (ST1010)",
-      "visible": true,
+      "visible": false,
       "color": [
         232,
         140,
@@ -522,7 +522,7 @@
     {
       "id": "ctp_flex_fold",
       "label": "CTP flex fold pose (PCB-move check)",
-      "visible": false,
+      "visible": true,
       "color": [
         255,
         120,
@@ -534,7 +534,7 @@
     {
       "id": "lcd_ffc",
       "label": "LCD FFC (ST1010)",
-      "visible": true,
+      "visible": false,
       "color": [
         64,
         140,
@@ -547,7 +547,7 @@
     {
       "id": "lcd_ffc_fold",
       "label": "LCD FFC fold pose (PCB-move check)",
-      "visible": false,
+      "visible": true,
       "color": [
         48,
         160,
@@ -1354,7 +1354,27 @@
       }
     ]
   },
-  "pages_links": []
+  "pages_links": [],
+  "exclusive_groups": [
+    {
+      "id": "ctp_flex_pose",
+      "label": "CTP flex pose",
+      "parts": [
+        "ctp_flex",
+        "ctp_flex_fold"
+      ],
+      "default": "ctp_flex_fold"
+    },
+    {
+      "id": "lcd_ffc_pose",
+      "label": "LCD FFC pose",
+      "parts": [
+        "lcd_ffc",
+        "lcd_ffc_fold"
+      ],
+      "default": "lcd_ffc_fold"
+    }
+  ]
 };
 
     const PARTS = MANIFEST.parts || [];
@@ -1374,6 +1394,10 @@
       })
     );
     const PART_META = Object.fromEntries(PARTS.map((p) => [p.id, p]));
+    const EXCLUSIVE_GROUPS = MANIFEST.exclusive_groups || [];
+    const EXCLUSIVE_PART_TO_GROUP = Object.fromEntries(
+      EXCLUSIVE_GROUPS.flatMap((g) => (g.parts || []).map((pid) => [pid, g]))
+    );
     const FEA_OVERLAYS = FEATURES.fea_overlays || [];
     const EXPLODE_AXIS = new THREE.Vector3(...(FEATURES.explode_axis || [0, 0, 1])).normalize();
     const EXPLODE_OFFSETS = FEATURES.explode_offsets_mm || {};
@@ -2452,6 +2476,7 @@
           const el = document.querySelector(`input[data-part="${id}"]`);
           if (el) el.checked = set.has(id);
         }
+        normalizeExclusiveGroups();
         soloPartId = null;
         partSnapshot = null;
         applyVisibility();
@@ -2960,6 +2985,34 @@
       setView(lastView);
     });
 
+    function normalizeExclusiveGroups(preferId = null) {
+      for (const g of EXCLUSIVE_GROUPS) {
+        const parts = g.parts || [];
+        const checked = parts.filter(
+          (id) => document.querySelector(`input[data-part="${id}"]`)?.checked
+        );
+        if (checked.length <= 1) continue;
+        const keep = preferId && parts.includes(preferId)
+          ? preferId
+          : checked[checked.length - 1];
+        for (const pid of parts) {
+          const el = document.querySelector(`input[data-part="${pid}"]`);
+          if (el) el.checked = pid === keep;
+        }
+      }
+    }
+    function enforceExclusiveGroup(changedId) {
+      const group = EXCLUSIVE_PART_TO_GROUP[changedId];
+      if (!group) return;
+      const el = document.querySelector(`input[data-part="${changedId}"]`);
+      if (!el?.checked) return;
+      for (const pid of group.parts || []) {
+        if (pid === changedId) continue;
+        const other = document.querySelector(`input[data-part="${pid}"]`);
+        if (other) other.checked = false;
+      }
+    }
+
     function applyVisibility() {
       for (const id of PART_IDS) {
         const on = document.querySelector(`input[data-part="${id}"]`)?.checked ?? true;
@@ -2970,7 +3023,9 @@
       recenterPivot();
       writeHash();
     }
-    document.getElementById('toggles').addEventListener('change', () => {
+    document.getElementById('toggles').addEventListener('change', (ev) => {
+      const changedId = ev.target?.dataset?.part;
+      if (changedId) enforceExclusiveGroup(changedId);
       // Manual checkbox edits leave solo mode.
       soloPartId = null;
       partSnapshot = null;
